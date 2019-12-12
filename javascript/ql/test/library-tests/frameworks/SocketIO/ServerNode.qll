@@ -1,5 +1,5 @@
 import javascript
 
-query predicate test_ServerNode(SocketIO::ServerNode srv, SocketIO::ServerObject res) {
-  res = srv.getServer()
+query predicate test_ServerNode(DataFlow::SourceNode srv, SocketIO::ServerObject res) {
+  res.ref() = srv
 }

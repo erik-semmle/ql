@@ -152,6 +152,8 @@ test_ServerNode
 | tst.js:15:1:15:15 | io.attach(http) | tst.js:1:12:1:33 | require ... .io')() |
 | tst.js:16:1:16:15 | io.bind(engine) | tst.js:1:12:1:33 | require ... .io')() |
 | tst.js:17:1:17:23 | io.onco ... socket) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:50:1:66:2 | io.on(' ... cal;\\n}) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:67:1:67:35 | io.on(' ...  => {}) | tst.js:1:12:1:33 | require ... .io')() |
 | tst.js:79:1:79:10 | obj.server | tst.js:1:12:1:33 | require ... .io')() |
 test_ClientSendNode_getAReceiver
 | client2.js:14:1:14:32 | sock.em ... there") | tst.js:72:3:72:43 | socket. ...  => {}) |
