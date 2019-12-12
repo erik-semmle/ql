@@ -140,19 +140,19 @@ test_SendNode_getSocket
 | tst.js:54:3:54:43 | socket. ...  => {}) | tst.js:50:19:50:24 | socket |
 | tst.js:55:3:55:27 | socket. ... ssage') | tst.js:50:19:50:24 | socket |
 test_ServerNode
-| tst.js:1:12:1:33 | require ... .io')() | tst.js:1:12:1:33 | socket.io server |
-| tst.js:4:13:4:24 | new Server() | tst.js:4:13:4:24 | socket.io server |
-| tst.js:6:13:6:27 | Server.listen() | tst.js:6:13:6:27 | socket.io server |
-| tst.js:9:1:9:21 | io.serv ... (false) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:10:1:10:21 | io.set( ... s', []) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:11:1:11:21 | io.path ... npath') | tst.js:1:12:1:33 | socket.io server |
-| tst.js:12:1:12:15 | io.adapter(foo) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:13:1:13:14 | io.origins([]) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:14:1:14:15 | io.listen(http) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:15:1:15:15 | io.attach(http) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:16:1:16:15 | io.bind(engine) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:17:1:17:23 | io.onco ... socket) | tst.js:1:12:1:33 | socket.io server |
-| tst.js:79:1:79:10 | obj.server | tst.js:1:12:1:33 | socket.io server |
+| tst.js:1:12:1:33 | require ... .io')() | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:4:13:4:24 | new Server() | tst.js:4:13:4:24 | new Server() |
+| tst.js:6:13:6:27 | Server.listen() | tst.js:6:13:6:27 | Server.listen() |
+| tst.js:9:1:9:21 | io.serv ... (false) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:10:1:10:21 | io.set( ... s', []) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:11:1:11:21 | io.path ... npath') | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:12:1:12:15 | io.adapter(foo) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:13:1:13:14 | io.origins([]) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:14:1:14:15 | io.listen(http) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:15:1:15:15 | io.attach(http) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:16:1:16:15 | io.bind(engine) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:17:1:17:23 | io.onco ... socket) | tst.js:1:12:1:33 | require ... .io')() |
+| tst.js:79:1:79:10 | obj.server | tst.js:1:12:1:33 | require ... .io')() |
 test_ClientSendNode_getAReceiver
 | client2.js:14:1:14:32 | sock.em ... there") | tst.js:72:3:72:43 | socket. ...  => {}) |
 | client2.js:16:1:16:36 | sock.wr ...  => {}) | tst.js:70:3:70:35 | socket. ...  => {}) |
@@ -167,10 +167,10 @@ test_ClientReceiveNode_getReceivedItem
 | client2.js:10:1:12:2 | sock.on ... d");\\n}) | 0 | client2.js:10:19:10:19 | x |
 | client2.js:18:1:18:41 | sock2.o ... dler')) | 0 | handler.js:1:19:1:19 | x |
 test_NamespaceObject
-| socket.io namespace with path '/' | tst.js:1:12:1:33 | socket.io server | / |
-| socket.io namespace with path '/' | tst.js:4:13:4:24 | socket.io server | / |
-| socket.io namespace with path '/' | tst.js:6:13:6:27 | socket.io server | / |
-| socket.io namespace with path '/foo/bar' | tst.js:1:12:1:33 | socket.io server | /foo/bar |
+| socket.io namespace with path '/' | tst.js:1:12:1:33 | require ... .io')() | / |
+| socket.io namespace with path '/' | tst.js:4:13:4:24 | new Server() | / |
+| socket.io namespace with path '/' | tst.js:6:13:6:27 | Server.listen() | / |
+| socket.io namespace with path '/foo/bar' | tst.js:1:12:1:33 | require ... .io')() | /foo/bar |
 test_ClientReceiveNode
 | client2.js:4:1:6:2 | sock.on ...  y);\\n}) | client2.js:1:12:1:56 | require ... lhost") |
 | client2.js:8:1:8:33 | sock.on ...  => {}) | client2.js:1:12:1:56 | require ... lhost") |
@@ -210,6 +210,6 @@ test_SendNode_getAReceiver
 | tst.js:55:3:55:27 | socket. ... ssage') | client2.js:4:1:6:2 | sock.on ...  y);\\n}) |
 | tst.js:55:3:55:27 | socket. ... ssage') | client2.js:8:1:8:33 | sock.on ...  => {}) |
 test_ServerObject
-| tst.js:1:12:1:33 | socket.io server | tst.js:1:12:1:33 | require ... .io')() | socket.io namespace with path '/' |
-| tst.js:4:13:4:24 | socket.io server | tst.js:4:13:4:24 | new Server() | socket.io namespace with path '/' |
-| tst.js:6:13:6:27 | socket.io server | tst.js:6:13:6:27 | Server.listen() | socket.io namespace with path '/' |
+| tst.js:1:12:1:33 | require ... .io')() | tst.js:1:12:1:33 | require ... .io')() | socket.io namespace with path '/' |
+| tst.js:4:13:4:24 | new Server() | tst.js:4:13:4:24 | new Server() | socket.io namespace with path '/' |
+| tst.js:6:13:6:27 | Server.listen() | tst.js:6:13:6:27 | Server.listen() | socket.io namespace with path '/' |

@@ -16,6 +16,8 @@ private import semmle.javascript.dataflow.InferredTypes
  * with each socket belonging to a namespace on a server.
  */
 module SocketIO {
+  private abstract class SocketIOObject extends EventEmitter::EventEmitterRange::Range {}
+	
   /** Gets a data flow node that creates a new socket.io server. */
   private DataFlow::SourceNode newServer() {
     result = DataFlow::moduleImport("socket.io").getAnInvocation()
@@ -28,8 +30,7 @@ module SocketIO {
    * Gets a data flow node that may refer to the socket.io server created at `srv`.
    */
   private DataFlow::SourceNode server(ServerObject srv, DataFlow::TypeTracker t) {
-    result = newServer() and
-    srv = MkServer(result) and
+    srv = result and
     t.start()
     or
     exists(DataFlow::TypeTracker t2, DataFlow::SourceNode pred | pred = server(srv, t2) |
@@ -319,9 +320,6 @@ module SocketIO {
     }
   }
 
-  /** A socket.io server, identified by its creation site. */
-  private newtype TServer = MkServer(DataFlow::SourceNode nd) { nd = newServer() }
-
   /** A socket.io namespace, identified by its server and its path. */
   private newtype TNamespace =
     MkNamespace(ServerObject srv, string path) {
@@ -333,35 +331,14 @@ module SocketIO {
     }
 
   /** A socket.io server. */
-  class ServerObject extends TServer {
-    DataFlow::SourceNode origin;
-
-    ServerObject() { this = MkServer(origin) }
-
-    /** Gets the data flow node where this server is created. */
-    DataFlow::SourceNode getOrigin() { result = origin }
+  class ServerObject extends DataFlow::SourceNode {
+    ServerObject() { this = newServer() }
 
     /** Gets the default namespace of this server. */
     NamespaceObject getDefaultNamespace() { result = MkNamespace(this, "/") }
 
     /** Gets the namespace with the given path of this server. */
     NamespaceObject getNamespace(string path) { result = MkNamespace(this, path) }
-
-    /**
-     * Holds if this server is created at the specified location.
-     * The location spans column `startcolumn` of line `startline` to
-     * column `endcolumn` of line `endline` in file `filepath`.
-     * For more information, see
-     * [Locations](https://help.semmle.com/QL/learn-ql/ql/locations.html).
-     */
-    predicate hasLocationInfo(
-      string filepath, int startline, int startcolumn, int endline, int endcolumn
-    ) {
-      origin.hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
-    }
-
-    /** Gets a textual representation of this server. */
-    string toString() { result = "socket.io server" }
   }
 
   /** A socket.io namespace. */
@@ -446,7 +423,7 @@ module SocketIOClient {
      * it can be determined.
      */
     SocketIO::ServerObject getATargetServer() {
-      getPackage(result.getOrigin()) = getPackage(this) and
+      getPackage(result) = getPackage(this) and
       (
         not exists(getNamespacePath()) or
         exists(result.getNamespace(getNamespacePath()))
