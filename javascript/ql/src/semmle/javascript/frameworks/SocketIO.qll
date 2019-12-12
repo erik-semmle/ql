@@ -28,10 +28,10 @@ module SocketIO {
     }
 
     /** Gets the default namespace of this server. */
-    NamespaceObject getDefaultNamespace() { result = MkNamespace(this, "/") }
+    ServerNamespace getDefaultNamespace() { result = MkNamespace(this, "/") }
 
     /** Gets the namespace with the given path of this server. */
-    NamespaceObject getNamespace(string path) { result = MkNamespace(this, path) }
+    ServerNamespace getNamespace(string path) { result = MkNamespace(this, path) }
 
     /**
      * Gets a data flow node that may refer to the socket.io server created at `srv`.
@@ -88,7 +88,7 @@ module SocketIO {
   /**
    * Gets a data flow node that may refer to the socket.io namespace created at `ns`.
    */
-  private DataFlow::SourceNode namespace(NamespaceObject ns, DataFlow::TypeTracker t) {
+  private DataFlow::SourceNode namespace(ServerNamespace ns, DataFlow::TypeTracker t) {
     t.start() and
     exists(ServerObject srv |
       // namespace lookup on `srv`
@@ -128,18 +128,18 @@ module SocketIO {
 
   /** A data flow node that may produce a namespace object. */
   class NamespaceNode extends DataFlow::SourceNode {
-    NamespaceObject ns;
+    ServerNamespace ns;
 
     NamespaceNode() { this = namespace(ns, DataFlow::TypeTracker::end()) }
 
     /** Gets the namespace to which this node refers. */
-    NamespaceObject getNamespace() { result = ns }
+    ServerNamespace getNamespace() { result = ns }
   }
 
   /**
    * Gets a data flow node that may refer to a socket.io socket belonging to namespace `ns`.
    */
-  private DataFlow::SourceNode socket(NamespaceObject ns, DataFlow::TypeTracker t) {
+  private DataFlow::SourceNode socket(ServerNamespace ns, DataFlow::TypeTracker t) {
     // callback accepting a socket
     t.start() and
     exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
@@ -191,12 +191,12 @@ module SocketIO {
 
   /** A data flow node that may produce a socket object. */
   class SocketNode extends DataFlow::SourceNode {
-    NamespaceObject ns;
+    ServerNamespace ns;
 
     SocketNode() { this = socket(ns, DataFlow::TypeTracker::end()) }
 
     /** Gets the namespace to which this socket belongs. */
-    NamespaceObject getNamespace() { result = ns }
+    ServerNamespace getNamespace() { result = ns }
   }
 
   /**
@@ -283,7 +283,7 @@ module SocketIO {
     /**
      * Gets the namespace to which data is sent.
      */
-    NamespaceObject getNamespace() {
+    ServerNamespace getNamespace() {
       result = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
       result = base.(NamespaceNode).getNamespace() or
       result = base.(SocketNode).getNamespace()
@@ -330,11 +330,11 @@ module SocketIO {
     }
 
   /** A socket.io namespace. */
-  class NamespaceObject extends TNamespace {
+  class ServerNamespace extends TNamespace {
     ServerObject srv;
     string path;
 
-    NamespaceObject() { this = MkNamespace(srv, path) }
+    ServerNamespace() { this = MkNamespace(srv, path) }
 
     /** Gets the server to which this namespace belongs. */
     ServerObject getServer() { result = srv }
@@ -419,7 +419,7 @@ module SocketIOClient {
     }
 
     /** Gets a namespace this socket may be communicating with. */
-    SocketIO::NamespaceObject getATargetNamespace() {
+    SocketIO::ServerNamespace getATargetNamespace() {
       result = getATargetServer().getNamespace(getNamespacePath())
       or
       // if the namespace of this socket cannot be determined, overapproximate
