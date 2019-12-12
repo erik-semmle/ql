@@ -16,7 +16,8 @@ private import semmle.javascript.dataflow.InferredTypes
  * with each socket belonging to a namespace on a server.
  */
 module SocketIO {
-  abstract private class SocketIOObject extends DataFlow::SourceNode, EventEmitter::EventEmitterRange::Range { }
+  abstract private class SocketIOObject extends DataFlow::SourceNode,
+    EventEmitter::EventEmitterRange::Range { }
 
   /** A socket.io server. */
   class ServerObject extends SocketIOObject {
@@ -85,55 +86,58 @@ module SocketIO {
     result = EventEmitter::chainableMethod()
   }
 
-  /**
-   * Gets a data flow node that may refer to the socket.io namespace created at `ns`.
-   */
-  private DataFlow::SourceNode namespace(ServerNamespace ns, DataFlow::TypeTracker t) {
-    t.start() and
-    exists(ServerObject srv |
-      // namespace lookup on `srv`
-      result = srv.ref().getAPropertyRead("sockets") and
-      ns = srv.getDefaultNamespace()
-      or
-      exists(DataFlow::MethodCallNode mcn, string path |
-        mcn = srv.ref().getAMethodCall("of") and
-        mcn.getArgument(0).mayHaveStringValue(path) and
-        result = mcn and
-        ns = MkNamespace(srv, path)
-      )
-      or
-      // invocation of a method that `srv` forwards to its default namespace
-      result = srv.ref().getAMethodCall(namespaceChainableMethod()) and
-      ns = srv.getDefaultNamespace()
-    )
-    or
-    exists(DataFlow::SourceNode pred, DataFlow::TypeTracker t2 | pred = namespace(ns, t2) |
-      result = pred.track(t2, t)
-      or
-      // invocation of a chainable method
-      result = pred.getAMethodCall(namespaceChainableMethod()) and
-      t = t2.continue()
-      or
-      // invocation of chainable getter method
-      exists(string m |
-        m = "json" or
-        m = "local" or
-        m = "volatile"
-      |
-        result = pred.getAPropertyRead(m) and
-        t = t2.continue()
-      )
-    )
-  }
-
-  /** A data flow node that may produce a namespace object. */
-  class NamespaceNode extends DataFlow::SourceNode {
+  class NamespaceObject extends SocketIOObject {
     ServerNamespace ns;
 
-    NamespaceNode() { this = namespace(ns, DataFlow::TypeTracker::end()) }
+    NamespaceObject() {
+      exists(ServerObject srv |
+        // namespace lookup on `srv`
+        this = srv.ref().getAPropertyRead("sockets") and
+        ns = srv.getDefaultNamespace()
+        or
+        exists(DataFlow::MethodCallNode mcn, string path |
+          mcn = srv.ref().getAMethodCall("of") and
+          mcn.getArgument(0).mayHaveStringValue(path) and
+          this = mcn and
+          ns = MkNamespace(srv, path)
+        )
+        or
+        // invocation of a method that `srv` forwards to its default namespace
+        this = srv.ref().getAMethodCall(namespaceChainableMethod()) and
+        ns = srv.getDefaultNamespace()
+      )
+    }
+    
+    ServerNamespace getNamespace() {
+      result = ns	
+    }
 
-    /** Gets the namespace to which this node refers. */
-    ServerNamespace getNamespace() { result = ns }
+    /**
+     * Gets a data flow node that may refer to the socket.io namespace created at `ns`.
+     */
+    private DataFlow::SourceNode namespace(DataFlow::TypeTracker t) {
+      t.start() and result = this
+      or
+      exists(DataFlow::SourceNode pred, DataFlow::TypeTracker t2 | pred = namespace(t2) |
+        result = pred.track(t2, t)
+        or
+        // invocation of a chainable method
+        result = pred.getAMethodCall(namespaceChainableMethod()) and
+        t = t2.continue()
+        or
+        // invocation of chainable getter method
+        exists(string m |
+          m = "json" or
+          m = "local" or
+          m = "volatile"
+        |
+          result = pred.getAPropertyRead(m) and
+          t = t2.continue()
+        )
+      )
+    }
+
+    override DataFlow::SourceNode ref() { result = namespace(DataFlow::TypeTracker::end()) }
   }
 
   /**
@@ -145,7 +149,7 @@ module SocketIO {
     exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
       (
         ns = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
-        ns = base.(NamespaceNode).getNamespace()
+        ns = any(NamespaceObject o | o.ref() = base).getNamespace()
       ) and
       (connect = "connect" or connect = "connection")
     |
@@ -260,7 +264,11 @@ module SocketIO {
 
     SendNode() {
       exists(string m |
-        (base = any(ServerObject o).ref() or base instanceof NamespaceNode or base instanceof SocketNode) and
+        (
+          base = any(ServerObject o).ref() or
+          base = any(NamespaceObject o).ref() or
+          base instanceof SocketNode
+        ) and
         this = base.getAMethodCall(m)
       |
         // a call to `emit`
@@ -285,7 +293,7 @@ module SocketIO {
      */
     ServerNamespace getNamespace() {
       result = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
-      result = base.(NamespaceNode).getNamespace() or
+      result = any(NamespaceObject o | o.ref() = base).getNamespace() or
       result = base.(SocketNode).getNamespace()
     }
 

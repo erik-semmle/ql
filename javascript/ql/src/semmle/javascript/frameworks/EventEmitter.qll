@@ -37,7 +37,7 @@ module EventEmitter {
     )
   }
   
-  private DataFlow::SourceNode trackEventEmitter(EventEmitterRange::Range emitter) {
+  DataFlow::SourceNode trackEventEmitter(EventEmitterRange::Range emitter) {
   	result = trackEventEmitter(DataFlow::TypeTracker::end(), emitter)
   }
 
@@ -63,7 +63,7 @@ module EventEmitter {
        * Get a reference through type-tracking to this EventEmitter.
        * The type-tracking tracks through chainable methods.
        */
-      DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
+      abstract DataFlow::SourceNode ref();// { result = trackEventEmitter(this) }
     }
 
     abstract class NodeJSEventEmitter extends Range {}
@@ -77,6 +77,8 @@ module EventEmitter {
           this = clazz.getAnInstantiation()
         )
       }
+      
+      override DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
     }
   }
 
