@@ -18,6 +18,28 @@ module EventEmitter {
     result = "prependListener" or
     result = "prependOnceListener"
   }
+  
+    
+  private DataFlow::SourceNode trackEventEmitter(DataFlow::TypeTracker t, EventEmitterRange::Range emitter) {
+    t.start() and result = emitter
+    or
+    exists(DataFlow::TypeTracker t2, DataFlow::SourceNode pred | pred = trackEventEmitter(t2, emitter) |
+      result = pred.track(t2, t)
+      or
+      // invocation of a chainable method
+      exists(DataFlow::MethodCallNode mcn |
+        mcn = pred.getAMethodCall(EventEmitter::chainableMethod()) and
+        // exclude getter versions
+        exists(mcn.getAnArgument()) and
+        result = mcn and
+        t = t2.continue()
+      )
+    )
+  }
+  
+  private DataFlow::SourceNode trackEventEmitter(EventEmitterRange::Range emitter) {
+  	result = trackEventEmitter(DataFlow::TypeTracker::end(), emitter)
+  }
 
   /**
    * An instance of the NodeJS EventEmitter class.
@@ -29,39 +51,19 @@ module EventEmitter {
     EventEmitter() { this = range }
 
     /**
-     * Get a method name that returns `this` on this type of emitter.
-     */
-    string getAChainableMethod() { result = range.getAChainableMethod() }
-
-    /**
      * Get a reference through type-tracking to this EventEmitter.
      * The type-tracking tracks through chainable methods.
      */
     DataFlow::SourceNode ref() { result = range.ref() }
   }
-
+  
   module EventEmitterRange {
     abstract class Range extends DataFlow::Node {
-      string getAChainableMethod() { result = EventEmitter::chainableMethod() }
-
-      private DataFlow::SourceNode ref(DataFlow::TypeTracker t) {
-        t.start() and result = this
-        or
-        exists(DataFlow::TypeTracker t2, DataFlow::SourceNode pred | pred = ref(t2) |
-          result = pred.track(t2, t)
-          or
-          // invocation of a chainable method
-          exists(DataFlow::MethodCallNode mcn |
-            mcn = pred.getAMethodCall(this.getAChainableMethod()) and
-            // exclude getter versions
-            exists(mcn.getAnArgument()) and
-            result = mcn and
-            t = t2.continue()
-          )
-        )
-      }
-
-      DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
+      /**
+       * Get a reference through type-tracking to this EventEmitter.
+       * The type-tracking tracks through chainable methods.
+       */
+      DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
     }
 
     abstract class NodeJSEventEmitter extends Range {}
