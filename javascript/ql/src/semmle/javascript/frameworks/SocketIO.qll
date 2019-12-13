@@ -3,7 +3,6 @@
  */
 
 import javascript
-private import semmle.javascript.dataflow.InferredTypes
 
 /**
  * Provides classes for working with server-side socket.io code
