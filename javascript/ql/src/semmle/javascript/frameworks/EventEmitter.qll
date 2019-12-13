@@ -113,17 +113,17 @@ module EventEmitter {
   }
 
   module EventRegistration {
-    abstract class Range extends DataFlow::CallNode {
-      EventEmitterRange::Range emitter;
+    abstract class Range extends DataFlow::Node {
+      EventEmitterRange::Range emitter; // TODO: Do I really need this field?
 
       final EventEmitter getEmitter() { result = emitter }
 
       string getChannel() {
-        this.getArgument(0).mayHaveStringValue(result)
+        this.(DataFlow::InvokeNode).getArgument(0).mayHaveStringValue(result)
       }
 
       DataFlow::Node getReceivedItem(int i) {
-        result = this.getABoundCallbackParameter(1, i)
+        result = this.(DataFlow::InvokeNode).getABoundCallbackParameter(1, i)
       }
 
       DataFlow::Node getAReturnedValue() { none() }
@@ -164,17 +164,17 @@ module EventEmitter {
   }
 
   module EventDispatch {
-    abstract class Range extends DataFlow::CallNode {
+    abstract class Range extends DataFlow::Node {
       EventEmitterRange::Range emitter;
 
       final EventEmitter getEmitter() { result = emitter }
 
       string getChannel() {
-        this.getArgument(0).mayHaveStringValue(result)
+        this.(DataFlow::CallNode).getArgument(0).mayHaveStringValue(result)
       }
 
       DataFlow::Node getSentItem(int i) {
-        result = this.getArgument(i + 1)
+        result = this.(DataFlow::CallNode).getArgument(i + 1)
       }
 
       EventRegistration::Range getAReceiver() {

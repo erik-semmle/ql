@@ -18,6 +18,7 @@ private import semmle.javascript.dataflow.InferredTypes
 // TODO: Restore SocketNode, NamespaceNode, ServerNode. And revert the Namespace class.
 // Go through all the previous classes, and ensure they exist.
 // Have all the .ref() methods return *Node objects.
+// TODO: Refactor out the .getAck() methods? 
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -207,7 +208,7 @@ module SocketIO {
   /**
    * A data flow node representing an API call that receives data from a client.
    */
-  class ReceiveNode extends EventEmitter::EventRegistration::Range {
+  class ReceiveNode extends EventEmitter::EventRegistration::Range, DataFlow::CallNode {
     override SocketObject emitter;
 
     ReceiveNode() { this = emitter.ref().getAMethodCall(EventEmitter::on()) }
@@ -230,6 +231,27 @@ module SocketIO {
     DataFlow::SourceNode getAck() {
       result = getListener().getLastParameter() and
       exists(result.getAnInvocation())
+    }
+  }
+  
+  //   pred = recv.getAck().getACall().getArgument(i) and
+  // TODO: Doc.  
+  class ReceiveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
+  	ReceiveNode rcv;
+  	ReceiveCallback() {
+  	  this = rcv.getAck()	
+  	}
+  	
+  	override string getChannel() {
+      result = rcv.getChannel()
+  	}
+
+    override DataFlow::Node getSentItem(int i) {
+      result = this.getACall().getArgument(i)
+    }
+
+    override SocketIOClient::SendCallback getAReceiver() {
+      result.getSendNode().getAReceiver() = rcv
     }
   }
 
@@ -304,6 +326,21 @@ module SocketIO {
     /** Gets a client-side node that may be receiving the data sent here. */
     override SocketIOClient::ReceiveNode getAReceiver() {
       result.getSocket().getATargetNamespace() = getNamespace()
+    }
+  }
+
+  // succ = send.getAck().getParameter(i)
+  class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
+    SendNode send;
+
+    SendCallback() { this = send.getAck() }
+
+    override string getChannel() { result = send.getChannel() }
+
+    override DataFlow::Node getReceivedItem(int i) { result = this.getParameter(i) }
+    
+    SendNode getSendNode() {
+      result = send	
     }
   }
 
@@ -461,6 +498,21 @@ module SocketIOClient {
     }
   }
 
+  // TODO: Doc.
+  class RecieveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
+    ReceiveNode rcv;
+
+    RecieveCallback() { this = rcv.getAck() and emitter = rcv.getEmitter() }
+
+    override string getChannel() { result = rcv.getChannel() }
+
+    override DataFlow::Node getSentItem(int i) { result = this.getACall().getArgument(i) }
+
+    override SocketIO::SendCallback getAReceiver() {
+      result.getSendNode().getAReceiver() = rcv
+    }
+  }
+
   /**
    * A data flow node representing an API call that sends data to the server.
    */
@@ -513,35 +565,18 @@ module SocketIOClient {
       result.getSocket().getNamespace() = getSocket().getATargetNamespace()
     }
   }
-}
 
-/** A data flow step through socket.io sockets. */
-private class SocketIoStep extends DataFlow::AdditionalFlowStep {
-  DataFlow::Node pred;
-  DataFlow::Node succ;
+  class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
+    SendNode send;
 
-  SocketIoStep() {
-    (
-      exists(SocketIO::SendNode send, SocketIOClient::ReceiveNode recv, int i |
-        recv = send.getAReceiver() and
-        not recv.getChannel() != send.getChannel()
-      |
-        pred = recv.getAck().getACall().getArgument(i) and
-        succ = send.getAck().getParameter(i)
-      )
-      or
-      exists(SocketIOClient::SendNode send, SocketIO::ReceiveNode recv, int i |
-        recv = send.getAReceiver() and
-        not recv.getChannel() != send.getChannel()
-      |
-        pred = recv.getAck().getACall().getArgument(i) and
-        succ = send.getAck().getParameter(i)
-      )
-    ) and
-    this = pred
-  }
+    SendCallback() { this = send.getAck() and emitter = send.getEmitter() }
 
-  override predicate step(DataFlow::Node predNode, DataFlow::Node succNode) {
-    predNode = pred and succNode = succ
+    override string getChannel() { result = send.getChannel() }
+
+    override DataFlow::Node getReceivedItem(int i) { result = this.getParameter(i) }
+    
+    SendNode getSendNode() {
+      result = send	
+    }
   }
 }
