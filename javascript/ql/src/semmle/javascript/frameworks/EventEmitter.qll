@@ -97,7 +97,7 @@ module EventEmitter {
     string getChannel() { result = range.getChannel() }
 
     /** Gets the `i`th parameter in the event handler. */
-    DataFlow::Node getEventHandlerParameter(int i) { result = range.getEventHandlerParameter(i) }
+    DataFlow::Node getReceivedItem(int i) { result = range.getReceivedItem(i) }
 
     /**
      * Gets a value that is returned by the event handler.
@@ -122,7 +122,7 @@ module EventEmitter {
         this.getArgument(0).mayHaveStringValue(result)
       }
 
-      DataFlow::Node getEventHandlerParameter(int i) {
+      DataFlow::Node getReceivedItem(int i) {
         result = this.getABoundCallbackParameter(1, i)
       }
 
@@ -204,7 +204,7 @@ module EventEmitter {
     override predicate step(DataFlow::Node pred, DataFlow::Node succ) {
       exists(int i | i >= 0 |
         pred = dispatch.getDispatchedArgument(i) and
-        succ = reg.getEventHandlerParameter(i)
+        succ = reg.getReceivedItem(i)
       )
       or
       reg.canReturnTo(dispatch) and

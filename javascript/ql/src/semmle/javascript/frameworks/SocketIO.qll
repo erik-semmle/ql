@@ -208,30 +208,24 @@ module SocketIO {
   /**
    * A data flow node representing an API call that receives data from a client.
    */
-  class ReceiveNode extends DataFlow::MethodCallNode {
-    SocketObject socket;
+  class ReceiveNode extends EventEmitter::EventRegistration::Range {
+    override SocketObject emitter;
 
-    ReceiveNode() { this = socket.ref().getAMethodCall(EventEmitter::on()) }
+    ReceiveNode() { this = emitter.ref().getAMethodCall(EventEmitter::on()) }
 
     /** Gets the socket through which data is received. */
-    SocketObject getSocket() { result = socket }
-
-    /** Gets the event name associated with the data, if it can be determined. */
-    string getEventName() { getArgument(0).mayHaveStringValue(result) }
-
+    SocketObject getSocket() { result = emitter }
+    
     /** Gets the callback that handles data received from a client. */
     private DataFlow::FunctionNode getListener() { result = getCallback(1) }
 
     /** Gets the `i`th parameter through which data is received from a client. */
-    DataFlow::SourceNode getReceivedItem(int i) {
+    override DataFlow::SourceNode getReceivedItem(int i) {
       exists(DataFlow::FunctionNode cb | cb = getListener() and result = cb.getParameter(i) |
         // exclude last parameter if it looks like a callback
         result != cb.getLastParameter() or not exists(result.getAnInvocation())
       )
     }
-
-    /** Gets a data flow node representing data received from a client. */
-    DataFlow::SourceNode getAReceivedItem() { result = getReceivedItem(_) }
 
     /** Gets the acknowledgment callback, if any. */
     DataFlow::SourceNode getAck() {
@@ -242,7 +236,7 @@ module SocketIO {
     /** Gets a client-side node that may be sending the data received here. */
     SocketIOClient::SendNode getASender() {
       result.getSocket().getATargetNamespace() = getSocket().getNamespace() and
-      not result.getEventName() != getEventName()
+      not result.getEventName() != this.getChannel()
     }
   }
 
@@ -250,7 +244,7 @@ module SocketIO {
    * A data flow node representing data received from a client, viewed as remote user input.
    */
   private class ReceivedItemAsRemoteFlow extends RemoteFlowSource {
-    ReceivedItemAsRemoteFlow() { this = any(ReceiveNode rercv).getAReceivedItem() }
+    ReceivedItemAsRemoteFlow() { this = any(ReceiveNode rercv).getReceivedItem(_) }
 
     override string getSourceType() { result = "socket.io client data" }
 
@@ -540,7 +534,7 @@ module SocketIOClient {
     /** Gets a server-side node that may be receiving the data sent here. */
     SocketIO::ReceiveNode getAReceiver() {
       result.getSocket().getNamespace() = getSocket().getATargetNamespace() and
-      not result.getEventName() != getEventName()
+      not result.getChannel() != getEventName()
     }
   }
 }
