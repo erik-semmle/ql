@@ -167,14 +167,14 @@ module Electron {
       }
 
       /**
-       * Holds if this dispatch can send an event to the given EventRegistration destination.
+       * TODO: DOc.
        */
-      override predicate canSendTo(EventEmitter::EventRegistration destination) {
+      override IPCSendRegistration getAReceiver() {
         this.getEmitter() instanceof RendererProcess and
-        destination.getEmitter() instanceof MainProcess
+        result.getEmitter() instanceof MainProcess
         or
         this.getEmitter() instanceof ProcessSender and
-        destination.getEmitter() instanceof RendererProcess
+        result.getEmitter() instanceof RendererProcess
       }
     }
   }

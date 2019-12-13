@@ -109,7 +109,7 @@ module EventEmitter {
      * Holds if this event handler can return a value to the given `dispatch`.
      * The default implementation is that there exists no such dispatch.
      */
-    predicate canReturnTo(EventDispatch dispatch) { range.canReturnTo(dispatch) }
+    predicate canReturnTo(EventDispatch dispatch) { range.canReturnTo(dispatch) } // TODO: Rename this thing.
   }
 
   module EventRegistration {
@@ -159,7 +159,7 @@ module EventEmitter {
      * Holds if this event dispatch can send an event to the given even registration.
      * The default implementation is that the emitters of the dispatch and registration have to be equal.
      */
-    predicate canSendTo(EventRegistration destination) { range.canSendTo(destination) }
+    EventRegistration getAReceiver() { result = range.getAReceiver() }
   }
 
   module EventDispatch {
@@ -176,8 +176,8 @@ module EventEmitter {
         result = this.getArgument(i + 1)
       }
 
-      predicate canSendTo(EventRegistration destination) {
-        this.getEmitter() = destination.getEmitter()
+      EventRegistration::Range getAReceiver() {
+        this.getEmitter() = result.getEmitter()
       }
     }
 
@@ -197,7 +197,7 @@ module EventEmitter {
 
     EventEmitterTaintStep() {
       this = dispatch and
-      dispatch.canSendTo(reg) and
+      reg = dispatch.getAReceiver() and
       reg.getChannel() = dispatch.getChannel()
     }
 
