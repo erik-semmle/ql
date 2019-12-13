@@ -15,9 +15,8 @@ private import semmle.javascript.dataflow.InferredTypes
  * path "/". Data flows between client and server side through sockets,
  * with each socket belonging to a namespace on a server.
  */
-// TODO: Restore SocketNode, NamespaceNode, ServerNode. And revert the Namespace class.
+// And revert the Namespace class.
 // Go through all the previous classes, and ensure they exist.
-// Have all the .ref() methods return *Node objects.
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -70,6 +69,17 @@ module SocketIO {
 
     override DataFlow::SourceNode ref() { result = server(DataFlow::TypeTracker::end()) }
   }
+  
+  class ServerNode extends DataFlow::SourceNode {
+  	ServerObject obj;
+  	ServerNode() {
+  	  this = obj.ref()	
+  	}
+  	
+  	ServerObject getServer() {
+  	  result = obj	
+  	}
+  }
 
   /**
    * Gets the name of a chainable method on socket.io namespace objects, which servers forward
@@ -88,10 +98,11 @@ module SocketIO {
     result = EventEmitter::chainableMethod()
   }
 
-  class NamespaceObject extends SocketIOObject {
+  // TODO: Doc.
+  class NamespaceBase extends SocketIOObject {
     ServerNamespace ns;
 
-    NamespaceObject() {
+    NamespaceBase() {
       exists(ServerObject srv |
         // namespace lookup on `srv`
         this = srv.ref().getAPropertyRead("sockets") and
@@ -139,6 +150,17 @@ module SocketIO {
 
     override DataFlow::SourceNode ref() { result = namespace(DataFlow::TypeTracker::end()) }
   }
+  
+  class NamespaceNode extends DataFlow::SourceNode {
+  	NamespaceBase namespace;
+  	NamespaceNode() {
+      this = namespace.ref()
+  	}
+  	
+  	NamespaceBase getNamespace() {
+  	  result = namespace
+  	}
+  }
 
   class SocketObject extends SocketIOObject {
     ServerNamespace ns;
@@ -147,7 +169,7 @@ module SocketIO {
       exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
         (
           ns = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
-          ns = any(NamespaceObject o | o.ref() = base).getNamespace()
+          ns = any(NamespaceBase o | o.ref() = base).getNamespace()
         ) and
         (connect = "connect" or connect = "connection")
       |
@@ -202,6 +224,17 @@ module SocketIO {
     }
 
     override DataFlow::SourceNode ref() { result = socket(DataFlow::TypeTracker::end()) }
+  }
+  
+  class SocketNode extends DataFlow::SourceNode {
+  	SocketObject socket;
+  	SocketNode() {
+  	  this = socket.ref()	
+  	}
+  	
+  	SocketObject getSocket() {
+  	  result = socket
+  	}
   }
 
   /**
@@ -293,7 +326,7 @@ module SocketIO {
      */
     ServerNamespace getNamespace() {
       result = emitter.(ServerObject).getDefaultNamespace() or
-      result = emitter.(NamespaceObject).getNamespace() or
+      result = emitter.(NamespaceBase).getNamespace() or
       result = emitter.(SocketObject).getNamespace()
     }
 
@@ -440,6 +473,17 @@ module SocketIOClient {
 
     /** Gets a server-side socket this client-side socket may be communicating with. */
     SocketIO::SocketObject getATargetSocket() { result.getNamespace() = getATargetNamespace() }
+  }
+  
+  class SocketNode extends DataFlow::SourceNode {
+  	SocketObject socket;
+  	SocketNode() {
+  	  this = socket.ref()	
+  	}
+  	
+  	SocketObject getSocket() {
+  	  result = socket	
+  	}
   }
 
   /**
