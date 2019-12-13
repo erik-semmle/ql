@@ -15,6 +15,7 @@ private import semmle.javascript.dataflow.InferredTypes
  * path "/". Data flows between client and server side through sockets,
  * with each socket belonging to a namespace on a server.
  */
+// TODO: Restore SocketNode, NamespaceNode, ServerNode. And revert the Namespace class.
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -37,11 +38,10 @@ module SocketIO {
     /**
      * Gets a data flow node that may refer to the socket.io server created at `srv`.
      */
-    private DataFlow::SourceNode server(ServerObject srv, DataFlow::TypeTracker t) {
-      srv = result and
-      t.start()
+    private DataFlow::SourceNode server(DataFlow::TypeTracker t) {
+      result = this and t.start()
       or
-      exists(DataFlow::TypeTracker t2, DataFlow::SourceNode pred | pred = server(srv, t2) |
+      exists(DataFlow::TypeTracker t2, DataFlow::SourceNode pred | pred = server(t2) |
         result = pred.track(t2, t)
         or
         // invocation of a chainable method
@@ -66,7 +66,7 @@ module SocketIO {
       )
     }
 
-    override DataFlow::SourceNode ref() { result = server(this, DataFlow::TypeTracker::end()) }
+    override DataFlow::SourceNode ref() { result = server(DataFlow::TypeTracker::end()) }
   }
 
   /**
@@ -107,10 +107,8 @@ module SocketIO {
         ns = srv.getDefaultNamespace()
       )
     }
-    
-    ServerNamespace getNamespace() {
-      result = ns	
-    }
+
+    ServerNamespace getNamespace() { result = ns }
 
     /**
      * Gets a data flow node that may refer to the socket.io namespace created at `ns`.
@@ -140,79 +138,83 @@ module SocketIO {
     override DataFlow::SourceNode ref() { result = namespace(DataFlow::TypeTracker::end()) }
   }
 
-  /**
-   * Gets a data flow node that may refer to a socket.io socket belonging to namespace `ns`.
-   */
-  private DataFlow::SourceNode socket(ServerNamespace ns, DataFlow::TypeTracker t) {
-    // callback accepting a socket
-    t.start() and
-    exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
-      (
-        ns = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
-        ns = any(NamespaceObject o | o.ref() = base).getNamespace()
-      ) and
-      (connect = "connect" or connect = "connection")
-    |
-      on = base.getAMethodCall(EventEmitter::on()) and
-      on.getArgument(0).mayHaveStringValue(connect) and
-      result = on.getCallback(1).getParameter(0)
-    )
-    or
-    exists(DataFlow::SourceNode pred, DataFlow::TypeTracker t2 | pred = socket(ns, t2) |
-      result = pred.track(t2, t)
-      or
-      // invocation of a chainable method
-      exists(string m |
-        m = "binary" or
-        m = "compress" or
-        m = "disconnect" or
-        m = "emit" or
-        m = "in" or
-        m = "join" or
-        m = "leave" or
-        m = "send" or
-        m = "to" or
-        m = "use" or
-        m = "write" or
-        m = EventEmitter::chainableMethod()
-      |
-        result = pred.getAMethodCall(m) and
-        t = t2.continue()
-      )
-      or
-      // invocation of a chainable getter method
-      exists(string m |
-        m = "broadcast" or
-        m = "json" or
-        m = "local" or
-        m = "volatile"
-      |
-        result = pred.getAPropertyRead(m) and
-        t = t2.continue()
-      )
-    )
-  }
-
-  /** A data flow node that may produce a socket object. */
-  class SocketNode extends DataFlow::SourceNode {
+  class SocketObject extends SocketIOObject {
     ServerNamespace ns;
 
-    SocketNode() { this = socket(ns, DataFlow::TypeTracker::end()) }
+    SocketObject() {
+      exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
+        (
+          ns = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
+          ns = any(NamespaceObject o | o.ref() = base).getNamespace()
+        ) and
+        (connect = "connect" or connect = "connection")
+      |
+        on = base.getAMethodCall(EventEmitter::on()) and
+        on.getArgument(0).mayHaveStringValue(connect) and
+        this = on.getCallback(1).getParameter(0)
+      )
+    }
 
     /** Gets the namespace to which this socket belongs. */
     ServerNamespace getNamespace() { result = ns }
+
+    /**
+     * Gets a data flow node that may refer to a socket.io socket belonging to namespace `ns`.
+     */
+    private DataFlow::SourceNode socket(DataFlow::TypeTracker t) {
+      result = this and t.start()
+      or
+      exists(DataFlow::SourceNode pred, DataFlow::TypeTracker t2 | pred = socket(t2) |
+        result = pred.track(t2, t)
+        or
+        // invocation of a chainable method
+        exists(string m |
+          m = "binary" or
+          m = "compress" or
+          m = "disconnect" or
+          m = "emit" or
+          m = "in" or
+          m = "join" or
+          m = "leave" or
+          m = "send" or
+          m = "to" or
+          m = "use" or
+          m = "write" or
+          m = EventEmitter::chainableMethod()
+        |
+          result = pred.getAMethodCall(m) and
+          t = t2.continue()
+        )
+        or
+        // invocation of a chainable getter method
+        exists(string m |
+          m = "broadcast" or
+          m = "json" or
+          m = "local" or
+          m = "volatile"
+        |
+          result = pred.getAPropertyRead(m) and
+          t = t2.continue()
+        )
+      )
+    }
+    
+    override DataFlow::SourceNode ref() {
+      result = socket(DataFlow::TypeTracker::end())	
+    }
   }
+
 
   /**
    * A data flow node representing an API call that receives data from a client.
    */
   class ReceiveNode extends DataFlow::MethodCallNode {
-    SocketNode socket;
+    SocketObject socket;
 
-    ReceiveNode() { this = socket.getAMethodCall(EventEmitter::on()) }
+    ReceiveNode() { this = socket.ref().getAMethodCall(EventEmitter::on()) }
 
     /** Gets the socket through which data is received. */
-    SocketNode getSocket() { result = socket }
+    SocketObject getSocket() { result = socket }
 
     /** Gets the event name associated with the data, if it can be determined. */
     string getEventName() { getArgument(0).mayHaveStringValue(result) }
@@ -264,11 +266,7 @@ module SocketIO {
 
     SendNode() {
       exists(string m |
-        (
-          base = any(ServerObject o).ref() or
-          base = any(NamespaceObject o).ref() or
-          base instanceof SocketNode
-        ) and
+        base = any(SocketIOObject o).ref() and
         this = base.getAMethodCall(m)
       |
         // a call to `emit`
@@ -286,7 +284,7 @@ module SocketIO {
      *
      * This predicate is not defined for broadcasting sends.
      */
-    SocketNode getSocket() { result = base }
+    SocketObject getSocket() { result = base }
 
     /**
      * Gets the namespace to which data is sent.
@@ -294,7 +292,7 @@ module SocketIO {
     ServerNamespace getNamespace() {
       result = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
       result = any(NamespaceObject o | o.ref() = base).getNamespace() or
-      result = base.(SocketNode).getNamespace()
+      result = any(SocketObject o | o.ref() = base).getNamespace()
     }
 
     /** Gets the event name associated with the data, if it can be determined. */
@@ -436,7 +434,7 @@ module SocketIOClient {
     }
 
     /** Gets a server-side socket this client-side socket may be communicating with. */
-    SocketIO::SocketNode getATargetSocket() { result.getNamespace() = getATargetNamespace() }
+    SocketIO::SocketObject getATargetSocket() { result.getNamespace() = getATargetNamespace() }
   }
 
   /**

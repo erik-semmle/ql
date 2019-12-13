@@ -1,5 +1,5 @@
 import javascript
 
-query predicate test_SocketNode(SocketIO::SocketNode sn, SocketIO::ServerNamespace res) {
-  res = sn.getNamespace()
+query predicate test_SocketNode(DataFlow::SourceNode sn, SocketIO::ServerNamespace res) {
+  res = any(SocketIO::SocketObject o | o.ref() = sn).getNamespace()
 }
