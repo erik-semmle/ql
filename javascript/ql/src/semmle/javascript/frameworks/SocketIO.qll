@@ -1,4 +1,4 @@
-/**g
+/**
  * Provides classes for working with [socket.io](https://socket.io).
  */
 
@@ -15,8 +15,6 @@ private import semmle.javascript.dataflow.InferredTypes
  * path "/". Data flows between client and server side through sockets,
  * with each socket belonging to a namespace on a server.
  */
-// And revert the Namespace class.
-// Go through all the previous classes, and ensure they exist.
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -31,10 +29,10 @@ module SocketIO {
     }
 
     /** Gets the default namespace of this server. */
-    ServerNamespace getDefaultNamespace() { result = MkNamespace(this, "/") }
+    NamespaceObject getDefaultNamespace() { result = MkNamespace(this, "/") }
 
     /** Gets the namespace with the given path of this server. */
-    ServerNamespace getNamespace(string path) { result = MkNamespace(this, path) }
+    NamespaceObject getNamespace(string path) { result = MkNamespace(this, path) }
 
     /**
      * Gets a data flow node that may refer to the socket.io server created at `srv`.
@@ -70,12 +68,14 @@ module SocketIO {
     override DataFlow::SourceNode ref() { result = server(DataFlow::TypeTracker::end()) }
   }
   
+  /** A data flow node that may produce (that is, create or return) a socket.io server. */
   class ServerNode extends DataFlow::SourceNode {
   	ServerObject obj;
   	ServerNode() {
   	  this = obj.ref()	
   	}
   	
+  	/** Gets the server to which this node refers. */
   	ServerObject getServer() {
   	  result = obj	
   	}
@@ -98,9 +98,11 @@ module SocketIO {
     result = EventEmitter::chainableMethod()
   }
 
-  // TODO: Doc.
+  /**
+   * A reference to a namespace object.
+   */
   class NamespaceBase extends SocketIOObject {
-    ServerNamespace ns;
+    NamespaceObject ns;
 
     NamespaceBase() {
       exists(ServerObject srv |
@@ -121,7 +123,8 @@ module SocketIO {
       )
     }
 
-    ServerNamespace getNamespace() { result = ns }
+    /** Gets the namespace to which this object refers. */
+    NamespaceObject getNamespace() { result = ns }
 
     /**
      * Gets a data flow node that may refer to the socket.io namespace created at `ns`.
@@ -151,19 +154,22 @@ module SocketIO {
     override DataFlow::SourceNode ref() { result = namespace(DataFlow::TypeTracker::end()) }
   }
   
+  /** A data flow node that may produce a namespace object. */
   class NamespaceNode extends DataFlow::SourceNode {
   	NamespaceBase namespace;
   	NamespaceNode() {
       this = namespace.ref()
   	}
   	
-  	NamespaceBase getNamespace() {
-  	  result = namespace
+	/** Gets the namespace to which this node refers. */
+  	NamespaceObject getNamespace() {
+  	  result = namespace.getNamespace()
   	}
   }
 
+  /** An socket object from SocketIO */
   class SocketObject extends SocketIOObject {
-    ServerNamespace ns;
+    NamespaceObject ns;
 
     SocketObject() {
       exists(DataFlow::SourceNode base, string connect, DataFlow::MethodCallNode on |
@@ -180,11 +186,8 @@ module SocketIO {
     }
 
     /** Gets the namespace to which this socket belongs. */
-    ServerNamespace getNamespace() { result = ns }
+    NamespaceObject getNamespace() { result = ns }
 
-    /**
-     * Gets a data flow node that may refer to a socket.io socket belonging to namespace `ns`.
-     */
     private DataFlow::SourceNode socket(DataFlow::TypeTracker t) {
       result = this and t.start()
       or
@@ -226,15 +229,15 @@ module SocketIO {
     override DataFlow::SourceNode ref() { result = socket(DataFlow::TypeTracker::end()) }
   }
   
+  /** A data flow node that may produce a socket object. */
   class SocketNode extends DataFlow::SourceNode {
   	SocketObject socket;
   	SocketNode() {
   	  this = socket.ref()	
   	}
   	
-  	SocketObject getSocket() {
-  	  result = socket
-  	}
+  	/** Gets the namespace to which this socket belongs. */
+    NamespaceObject getNamespace() { result = socket.getNamespace() }
   }
 
   /**
@@ -260,9 +263,7 @@ module SocketIO {
     }
   }
   
-  //   pred = recv.getAck().getACall().getArgument(i) and
-  // TODO: Doc.
-  // TODO: /** Gets the acknowledgment callback, if any. */  
+  /** An acknowledgment callback when receiving a message. */  
   class ReceiveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
   	ReceiveNode rcv;
   	ReceiveCallback() {
@@ -324,7 +325,7 @@ module SocketIO {
     /**
      * Gets the namespace to which data is sent.
      */
-    ServerNamespace getNamespace() {
+    NamespaceObject getNamespace() {
       result = emitter.(ServerObject).getDefaultNamespace() or
       result = emitter.(NamespaceBase).getNamespace() or
       result = emitter.(SocketObject).getNamespace()
@@ -351,8 +352,7 @@ module SocketIO {
     }
   }
 
-  // succ = send.getAck().getParameter(i)
-  // TODO:     /** Gets the acknowledgment callback, if any. */
+  /** An acknowledgment callback from sending message. */
   class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
     SendNode send;
 
@@ -367,6 +367,9 @@ module SocketIO {
 
     override DataFlow::Node getReceivedItem(int i) { result = this.getParameter(i) }
     
+    /**
+     * Get the send node where this callback was registered. 
+     */
     SendNode getSendNode() {
       result = send	
     }
@@ -381,11 +384,11 @@ module SocketIO {
     }
 
   /** A socket.io namespace. */
-  class ServerNamespace extends TNamespace {
+  class NamespaceObject extends TNamespace {
     ServerObject srv;
     string path;
 
-    ServerNamespace() { this = MkNamespace(srv, path) }
+    NamespaceObject() { this = MkNamespace(srv, path) }
 
     /** Gets the server to which this namespace belongs. */
     ServerObject getServer() { result = srv }
@@ -463,7 +466,7 @@ module SocketIOClient {
     }
 
     /** Gets a namespace this socket may be communicating with. */
-    SocketIO::ServerNamespace getATargetNamespace() {
+    SocketIO::NamespaceObject getATargetNamespace() {
       result = getATargetServer().getNamespace(getNamespacePath())
       or
       // if the namespace of this socket cannot be determined, overapproximate
@@ -475,20 +478,40 @@ module SocketIOClient {
     SocketIO::SocketObject getATargetSocket() { result.getNamespace() = getATargetNamespace() }
   }
   
+  /** A data flow node that may produce a socket object. */
   class SocketNode extends DataFlow::SourceNode {
   	SocketObject socket;
   	SocketNode() {
   	  this = socket.ref()	
   	}
   	
-  	SocketObject getSocket() {
-  	  result = socket	
-  	}
+  	/** Gets the path of the namespace this socket belongs to, if it can be determined. */
+    string getNamespacePath() {
+      result = socket.getNamespacePath()	
+    }
+    
+    /**
+     * Gets a server this socket may be communicating with.
+     *
+     * To avoid matching sockets with unrelated servers, we restrict the search to
+     * servers defined in the same npm package. Furthermore, the server is required
+     * to have a namespace with the same path as the namespace of this socket, if
+     * it can be determined.
+     */
+    SocketIO::ServerObject getATargetServer() {
+      result = socket.getATargetServer()	
+    }
+    
+    /** Gets a namespace this socket may be communicating with. */
+    SocketIO::NamespaceObject getATargetNamespace() {
+      result = socket.getATargetNamespace()	
+    }
+    
+    /** Gets a server-side socket this client-side socket may be communicating with. */
+    SocketIO::SocketNode getATargetSocket() { result.getNamespace() = socket.getATargetNamespace() }
   }
 
-  /**
-   * Gets the NPM package that contains `nd`.
-   */
+  /** Gets the NPM package that contains `nd`. */
   private NPMPackage getPackage(DataFlow::SourceNode nd) { result.getAFile() = nd.getFile() }
 
   /**
@@ -526,7 +549,7 @@ module SocketIOClient {
     }
   }
 
-  // TODO: Doc.
+  /** An acknowledgment callback from a receive node. */
   class RecieveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
     ReceiveNode rcv;
 
@@ -544,6 +567,9 @@ module SocketIOClient {
       result.getSendNode().getAReceiver() = rcv
     }
     
+    /**
+     * Get the receive node where this callback was registered.
+     */
     ReceiveNode getReceiveNode() {
       result = rcv	
     }
@@ -599,7 +625,7 @@ module SocketIOClient {
     }
   }
 
-  // TODO: /** Gets the acknowledgment callback, if any. */
+  /** An acknowledgment callback from sending message. */
   class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
     SendNode send;
 
@@ -612,6 +638,9 @@ module SocketIOClient {
 
     override DataFlow::Node getReceivedItem(int i) { result = this.getParameter(i) }
     
+    /**
+     * Get the SendNode where this callback was registered.
+     */
     SendNode getSendNode() {
       result = send	
     }

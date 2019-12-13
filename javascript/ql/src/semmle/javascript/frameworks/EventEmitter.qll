@@ -37,6 +37,9 @@ module EventEmitter {
     )
   }
   
+  /**
+   * Type tracking of an event emitter. Types are tracked through the chainable methods in the NodeJS eventEmitter.
+   */
   DataFlow::SourceNode trackEventEmitter(EventEmitterRange::Range emitter) {
   	result = trackEventEmitter(DataFlow::TypeTracker::end(), emitter)
   }
@@ -61,12 +64,19 @@ module EventEmitter {
     abstract class Range extends DataFlow::Node {
       /**
        * Get a reference through type-tracking to this EventEmitter.
-       * The type-tracking tracks through chainable methods.
+       * The type-tracking tracks through chainable methods and possibly chainable getter properties.
        */
-      abstract DataFlow::SourceNode ref();// { result = trackEventEmitter(this) }
+      abstract DataFlow::SourceNode ref();
     }
 
-    abstract class NodeJSEventEmitter extends Range {}
+    /**
+     * An NodeJS EventEmitter instance. 
+     * Events dispatched on this EventEmitter will be handled by event handlers registered on this EventEmitter. 
+     * (That is opposed to e.g. SocketIO, which implements the same interface, but where events cross object boundaries). 
+     */
+    abstract class NodeJSEventEmitter extends Range {
+      override DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
+    }
 
     private class ImportedNodeJSEventEmitter extends NodeJSEventEmitter {
       ImportedNodeJSEventEmitter() {
@@ -77,8 +87,6 @@ module EventEmitter {
           this = clazz.getAnInstantiation()
         )
       }
-      
-      override DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
     }
   }
 

@@ -75,8 +75,6 @@ module Electron {
    */
   class WebContents extends DataFlow::SourceNode, EventEmitter::EventEmitterRange::NodeJSEventEmitter {
     WebContents() { this.(DataFlow::PropRead).accesses(any(BrowserObject bo), "webContents") }
-    
-    override DataFlow::SourceNode ref() { result = EventEmitter::trackEventEmitter(this) }
   }
 
   /**
