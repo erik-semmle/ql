@@ -303,8 +303,7 @@ module SocketIO {
 
     /** Gets a client-side node that may be receiving the data sent here. */
     override SocketIOClient::ReceiveNode getAReceiver() {
-      result.getSocket().getATargetNamespace() = getNamespace() and
-      not result.getChannel() != getChannel() // TODO:Remove
+      result.getSocket().getATargetNamespace() = getNamespace()
     }
   }
 
@@ -511,8 +510,7 @@ module SocketIOClient {
 
     /** Gets a server-side node that may be receiving the data sent here. */
     override SocketIO::ReceiveNode getAReceiver() {
-      result.getSocket().getNamespace() = getSocket().getATargetNamespace() and
-      not result.getChannel() != getChannel() // TODO: Remove.
+      result.getSocket().getNamespace() = getSocket().getATargetNamespace()
     }
   }
 }
@@ -525,21 +523,17 @@ private class SocketIoStep extends DataFlow::AdditionalFlowStep {
   SocketIoStep() {
     (
       exists(SocketIO::SendNode send, SocketIOClient::ReceiveNode recv, int i |
-        recv = send.getAReceiver()
+        recv = send.getAReceiver() and
+        not recv.getChannel() != send.getChannel()
       |
-        /*pred = send.getSentItem(i) and
-        succ = recv.getReceivedItem(i)
-        or */
         pred = recv.getAck().getACall().getArgument(i) and
         succ = send.getAck().getParameter(i)
       )
       or
       exists(SocketIOClient::SendNode send, SocketIO::ReceiveNode recv, int i |
-        recv = send.getAReceiver()
+        recv = send.getAReceiver() and
+        not recv.getChannel() != send.getChannel()
       |
-        /* pred = send.getSentItem(i) and
-        succ = recv.getReceivedItem(i)
-        or */
         pred = recv.getAck().getACall().getArgument(i) and
         succ = send.getAck().getParameter(i)
       )

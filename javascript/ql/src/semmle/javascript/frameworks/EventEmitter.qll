@@ -158,6 +158,7 @@ module EventEmitter {
     /**
      * Holds if this event dispatch can send an event to the given even registration.
      * The default implementation is that the emitters of the dispatch and registration have to be equal.
+     * TODO: Ignoring channel.
      */
     EventRegistration getAReceiver() { result = range.getAReceiver() }
   }
