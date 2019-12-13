@@ -198,7 +198,7 @@ module EventEmitter {
     EventEmitterTaintStep() {
       this = dispatch and
       reg = dispatch.getAReceiver() and
-      reg.getChannel() = dispatch.getChannel()
+      not dispatch.getChannel() != reg.getChannel()
     }
 
     override predicate step(DataFlow::Node pred, DataFlow::Node succ) {

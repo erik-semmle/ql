@@ -302,10 +302,9 @@ module SocketIO {
     }
 
     /** Gets a client-side node that may be receiving the data sent here. */
-    SocketIOClient::ReceiveNode getAReceiver() {
-      // TODO: Replace when I do the TaintStep.
+    override SocketIOClient::ReceiveNode getAReceiver() {
       result.getSocket().getATargetNamespace() = getNamespace() and
-      not result.getChannel() != getChannel()
+      not result.getChannel() != getChannel() // TODO:Remove
     }
   }
 
@@ -513,7 +512,7 @@ module SocketIOClient {
     /** Gets a server-side node that may be receiving the data sent here. */
     override SocketIO::ReceiveNode getAReceiver() {
       result.getSocket().getNamespace() = getSocket().getATargetNamespace() and
-      not result.getChannel() != getChannel()
+      not result.getChannel() != getChannel() // TODO: Remove.
     }
   }
 }
@@ -528,9 +527,9 @@ private class SocketIoStep extends DataFlow::AdditionalFlowStep {
       exists(SocketIO::SendNode send, SocketIOClient::ReceiveNode recv, int i |
         recv = send.getAReceiver()
       |
-        pred = send.getSentItem(i) and
+        /*pred = send.getSentItem(i) and
         succ = recv.getReceivedItem(i)
-        or
+        or */
         pred = recv.getAck().getACall().getArgument(i) and
         succ = send.getAck().getParameter(i)
       )
@@ -538,9 +537,9 @@ private class SocketIoStep extends DataFlow::AdditionalFlowStep {
       exists(SocketIOClient::SendNode send, SocketIO::ReceiveNode recv, int i |
         recv = send.getAReceiver()
       |
-        pred = send.getSentItem(i) and
+        /* pred = send.getSentItem(i) and
         succ = recv.getReceivedItem(i)
-        or
+        or */
         pred = recv.getAck().getACall().getArgument(i) and
         succ = send.getAck().getParameter(i)
       )
