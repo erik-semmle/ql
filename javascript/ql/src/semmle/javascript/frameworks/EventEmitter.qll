@@ -153,7 +153,7 @@ module EventEmitter {
     string getChannel() { result = range.getChannel() }
 
     /** Gets the `i`th argument that is send to the event handler. */
-    DataFlow::Node getDispatchedArgument(int i) { result = range.getDispatchedArgument(i) }
+    DataFlow::Node getSentItem(int i) { result = range.getSentItem(i) }
 
     /**
      * Holds if this event dispatch can send an event to the given even registration.
@@ -172,7 +172,7 @@ module EventEmitter {
         this.getArgument(0).mayHaveStringValue(result)
       }
 
-      DataFlow::Node getDispatchedArgument(int i) {
+      DataFlow::Node getSentItem(int i) {
         result = this.getArgument(i + 1)
       }
 
@@ -203,7 +203,7 @@ module EventEmitter {
 
     override predicate step(DataFlow::Node pred, DataFlow::Node succ) {
       exists(int i | i >= 0 |
-        pred = dispatch.getDispatchedArgument(i) and
+        pred = dispatch.getSentItem(i) and
         succ = reg.getReceivedItem(i)
       )
       or

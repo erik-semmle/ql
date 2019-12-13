@@ -1,7 +1,7 @@
 import javascript
 
 query predicate test_ClientReceiveNode(
-  SocketIOClient::ReceiveNode rn, SocketIOClient::SocketNode res
+  SocketIOClient::ReceiveNode rn, DataFlow::SourceNode res
 ) {
-  res = rn.getSocket()
+  res = rn.getSocket().ref()
 }

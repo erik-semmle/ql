@@ -16,6 +16,7 @@ private import semmle.javascript.dataflow.InferredTypes
  * with each socket belonging to a namespace on a server.
  */
 // TODO: Restore SocketNode, NamespaceNode, ServerNode. And revert the Namespace class.
+// Go through all the previous classes, and ensure they exist.
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -198,12 +199,9 @@ module SocketIO {
         )
       )
     }
-    
-    override DataFlow::SourceNode ref() {
-      result = socket(DataFlow::TypeTracker::end())	
-    }
-  }
 
+    override DataFlow::SourceNode ref() { result = socket(DataFlow::TypeTracker::end()) }
+  }
 
   /**
    * A data flow node representing an API call that receives data from a client.
@@ -215,7 +213,7 @@ module SocketIO {
 
     /** Gets the socket through which data is received. */
     SocketObject getSocket() { result = emitter }
-    
+
     /** Gets the callback that handles data received from a client. */
     private DataFlow::FunctionNode getListener() { result = getCallback(1) }
 
@@ -235,6 +233,7 @@ module SocketIO {
 
     /** Gets a client-side node that may be sending the data received here. */
     SocketIOClient::SendNode getASender() {
+      // TODO: Replace (remove?) when I do the TaintStep.
       result.getSocket().getATargetNamespace() = getSocket().getNamespace() and
       not result.getEventName() != this.getChannel()
     }
@@ -254,15 +253,12 @@ module SocketIO {
   /**
    * A data flow node representing an API call that sends data to a client.
    */
-  class SendNode extends DataFlow::MethodCallNode {
-    DataFlow::SourceNode base;
+  class SendNode extends DataFlow::MethodCallNode, EventEmitter::EventDispatch::Range {
+    override SocketIOObject emitter;
     int firstDataIndex;
 
     SendNode() {
-      exists(string m |
-        base = any(SocketIOObject o).ref() and
-        this = base.getAMethodCall(m)
-      |
+      exists(string m | this = emitter.ref().getAMethodCall(m) |
         // a call to `emit`
         m = "emit" and
         firstDataIndex = 1
@@ -278,24 +274,24 @@ module SocketIO {
      *
      * This predicate is not defined for broadcasting sends.
      */
-    SocketObject getSocket() { result = base }
+    SocketObject getSocket() { result = emitter }
 
     /**
      * Gets the namespace to which data is sent.
      */
     ServerNamespace getNamespace() {
-      result = any(ServerObject o | o.ref() = base).getDefaultNamespace() or
-      result = any(NamespaceObject o | o.ref() = base).getNamespace() or
-      result = any(SocketObject o | o.ref() = base).getNamespace()
+      result = emitter.(ServerObject).getDefaultNamespace() or
+      result = emitter.(NamespaceObject).getNamespace() or
+      result = emitter.(SocketObject).getNamespace()
     }
 
     /** Gets the event name associated with the data, if it can be determined. */
-    string getEventName() {
+    override string getChannel() {
       if firstDataIndex = 1 then getArgument(0).mayHaveStringValue(result) else result = "message"
     }
 
     /** Gets the `i`th argument through which data is sent to the client. */
-    DataFlow::Node getSentItem(int i) {
+    override DataFlow::Node getSentItem(int i) {
       result = getArgument(i + firstDataIndex) and
       i >= 0 and
       (
@@ -303,9 +299,6 @@ module SocketIO {
         result != getLastArgument() or not exists(getAck())
       )
     }
-
-    /** Gets a data flow node representing data sent to the client. */
-    DataFlow::Node getASentItem() { result = getSentItem(_) }
 
     /** Gets the acknowledgment callback, if any. */
     DataFlow::FunctionNode getAck() {
@@ -316,8 +309,9 @@ module SocketIO {
 
     /** Gets a client-side node that may be receiving the data sent here. */
     SocketIOClient::ReceiveNode getAReceiver() {
+      // TODO: Replace when I do the TaintStep.
       result.getSocket().getATargetNamespace() = getNamespace() and
-      not result.getEventName() != getEventName()
+      not result.getEventName() != getChannel()
     }
   }
 
@@ -352,42 +346,40 @@ module SocketIO {
  * (npm package `socket.io-client`).
  */
 module SocketIOClient {
-  /**
-   * Gets a data flow node that may refer to the socket.io socket created at `invk`.
-   */
-  private DataFlow::SourceNode socket(DataFlow::InvokeNode invk, DataFlow::TypeTracker t) {
-    t.start() and
-    exists(DataFlow::SourceNode io |
-      io = DataFlow::globalVarRef("io") or
-      io = DataFlow::globalVarRef("io").getAPropertyRead("connect") or
-      io = DataFlow::moduleImport("io") or
-      io = DataFlow::moduleMember("io", "connect") or
-      io = DataFlow::moduleImport("socket.io-client") or
-      io = DataFlow::moduleMember("socket.io-client", "connect")
-    |
-      invk = io.getAnInvocation() and
-      result = invk
-    )
-    or
-    exists(DataFlow::TypeTracker t2 | result = socket(invk, t2).track(t2, t))
-  }
+  abstract private class SocketIOObject extends DataFlow::SourceNode,
+    EventEmitter::EventEmitterRange::Range { }
 
-  /**
-   * Gets the NPM package that contains `nd`.
-   */
-  private NPMPackage getPackage(DataFlow::SourceNode nd) { result.getAFile() = nd.getFile() }
+  /** A socket object. */
+  class SocketObject extends SocketIOObject, DataFlow::InvokeNode {
+    SocketObject() {
+      exists(DataFlow::SourceNode io |
+        io = DataFlow::globalVarRef("io") or
+        io = DataFlow::globalVarRef("io").getAPropertyRead("connect") or
+        io = DataFlow::moduleImport("io") or
+        io = DataFlow::moduleMember("io", "connect") or
+        io = DataFlow::moduleImport("socket.io-client") or
+        io = DataFlow::moduleMember("socket.io-client", "connect")
+      |
+        this = io.getAnInvocation()
+      )
+    }
 
-  /** A data flow node that may produce a socket object. */
-  class SocketNode extends DataFlow::SourceNode {
-    DataFlow::InvokeNode invk;
+    /**
+     * Gets a data flow node that may refer to the socket.io socket created at `invk`.
+     */
+    private DataFlow::SourceNode socket(DataFlow::TypeTracker t) {
+      t.start() and result = this
+      or
+      exists(DataFlow::TypeTracker t2 | result = socket(t2).track(t2, t))
+    }
 
-    SocketNode() { this = socket(invk, DataFlow::TypeTracker::end()) }
+    override DataFlow::SourceNode ref() { result = socket(DataFlow::TypeTracker::end()) }
 
     /** Gets the path of the namespace this socket belongs to, if it can be determined. */
     string getNamespacePath() {
       // the path name of the specified URL
       exists(string url, string pathRegex |
-        invk.getArgument(0).mayHaveStringValue(url) and
+        this.getArgument(0).mayHaveStringValue(url) and
         pathRegex = "(?<!/)/(?!/)[^?#]*"
       |
         result = url.regexpFind(pathRegex, 0, _)
@@ -398,7 +390,7 @@ module SocketIOClient {
       )
       or
       // if no URL is specified, the path defaults to "/"
-      not exists(invk.getArgument(0)) and
+      not exists(this.getArgument(0)) and
       result = "/"
     }
 
@@ -432,15 +424,20 @@ module SocketIOClient {
   }
 
   /**
+   * Gets the NPM package that contains `nd`.
+   */
+  private NPMPackage getPackage(DataFlow::SourceNode nd) { result.getAFile() = nd.getFile() }
+
+  /**
    * A data flow node representing an API call that receives data from the server.
    */
   class ReceiveNode extends DataFlow::MethodCallNode {
-    SocketNode socket;
+    SocketObject socket;
 
-    ReceiveNode() { this = socket.getAMethodCall(EventEmitter::on()) }
+    ReceiveNode() { this = socket.ref().getAMethodCall(EventEmitter::on()) }
 
     /** Gets the socket through which data is received. */
-    SocketNode getSocket() { result = socket }
+    SocketObject getSocket() { result = socket }
 
     /** Gets the event name associated with the data, if it can be determined. */
     string getEventName() { getArgument(0).mayHaveStringValue(result) }
@@ -477,7 +474,7 @@ module SocketIOClient {
     /** Gets a server-side node that may be sending the data received here. */
     SocketIO::SendNode getASender() {
       result.getNamespace() = getSocket().getATargetNamespace() and
-      not result.getEventName() != getEventName()
+      not result.getChannel() != getEventName()
     }
   }
 
@@ -485,11 +482,11 @@ module SocketIOClient {
    * A data flow node representing an API call that sends data to the server.
    */
   class SendNode extends DataFlow::MethodCallNode {
-    SocketNode base;
+    SocketObject base;
     int firstDataIndex;
 
     SendNode() {
-      exists(string m | this = base.getAMethodCall(m) |
+      exists(string m | this = base.ref().getAMethodCall(m) |
         // a call to `emit`
         m = "emit" and
         firstDataIndex = 1
@@ -503,7 +500,7 @@ module SocketIOClient {
     /**
      * Gets the socket through which data is sent to the server.
      */
-    SocketNode getSocket() { result = base }
+    SocketObject getSocket() { result = base }
 
     /**
      * Gets the path of the namespace to which data is sent, if it can be determined.
