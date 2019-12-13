@@ -109,12 +109,12 @@ module EventEmitter {
      * Holds if this event handler can return a value to the given `dispatch`.
      * The default implementation is that there exists no such dispatch.
      */
-    predicate canReturnTo(EventDispatch dispatch) { range.canReturnTo(dispatch) } // TODO: Rename this thing.
+    predicate canReturnTo(EventDispatch dispatch) { range.canReturnTo(dispatch) }
   }
 
   module EventRegistration {
     abstract class Range extends DataFlow::Node {
-      EventEmitterRange::Range emitter; // TODO: Do I really need this field?
+      EventEmitterRange::Range emitter;
 
       final EventEmitter getEmitter() { result = emitter }
 
@@ -156,9 +156,9 @@ module EventEmitter {
     DataFlow::Node getSentItem(int i) { result = range.getSentItem(i) }
 
     /**
-     * Holds if this event dispatch can send an event to the given even registration.
+     * Get an EventRegistration that this event dispatch can send an event to.
      * The default implementation is that the emitters of the dispatch and registration have to be equal.
-     * TODO: Ignoring channel.
+     * Channels are by default ignored.
      */
     EventRegistration getAReceiver() { result = range.getAReceiver() }
   }

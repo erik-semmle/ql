@@ -1,4 +1,4 @@
-/**
+/**g
  * Provides classes for working with [socket.io](https://socket.io).
  */
 
@@ -18,7 +18,6 @@ private import semmle.javascript.dataflow.InferredTypes
 // TODO: Restore SocketNode, NamespaceNode, ServerNode. And revert the Namespace class.
 // Go through all the previous classes, and ensure they exist.
 // Have all the .ref() methods return *Node objects.
-// TODO: Refactor out the .getAck() methods? 
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
     EventEmitter::EventEmitterRange::Range { }
@@ -217,7 +216,7 @@ module SocketIO {
     SocketObject getSocket() { result = emitter }
 
     /** Gets the callback that handles data received from a client. */
-    private DataFlow::FunctionNode getListener() { result = getCallback(1) }
+    DataFlow::FunctionNode getListener() { result = getCallback(1) }
 
     /** Gets the `i`th parameter through which data is received from a client. */
     override DataFlow::SourceNode getReceivedItem(int i) {
@@ -226,20 +225,17 @@ module SocketIO {
         result != cb.getLastParameter() or not exists(result.getAnInvocation())
       )
     }
-
-    /** Gets the acknowledgment callback, if any. */
-    DataFlow::SourceNode getAck() {
-      result = getListener().getLastParameter() and
-      exists(result.getAnInvocation())
-    }
   }
   
   //   pred = recv.getAck().getACall().getArgument(i) and
-  // TODO: Doc.  
+  // TODO: Doc.
+  // TODO: /** Gets the acknowledgment callback, if any. */  
   class ReceiveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
   	ReceiveNode rcv;
   	ReceiveCallback() {
-  	  this = rcv.getAck()	
+  	  this = rcv.getListener().getLastParameter() and
+      exists(this.getAnInvocation()) and
+      emitter = rcv.getEmitter()
   	}
   	
   	override string getChannel() {
@@ -312,15 +308,8 @@ module SocketIO {
       i >= 0 and
       (
         // exclude last argument if it looks like a callback
-        result != getLastArgument() or not exists(getAck())
+        result != getLastArgument() or not exists(SendCallback c | c.getSendNode() = this)
       )
-    }
-
-    /** Gets the acknowledgment callback, if any. */
-    DataFlow::FunctionNode getAck() {
-      // acknowledgments are only available when sending through a socket
-      exists(getSocket()) and
-      result = getLastArgument().getALocalSource()
     }
 
     /** Gets a client-side node that may be receiving the data sent here. */
@@ -330,10 +319,16 @@ module SocketIO {
   }
 
   // succ = send.getAck().getParameter(i)
+  // TODO:     /** Gets the acknowledgment callback, if any. */
   class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
     SendNode send;
 
-    SendCallback() { this = send.getAck() }
+    SendCallback() {
+   	  // acknowledgments are only available when sending through a socket
+      exists(send.getSocket()) and
+      this = send.getLastArgument().getALocalSource() and
+      emitter = send.getEmitter()
+    }
 
     override string getChannel() { result = send.getChannel() }
 
@@ -375,11 +370,9 @@ module SocketIO {
  * (npm package `socket.io-client`).
  */
 module SocketIOClient {
-  abstract private class SocketIOObject extends DataFlow::SourceNode,
-    EventEmitter::EventEmitterRange::Range { }
-
   /** A socket object. */
-  class SocketObject extends SocketIOObject, DataFlow::InvokeNode {
+  class SocketObject extends DataFlow::InvokeNode,
+    EventEmitter::EventEmitterRange::Range {
     SocketObject() {
       exists(DataFlow::SourceNode io |
         io = DataFlow::globalVarRef("io") or
@@ -393,16 +386,13 @@ module SocketIOClient {
       )
     }
 
-    /**
-     * Gets a data flow node that may refer to the socket.io socket created at `invk`.
-     */
-    private DataFlow::SourceNode socket(DataFlow::TypeTracker t) {
+    private DataFlow::SourceNode ref(DataFlow::TypeTracker t) {
       t.start() and result = this
       or
-      exists(DataFlow::TypeTracker t2 | result = socket(t2).track(t2, t))
+      exists(DataFlow::TypeTracker t2 | result = ref(t2).track(t2, t))
     }
 
-    override DataFlow::SourceNode ref() { result = socket(DataFlow::TypeTracker::end()) }
+    override DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
 
     /** Gets the path of the namespace this socket belongs to, if it can be determined. */
     string getNamespacePath() {
@@ -479,7 +469,7 @@ module SocketIOClient {
     }
 
     /** Gets the callback that handles data received from the server. */
-    private DataFlow::FunctionNode getListener() {
+    DataFlow::FunctionNode getListener() {
       result = getListener(DataFlow::TypeBackTracker::end())
     }
 
@@ -490,19 +480,17 @@ module SocketIOClient {
         result != cb.getLastParameter() or not exists(result.getAnInvocation())
       )
     }
-
-    /** Gets the acknowledgment callback, if any. */
-    DataFlow::SourceNode getAck() {
-      result = getListener().getLastParameter() and
-      exists(result.getAnInvocation())
-    }
   }
 
   // TODO: Doc.
   class RecieveCallback extends EventEmitter::EventDispatch::Range, DataFlow::SourceNode {
     ReceiveNode rcv;
 
-    RecieveCallback() { this = rcv.getAck() and emitter = rcv.getEmitter() }
+    RecieveCallback() { 
+   	  this = rcv.getListener().getLastParameter() and
+      exists(this.getAnInvocation()) and 
+      emitter = rcv.getEmitter()
+    }
 
     override string getChannel() { result = rcv.getChannel() }
 
@@ -510,6 +498,10 @@ module SocketIOClient {
 
     override SocketIO::SendCallback getAReceiver() {
       result.getSendNode().getAReceiver() = rcv
+    }
+    
+    ReceiveNode getReceiveNode() {
+      result = rcv	
     }
   }
 
@@ -553,12 +545,9 @@ module SocketIOClient {
       i >= 0 and
       (
         // exclude last argument if it looks like a callback
-        result != getLastArgument() or not exists(getAck())
+        result != getLastArgument() or not exists(SendCallback c | c.getSendNode() = this)
       )
     }
-
-    /** Gets the acknowledgment callback, if any. */
-    DataFlow::FunctionNode getAck() { result = getLastArgument().getALocalSource() }
 
     /** Gets a server-side node that may be receiving the data sent here. */
     override SocketIO::ReceiveNode getAReceiver() {
@@ -566,10 +555,14 @@ module SocketIOClient {
     }
   }
 
+  // TODO: /** Gets the acknowledgment callback, if any. */
   class SendCallback extends EventEmitter::EventRegistration::Range, DataFlow::FunctionNode {
     SendNode send;
 
-    SendCallback() { this = send.getAck() and emitter = send.getEmitter() }
+    SendCallback() {
+      this = send.getLastArgument().getALocalSource() and 
+      emitter = send.getEmitter() 
+    }
 
     override string getChannel() { result = send.getChannel() }
 
