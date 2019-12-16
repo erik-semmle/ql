@@ -38,36 +38,28 @@ module EventEmitter {
   }
   
   /**
-   * Type tracking of an event emitter. Types are tracked through the chainable methods in the NodeJS eventEmitter.
+   * Type tracking of an EventEmitter. Types are tracked through the chainable methods in the NodeJS eventEmitter.
    */
   DataFlow::SourceNode trackEventEmitter(EventEmitterRange::Range emitter) {
-  	result = trackEventEmitter(DataFlow::TypeTracker::end(), emitter)
+    result = trackEventEmitter(DataFlow::TypeTracker::end(), emitter)
   }
 
   /**
-   * An instance of the NodeJS EventEmitter class.
-   * Extend this class to mark something as being an instance of the EventEmitter class.
+   * An EventEmitter instance that implements the NodeJS EventEmitter API.
    */
   final class EventEmitter extends DataFlow::Node {
     EventEmitterRange::Range range;
 
     EventEmitter() { this = range }
-
-    /**
-     * Get a reference through type-tracking to this EventEmitter.
-     * The type-tracking tracks through chainable methods.
-     */
-    DataFlow::SourceNode ref() { result = range.ref() }
   }
   
   module EventEmitterRange {
-    abstract class Range extends DataFlow::Node {
-      /**
-       * Get a reference through type-tracking to this EventEmitter.
-       * The type-tracking tracks through chainable methods and possibly chainable getter properties.
-       */
-      abstract DataFlow::SourceNode ref();
-    }
+    /**
+     * An object that implements the EventEmitter API. 
+     * Extending this class does nothing, its mostly to indicate intent.
+     * The magic only happens when extending EventRegistration::Range and EventDispatch::Range. 
+     */
+    abstract class Range extends DataFlow::Node {}
 
     /**
      * An NodeJS EventEmitter instance. 
@@ -75,7 +67,7 @@ module EventEmitter {
      * (That is opposed to e.g. SocketIO, which implements the same interface, but where events cross object boundaries). 
      */
     abstract class NodeJSEventEmitter extends Range {
-      override DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
+      DataFlow::SourceNode ref() { result = trackEventEmitter(this) }
     }
 
     private class ImportedNodeJSEventEmitter extends NodeJSEventEmitter {
@@ -91,7 +83,7 @@ module EventEmitter {
   }
 
   /**
-   * A registration of an event handler on a particular EventEmitter.
+   * A registration of an event handler on an EventEmitter.
    */
   final class EventRegistration extends DataFlow::Node {
     EventRegistration::Range range;
@@ -121,6 +113,12 @@ module EventEmitter {
   }
 
   module EventRegistration {
+    /**
+     * A registration of an event handler on an EventEmitter.
+     * The default implementation assumes that `this` is a DataFlow::InvokeNode where the 
+     * first argument is a string describing which channel is registered, and the second
+     * argument is the event handler callback. 
+     */
     abstract class Range extends DataFlow::Node {
       EventEmitterRange::Range emitter;
 
@@ -149,7 +147,7 @@ module EventEmitter {
   /**
    * A dispatch of an event on an EventEmitter.
    */
-  final class EventDispatch extends DataFlow::CallNode {
+  final class EventDispatch extends DataFlow::Node {
     EventDispatch::Range range;
 
     EventDispatch() { this = range }
@@ -172,17 +170,23 @@ module EventEmitter {
   }
 
   module EventDispatch {
+    /**
+     * A dispatch of an event on an EventEmitter.
+     * The default implementation assumes that the dispatch is a DataFlow::InvokeNode, 
+     * where the first argument is a string describing the channel, and the `i`+1 argument 
+     * is the `i`th item sent to the event handler. 
+     */
     abstract class Range extends DataFlow::Node {
       EventEmitterRange::Range emitter;
 
       final EventEmitter getEmitter() { result = emitter }
 
       string getChannel() {
-        this.(DataFlow::CallNode).getArgument(0).mayHaveStringValue(result)
+        this.(DataFlow::InvokeNode).getArgument(0).mayHaveStringValue(result)
       }
 
       DataFlow::Node getSentItem(int i) {
-        result = this.(DataFlow::CallNode).getArgument(i + 1)
+        result = this.(DataFlow::InvokeNode).getArgument(i + 1)
       }
 
       EventRegistration::Range getAReceiver() {

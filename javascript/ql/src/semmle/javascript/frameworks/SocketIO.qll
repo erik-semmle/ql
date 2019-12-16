@@ -16,7 +16,9 @@ import javascript
  */
 module SocketIO {
   abstract private class SocketIOObject extends DataFlow::SourceNode,
-    EventEmitter::EventEmitterRange::Range { }
+    EventEmitter::EventEmitterRange::Range {
+      abstract DataFlow::SourceNode ref();
+    }
 
   /** A socket.io server. */
   class ServerObject extends SocketIOObject {
@@ -427,7 +429,7 @@ module SocketIOClient {
       exists(DataFlow::TypeTracker t2 | result = ref(t2).track(t2, t))
     }
 
-    override DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
+    DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
 
     /** Gets the path of the namespace this socket belongs to, if it can be determined. */
     string getNamespacePath() {

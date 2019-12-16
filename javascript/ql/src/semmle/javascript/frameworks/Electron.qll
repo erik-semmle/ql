@@ -90,7 +90,10 @@ module Electron {
      * A model for the Main and Renderer process in an Electron app.
      */
     abstract class Process extends EventEmitter::EventEmitterRange::Range {
-      override DataFlow::SourceNode ref() { result = EventEmitter::trackEventEmitter(this) }
+      /**
+       * Type tracking on a process. The type tracking tracks through chainable methods.
+       */
+      DataFlow::SourceNode ref() { result = EventEmitter::trackEventEmitter(this) }
     }
 
     /**
@@ -136,7 +139,7 @@ module Electron {
       }
 
       override predicate canReturnTo(EventEmitter::EventDispatch dispatch) {
-        dispatch.getCalleeName() = "sendSync"
+        dispatch.(IPCDispatch).getCalleeName() = "sendSync"
       }
     }
 
@@ -165,7 +168,7 @@ module Electron {
       }
 
       /**
-       * TODO: DOc.
+       * Gets a registration that this dispatch can send an event to. 
        */
       override IPCSendRegistration getAReceiver() {
         this.getEmitter() instanceof RendererProcess and
