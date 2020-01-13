@@ -223,6 +223,10 @@ abstract class Configuration extends string {
   predicate hasFlowPath(SourcePathNode source, SinkPathNode sink) {
     flowsTo(source, _, sink, _, this)
   }
+
+  // TODO: Doc!
+  predicate isAdditionalStoreStep(DataFlow::Node pred, DataFlow::Node succ, string prop) { none() }
+  predicate isAdditionalLoadStep(DataFlow::Node pred, DataFlow::Node succ, string prop) { none() }
 }
 
 /**
@@ -449,6 +453,14 @@ abstract class AdditionalFlowStep extends DataFlow::Node {
   ) {
     none()
   }
+
+  // TODO: Doc!
+  // TODO: Should these be in AdditionalTaintStep instead?
+  cached
+  predicate store(DataFlow::Node pred, DataFlow::Node succ, string prop) { none() }
+  
+  cached
+  predicate load(DataFlow::Node pred, DataFlow::Node succ, string prop) { none() }
 }
 
 /**
@@ -551,6 +563,10 @@ private predicate exploratoryFlowStep(
   basicFlowStep(pred, succ, _, cfg) or
   basicStoreStep(pred, succ, _) or
   basicLoadStep(pred, succ, _) or
+  any(AdditionalFlowStep s).store(pred, succ, _) or
+  cfg.isAdditionalStoreStep(pred, succ, _) or
+  any(AdditionalFlowStep s).load(pred, succ, _) or
+  cfg.isAdditionalLoadStep(pred, succ, _) or
   // the following two disjuncts taken together over-approximate flow through
   // higher-order calls
   callback(pred, succ) or
@@ -712,6 +728,12 @@ private predicate storeStep(
   basicStoreStep(pred, succ, prop) and
   summary = PathSummary::level()
   or
+  any(AdditionalFlowStep s).store(pred, succ, prop) and
+  summary = PathSummary::level()
+  or
+  cfg.isAdditionalStoreStep(pred, succ, prop) and
+  summary = PathSummary::level()
+  or
   exists(Function f, DataFlow::Node mid |
     // `f` stores its parameter `pred` in property `prop` of a value that flows back to the caller,
     // and `succ` is an invocation of `f`
@@ -765,6 +787,12 @@ private predicate loadStep(
   PathSummary summary
 ) {
   basicLoadStep(pred, succ, prop) and
+  summary = PathSummary::level()
+  or
+  any(AdditionalFlowStep s).load(pred, succ, prop) and
+  summary = PathSummary::level()
+  or
+  cfg.isAdditionalLoadStep(pred, succ, prop) and
   summary = PathSummary::level()
   or
   exists(Function f, DataFlow::PropRead read |
