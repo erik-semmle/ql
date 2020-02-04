@@ -141,7 +141,9 @@ module NodeJSLib {
     RequestInputAccess() {
       // `req.url`
       kind = "url" and
-      this.asExpr().(PropAccess).accesses(request, "url")
+      exists(string prop | prop = "url" or prop = "urlBase" |
+        this.asExpr().(PropAccess).accesses(request, prop)
+      )
       or
       exists(PropAccess headers |
         // `req.headers.cookie`
@@ -621,23 +623,36 @@ module NodeJSLib {
     RouteHandlerCandidate() {
       exists(string request, string response |
         (request = "request" or request = "req") and
-        (response = "response" or response = "res") and
+        (response = "response" or response = "res" or response = "resp") and
         // heuristic: parameter names match the Node.js documentation
-        astNode.getNumParameter() = 2 and
-        astNode.getParameter(0).getName() = request and
-        astNode.getParameter(1).getName() = response
-      |
-        not (
-          // heuristic: not a class method (Node.js invokes this with a function call)
-          astNode = any(MethodDefinition def).getBody()
-          or
-          // heuristic: does not return anything (Node.js will not use the return value)
-          exists(astNode.getAReturnStmt().getExpr())
-          or
-          // heuristic: is not invoked (Node.js invokes this at a call site we cannot reason precisely about)
-          exists(DataFlow::InvokeNode cs | cs.getACallee() = astNode)
+        // astNode.getNumParameter() = 2 and
+        exists(int i | 
+          astNode.getParameter(i).getName() = request and
+          astNode.getParameter(i + 1).getName() = response and
+          // exists a NodeJS like call to response.
+          exists(DataFlow::MethodCallNode resWrite | 
+            resWrite.getMethodName() = "writeHeader" or
+            resWrite.getMethodName() = "end" or
+            resWrite.getMethodName() = "setHeader" or
+            resWrite.getMethodName() = "writeHead" or
+            resWrite.getMethodName() = "write" or
+            resWrite.getMethodName() = "send" or
+            resWrite.getMethodName() = "header" or
+            resWrite.getMethodName() = "json" or
+            resWrite.getMethodName() = "sendStatus" or
+            resWrite.getMethodName() = "status" or
+            resWrite.getMethodName() = "redirect"
+          |
+            getParameter(i + 1).flowsTo(resWrite.getReceiver())
+          )
         )
       )
+    }
+  }
+
+  private class CandidateAsRouteHandler extends NodeJSLib::RouteHandler {
+    CandidateAsRouteHandler() {
+      this instanceof NodeJSLib::RouteHandlerCandidate
     }
   }
 
