@@ -325,3 +325,10 @@ function test2() {
   // OK
   $('myId').html(target.length)
 }
+
+function inputValue() {
+	var input = document.createElement("input");
+	insertIntoDOM(input, function clicked() {
+		document.body.innerHTML = input.value; // NOT OK
+	});
+}

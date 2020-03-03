@@ -19,4 +19,20 @@ module DomBasedXss {
   class LocationSource extends Source {
     LocationSource() { this = DOM::locationSource() }
   }
+
+  /**
+   * A read of the `value` property from a DOM node.
+   *
+   * For example:
+   * ```
+   * var input = document.createElement("input");
+   * insertIntoDOM(input, function () {
+   *   var color = input.value; // <- source
+   * });
+   *
+   * ```
+   */
+  class DOMValuePropertyAsSource extends Source {
+    DOMValuePropertyAsSource() { this = DOM::domValueSource().getAPropertyRead("value") }
+  }
 }
