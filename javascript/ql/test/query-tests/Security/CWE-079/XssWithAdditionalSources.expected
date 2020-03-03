@@ -336,6 +336,9 @@ nodes
 | tst.js:332:29:332:39 | input.value |
 | tst.js:332:29:332:39 | input.value |
 | tst.js:332:29:332:39 | input.value |
+| tst.js:335:28:335:43 | $("input").val() |
+| tst.js:335:28:335:43 | $("input").val() |
+| tst.js:335:28:335:43 | $("input").val() |
 | typeahead.js:9:28:9:30 | loc |
 | typeahead.js:9:28:9:30 | loc |
 | typeahead.js:10:16:10:18 | loc |
@@ -650,6 +653,7 @@ edges
 | tst.js:313:10:313:10 | e | tst.js:314:20:314:20 | e |
 | tst.js:319:35:319:42 | location | tst.js:319:35:319:42 | location |
 | tst.js:332:29:332:39 | input.value | tst.js:332:29:332:39 | input.value |
+| tst.js:335:28:335:43 | $("input").val() | tst.js:335:28:335:43 | $("input").val() |
 | typeahead.js:9:28:9:30 | loc | typeahead.js:10:16:10:18 | loc |
 | typeahead.js:9:28:9:30 | loc | typeahead.js:10:16:10:18 | loc |
 | typeahead.js:9:28:9:30 | loc | typeahead.js:10:16:10:18 | loc |

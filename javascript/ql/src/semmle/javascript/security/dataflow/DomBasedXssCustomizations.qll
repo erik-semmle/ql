@@ -33,6 +33,12 @@ module DomBasedXss {
    * ```
    */
   class DOMValuePropertyAsSource extends Source {
-    DOMValuePropertyAsSource() { this = DOM::domValueSource().getAPropertyRead("value") }
+    DOMValuePropertyAsSource() { 
+      this = DOM::domValueSource().getAPropertyRead("value") or 
+      exists(JQuery::MethodCall call | this = call |
+        call.getMethodName() = "val" and
+        not exists(call.getAnArgument())
+      )
+    }
   }
 }

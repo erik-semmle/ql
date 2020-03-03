@@ -331,4 +331,6 @@ function inputValue() {
 	insertIntoDOM(input, function clicked() {
 		document.body.innerHTML = input.value; // NOT OK
 	});
+	
+	document.body.innerHTML = $("input").val() // NOT OK
 }
