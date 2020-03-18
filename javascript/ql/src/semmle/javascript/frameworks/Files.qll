@@ -346,6 +346,45 @@ private class WalkDir extends FileNameProducer, FileSystemAccess, DataFlow::Call
 }
 
 /**
+ * A call to the library `globule`.
+ */
+private class Globule extends FileNameProducer, FileSystemAccess, DataFlow::CallNode {
+  Globule() {
+    this = DataFlow::moduleMember("globule", "find").getACall()
+    or
+    this = DataFlow::moduleMember("globule", "match").getACall()
+    or
+    this = DataFlow::moduleMember("globule", "isMatch").getACall()
+    or
+    this = DataFlow::moduleMember("globule", "mapping").getACall()
+    or
+    this = DataFlow::moduleMember("globule", "findMapping").getACall()
+  }
+
+  override DataFlow::Node getAPathArgument() {
+    (this.getCalleeName() = "match" or this.getCalleeName() = "isMatch") and
+    result = getArgument(1)
+    or
+    this.getCalleeName() = "mapping" and
+    (
+      result = getAnArgument() and not exists(result.getALocalSource().getAPropertyWrite("src"))
+      or
+      result = getAnArgument().getALocalSource().getAPropertyWrite("src").getRhs()
+    )
+  }
+
+  override DataFlow::Node getAFileName() {
+    result = this and
+    (
+      this.getCalleeName() = "find" or
+      this.getCalleeName() = "match" or
+      this.getCalleeName() = "findMapping" or
+      this.getCalleeName() = "mapping"
+    )
+  }
+}
+
+/**
  * A file system access made by a NodeJS library.
  * This class models multiple NodeJS libraries that access files.
  */
@@ -360,6 +399,8 @@ private class LibraryAccess extends FileSystemAccess, DataFlow::InvokeNode {
       this = DataFlow::moduleImport("rimraf").getACall()
       or
       this = DataFlow::moduleImport("readdirp").getACall()
+      or
+      this = DataFlow::moduleImport("walker").getACall()
       or
       this =
         DataFlow::moduleMember("node-dir",

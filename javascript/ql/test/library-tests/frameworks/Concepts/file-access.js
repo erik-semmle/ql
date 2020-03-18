@@ -87,3 +87,6 @@ jsonfile.readFile('baz.json').then(obj => console.log(obj))
 	var paths = walk.sync('../');
 	let result = await walk.async('../')
 })();
+
+var walker = require("walker");
+walker('/etc/').filterDir(() => {}).on('entry', () => {}); // only file access modelled.
