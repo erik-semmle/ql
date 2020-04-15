@@ -100,6 +100,9 @@ module StepSummary {
       summary = LoadStep(prop)
     )
     or
+    globalStoreLoadStep(pred, succ) and
+    summary = LevelStep()
+    or
     any(AdditionalTypeTrackingStep st).step(pred, succ) and
     summary = LevelStep()
     or

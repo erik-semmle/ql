@@ -648,6 +648,10 @@ private predicate basicFlowStepNoBarrier(
   globalFlowStep(pred, succ) and
   summary = PathSummary::level()
   or
+  // Flow through load and store on global variable
+  globalStoreLoadStep(pred, succ) and
+  summary = PathSummary::level()
+  or
   // Flow into function
   callStep(pred, succ) and
   summary = PathSummary::call()
@@ -688,6 +692,7 @@ private predicate exploratoryFlowStep(
     basicFlowStepNoBarrier(pred, succ, _, cfg) or
     basicStoreStep(pred, succ, _) or
     basicLoadStep(pred, succ, _) or
+    globalStoreLoadStep(pred, succ) or
     isAdditionalStoreStep(pred, succ, _, cfg) or
     isAdditionalLoadStep(pred, succ, _, cfg) or
     isAdditionalLoadStoreStep(pred, succ, _, _, cfg) or
@@ -848,7 +853,7 @@ private predicate flowThroughCall(
  */
 pragma[nomagic]
 private predicate storeStep(
-  DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg,
+  DataFlow::Node pred, DataFlow::SourceNode succ, string prop, DataFlow::Configuration cfg,
   PathSummary summary
 ) {
   isRelevant(pred, cfg) and

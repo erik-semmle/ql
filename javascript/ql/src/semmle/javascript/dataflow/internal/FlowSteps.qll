@@ -269,23 +269,14 @@ private module CachedSteps {
   }
 
   /**
-   * Holds if there is a write to property `prop` of global variable `gv`
-   * in file `f`, where the right-hand side of the write is `rhs`.
+   * For global variables there is a step from the right-hand side of a write to any
+   * read of the same property from the same global variable in the same file.
    */
-  pragma[noinline]
-  private predicate globalPropertyWrite(GlobalVariable gv, File f, string prop, DataFlow::Node rhs) {
-    exists(DataFlow::PropWrite pw | pw.writes(getAUseIn(gv, f), prop, rhs))
-  }
-
-  /**
-   * Holds if there is a read from property `prop` of `base`, which is
-   * an access to global variable `base` in file `f`.
-   */
-  pragma[noinline]
-  private predicate globalPropertyRead(GlobalVariable gv, File f, string prop, DataFlow::Node base) {
-    exists(DataFlow::PropRead pr |
-      base = getAUseIn(gv, f) and
-      pr.accesses(base, prop)
+  cached
+  predicate globalStoreLoadStep(DataFlow::Node pred, DataFlow::PropRead succ) {
+    exists(GlobalVariable gv, File f, string prop |
+      exists(DataFlow::PropWrite pw | pw.writes(getAUseIn(gv, f), prop, pred)) and
+      succ.accesses(getAUseIn(gv, f), prop)
     )
   }
 
@@ -302,19 +293,10 @@ private module CachedSteps {
    * ```
    *
    * there is a store step from `e` to `new A()` under property `prop`.
-   *
-   * As a special case, if the base of the property write is a global variable,
-   * then there is a store step from the right-hand side of the write to any
-   * read of the same property from the same global variable in the same file.
    */
   cached
-  predicate basicStoreStep(DataFlow::Node pred, DataFlow::Node succ, string prop) {
-    succ.(DataFlow::SourceNode).hasPropertyWrite(prop, pred)
-    or
-    exists(GlobalVariable gv, File f |
-      globalPropertyWrite(gv, f, prop, pred) and
-      globalPropertyRead(gv, f, prop, succ)
-    )
+  predicate basicStoreStep(DataFlow::Node pred, DataFlow::SourceNode succ, string prop) {
+    succ.hasPropertyWrite(prop, pred)
   }
 
   /**

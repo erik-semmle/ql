@@ -86,6 +86,10 @@ private module NodeTracking {
       // Flow out of function
       returnStep(pred, succ) and
       summary = PathSummary::return()
+      or
+      // A store/load pair on a global variable
+      globalStoreLoadStep(pred, succ) and
+      summary = PathSummary::return()
     )
   }
 
