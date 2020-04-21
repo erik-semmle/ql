@@ -51,6 +51,7 @@ private import semmle.code.cpp.ir.IR
  * methods.
  */
 class GVN extends TValueNumber {
+  pragma[noinline]
   GVN() {
     exists(Instruction instr |
       this = tvalueNumber(instr) and exists(instr.getUnconvertedResultExpression())
@@ -96,6 +97,8 @@ class GVN extends TValueNumber {
     this instanceof TUnaryValueNumber and result = "Unary"
     or
     this instanceof TInheritanceConversionValueNumber and result = "InheritanceConversion"
+    or
+    this instanceof TLoadTotalOverlapValueNumber and result = "LoadTotalOverlap"
     or
     this instanceof TUniqueValueNumber and result = "Unique"
   }

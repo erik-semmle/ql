@@ -3,8 +3,6 @@ private import semmle.code.cpp.ir.IR
 private import semmle.code.cpp.ir.dataflow.DataFlow
 private import semmle.code.cpp.ir.dataflow.internal.DataFlowPrivate
 
-Function viableImpl(CallInstruction call) { result = viableCallable(call) }
-
 /**
  * Gets a function that might be called by `call`.
  */
@@ -72,8 +70,7 @@ private module VirtualDispatch {
         // Call return
         exists(DataFlowCall call, ReturnKind returnKind |
           other = getAnOutNode(call, returnKind) and
-          src.(ReturnNode).getKind() = returnKind and
-          call.getStaticCallTarget() = src.getEnclosingCallable()
+          returnNodeWithKindAndEnclosingCallable(src, returnKind, call.getStaticCallTarget())
         ) and
         allowFromArg = false
         or
@@ -127,6 +124,18 @@ private module VirtualDispatch {
     }
   }
 
+  /**
+   * A ReturnNode with its ReturnKind and its enclosing callable.
+   *
+   * Used to fix a join ordering issue in flowsFrom.
+   */
+  private predicate returnNodeWithKindAndEnclosingCallable(
+    ReturnNode node, ReturnKind kind, DataFlowCallable callable
+  ) {
+    node.getKind() = kind and
+    node.getEnclosingCallable() = callable
+  }
+
   /** Call through a function pointer. */
   private class DataSensitiveExprCall extends DataSensitiveCall {
     DataSensitiveExprCall() { not exists(this.getStaticCallTarget()) }
@@ -137,6 +146,12 @@ private module VirtualDispatch {
       exists(FunctionInstruction fi |
         this.flowsFrom(DataFlow::instructionNode(fi), _) and
         result = fi.getFunctionSymbol()
+      ) and
+      (
+        this.getNumberOfArguments() <= result.getEffectiveNumberOfParameters() and
+        this.getNumberOfArguments() >= result.getEffectiveNumberOfParameters()
+        or
+        result.isVarargs()
       )
     }
   }
