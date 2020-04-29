@@ -72,20 +72,22 @@ module Express {
   /**
    * A call to an Express router method that sets up a route.
    */
-  class RouteSetup extends HTTP::Servers::StandardRouteSetup, MethodCallExpr {
+  class RouteSetup extends HTTP::Servers::StandardRouteSetup {
+    DataFlow::CallNode call;
     RouteSetup() {
-      isRouter(getReceiver()) and
-      getMethodName() = routeSetupMethodName()
+      call.getEnclosingExpr() = this and 
+      isRouter(call.getReceiver().asExpr()) and
+      (not exists(call.getCalleeName()) or call.getCalleeName() = routeSetupMethodName())
     }
 
     /** Gets the path associated with the route. */
-    string getPath() { getArgument(0).mayHaveStringValue(result) }
+    string getPath() { call.getArgument(0).mayHaveStringValue(result) }
 
     /** Gets the router on which handlers are being registered. */
     RouterDefinition getRouter() { isRouter(getReceiver(), result) }
 
     /** Holds if this is a call `use`, such as `app.use(handler)`. */
-    predicate isUseCall() { getMethodName() = "use" }
+    predicate isUseCall() { call.getCalleeName() = "use" }
 
     /**
      * Gets the `n`th handler registered by this setup, with 0 being the first.
@@ -96,11 +98,11 @@ module Express {
     Expr getRouteHandlerExpr(int index) {
       // The first argument is a URI pattern if it is a string. If it could possibly be
       // a function, we consider it to be a route handler, otherwise a URI pattern.
-      exists(AnalyzedNode firstArg | firstArg = getArgument(0).analyze() |
+      exists(AnalyzedNode firstArg | firstArg = call.getArgument(0).analyze() |
         if firstArg.getAType() = TTFunction()
-        then result = getArgument(index)
+        then result = call.getArgument(index).asExpr()
         else (
-          index >= 0 and result = getArgument(index + 1)
+          index >= 0 and result = call.getArgument(index + 1).asExpr()
         )
       )
     }
@@ -124,17 +126,25 @@ module Express {
 
     override Expr getServer() { result.(Application).getARouteHandler() = getARouteHandler() }
 
+    Expr getReceiver() {
+      result = call.getReceiver().asExpr()
+    }
+
+    Expr getAnArgument() {
+      result = call.getAnArgument().asExpr()
+    }
+
     /**
      * Gets the HTTP request type this is registered for, if any.
      *
      * Has no result for `use` and `all` calls.
      */
-    HTTP::RequestMethodName getRequestMethod() { result.toLowerCase() = getMethodName() }
+    HTTP::RequestMethodName getRequestMethod() { result.toLowerCase() = call.getCalleeName() }
 
     /**
      * Holds if this registers a route for all request methods.
      */
-    predicate handlesAllRequestMethods() { getMethodName() = "use" or getMethodName() = "all" }
+    predicate handlesAllRequestMethods() { call.getCalleeName() = "use" or call.getCalleeName() = "all" }
 
     /**
      * Holds if this route setup sets up a route for the same
