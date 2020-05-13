@@ -259,7 +259,7 @@ module PasswordHeuristics {
     password.length() < 4
     or
     exists(string normalized | normalized = password.toLowerCase() |
-      count(normalized.charAt(_)) = 1 or
+      exists(unique(string c | c = normalized.charAt(_))) or
       normalized.regexpMatch(".*(pass|test|sample|example|secret|root|admin|user|change|auth).*")
     )
   }

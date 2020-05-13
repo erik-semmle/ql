@@ -70,7 +70,7 @@ module AccessPath {
    */
   private class EffectivelyConstantVariable extends LocalVariable {
     EffectivelyConstantVariable() {
-      strictcount(SsaExplicitDefinition ssa | ssa.getSourceVariable() = this) = 1
+      exists(unique(SsaExplicitDefinition ssa | ssa.getSourceVariable() = this))
     }
 
     /** Gets the SSA definition of this variable. */
@@ -227,7 +227,7 @@ module AccessPath {
    * self-assignments.
    */
   predicate isAssignedInUniqueFile(string accessPath) {
-    strictcount(File f | isAssignedInFile(accessPath, f)) = 1
+    exists(unique(File f | isAssignedInFile(accessPath, f)))
   }
 
   /**

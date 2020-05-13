@@ -869,7 +869,7 @@ module TaintTracking {
   }
 
   /** Gets a variable that is defined exactly once. */
-  private Variable singleDef() { strictcount(result.getADefinition()) = 1 }
+  private Variable singleDef() { exists(unique(VarDef def | def = result.getADefinition())) }
 
   /** A check of the form `if(x == 'some-constant')`, which sanitizes `x` in its "then" branch. */
   class ConstantComparison extends AdditionalSanitizerGuardNode, DataFlow::ValueNode {
