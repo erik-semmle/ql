@@ -69,20 +69,20 @@ module StringOps {
         count(this.getACallee()) = 1 and
         count(callee.getAReturnedExpr()) = 1 and
         not this.isImprecise() and
-        inner.getBaseString().getALocalSource().getEnclosingExpr() = callee.getAParameter() and
-        inner.getSubstring().getALocalSource().getEnclosingExpr() = callee.getAParameter()
+        inner.getBaseString().getALocalSource() = DataFlow::parameterNode(callee.getAParameter()) and
+        inner.getSubstring().getALocalSource() = DataFlow::parameterNode(callee.getAParameter())
       }
 
       override DataFlow::Node getBaseString() {
         exists(int arg |
-          inner.getBaseString().getALocalSource().getEnclosingExpr() = callee.getParameter(arg) and
+          inner.getBaseString().getALocalSource() = DataFlow::parameterNode(callee.getParameter(arg)) and
           result = this.getArgument(arg)
         )
       }
 
       override DataFlow::Node getSubstring() {
         exists(int arg |
-          inner.getSubstring().getALocalSource().getEnclosingExpr() = callee.getParameter(arg) and
+          inner.getSubstring().getALocalSource() = DataFlow::parameterNode(callee.getParameter(arg)) and
           result = this.getArgument(arg)
         )
       }
@@ -300,20 +300,20 @@ module StringOps {
         count(this.getACallee()) = 1 and
         count(callee.getAReturnedExpr()) = 1 and
         not this.isImprecise() and
-        inner.getBaseString().getALocalSource().getEnclosingExpr() = callee.getAParameter() and
-        inner.getSubstring().getALocalSource().getEnclosingExpr() = callee.getAParameter()
+        inner.getBaseString().getALocalSource() = DataFlow::parameterNode(callee.getAParameter()) and
+        inner.getSubstring().getALocalSource() = DataFlow::parameterNode(callee.getAParameter())
       }
 
       override DataFlow::Node getBaseString() {
         exists(int arg |
-          inner.getBaseString().getALocalSource().getEnclosingExpr() = callee.getParameter(arg) and
+          inner.getBaseString().getALocalSource() = DataFlow::parameterNode(callee.getParameter(arg)) and
           result = this.getArgument(arg)
         )
       }
 
       override DataFlow::Node getSubstring() {
         exists(int arg |
-          inner.getSubstring().getALocalSource().getEnclosingExpr() = callee.getParameter(arg) and
+          inner.getSubstring().getALocalSource() = DataFlow::parameterNode(callee.getParameter(arg)) and
           result = this.getArgument(arg)
         )
       }
