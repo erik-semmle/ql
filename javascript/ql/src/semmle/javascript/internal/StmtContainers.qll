@@ -9,29 +9,32 @@ private import javascript
 
 cached
 private StmtContainer getStmtContainer(NodeInStmtContainer node) {
-  exprContainers(node, result)
-  or
-  stmtContainers(node, result)
-  or
-  // Properties
-  exists(ASTNode parent | properties(node, parent, _, _, _) |
-    exprContainers(parent, result)
-    or
-    stmtContainers(parent, result)
-  )
-  or
-  // Synthetic CFG nodes
-  entry_cfg_node(node, result)
-  or
-  exit_cfg_node(node, result)
-  or
-  exists(Expr test |
-    guard_node(node, _, test) and
-    exprContainers(test, result)
-  )
-  or
-  // JSDoc type annotations
-  stmtContainers(node.(JSDocTypeExpr).getEnclosingStmt(), result)
+  result =
+    unique(StmtContainer container |
+      exprContainers(node, container)
+      or
+      stmtContainers(node, container)
+      or
+      // Properties
+      exists(ASTNode parent | properties(node, parent, _, _, _) |
+        exprContainers(parent, container)
+        or
+        stmtContainers(parent, container)
+      )
+      or
+      // Synthetic CFG nodes
+      entry_cfg_node(node, container)
+      or
+      exit_cfg_node(node, container)
+      or
+      exists(Expr test |
+        guard_node(node, _, test) and
+        exprContainers(test, container)
+      )
+      or
+      // JSDoc type annotations
+      stmtContainers(node.(JSDocTypeExpr).getEnclosingStmt(), container)
+    )
 }
 
 /**

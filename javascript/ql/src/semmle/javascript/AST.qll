@@ -84,10 +84,13 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
    * change between versions of the extractor.
    */
   ASTNode getChild(int i) {
-    result = getChildExpr(i) or
-    result = getChildStmt(i) or
-    properties(result, this, i, _, _) or
-    result = getChildTypeExpr(i)
+    result =
+      unique(ASTNode child |
+        child = getChildExpr(i) or
+        child = getChildStmt(i) or
+        properties(child, this, i, _, _) or
+        child = getChildTypeExpr(i)
+      )
   }
 
   /** Gets the `i`th child statement of this node. */
