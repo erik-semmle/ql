@@ -63,13 +63,13 @@ class ImportDeclaration extends Stmt, Import, @importdeclaration {
 
   override DataFlow::Node getImportedModuleNode() {
     // `import * as http from 'http'` or `import http from `http`'
+    exists(ImportNamespaceSpecifier is | is = unique(ImportSpecifier i | i = getASpecifier()) |
+      result = DataFlow::valueNode(is)
+    )
+    or
     exists(ImportSpecifier is |
       is = getASpecifier() and
-      result = DataFlow::valueNode(is)
-    |
-      is instanceof ImportNamespaceSpecifier and
-      count(getASpecifier()) = 1
-      or
+      result = DataFlow::valueNode(is) and
       is.getImportedName() = "default"
     )
     or
