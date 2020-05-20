@@ -438,6 +438,21 @@ module NodeJSLib {
      */
     DataFlow::SourceNode moduleMember(string member) {
       result = fsModule(DataFlow::TypeTracker::end()).getAPropertyRead(member)
+      or
+      exists(DataFlow::PropRead read |
+        fsMemberNameRef(DataFlow::TypeBackTracker::end(), read).getStringValue() = member and
+        result = read
+      )
+    }
+
+    private DataFlow::Node fsMemberNameRef(DataFlow::TypeBackTracker t, DataFlow::PropRead read) {
+      t.start() and
+      read = fsModule(DataFlow::TypeTracker::end()).getAPropertyRead() and
+      exists(DataFlow::Node propName | propName = read.getPropertyNameExpr().flow() |
+        result = propName
+      )
+      or
+      exists(DataFlow::TypeBackTracker t2 | t = t2.smallstep(result, fsMemberNameRef(t2, read)))
     }
 
     private DataFlow::SourceNode fsModule(DataFlow::TypeTracker t) {

@@ -4,6 +4,7 @@
 
 import javascript
 private import semmle.javascript.dataflow.InferredTypes
+private import semmle.javascript.Symbol as Symbol
 
 deprecated module GlobalAccessPath {
   /**
@@ -405,6 +406,8 @@ module AccessPath {
       succ = getAReferenceTo(name) and
       isAssignedInUniqueFile(name)
     )
+    or
+    Symbol::step(pred, succ)
   }
 
   /**
