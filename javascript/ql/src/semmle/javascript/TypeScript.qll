@@ -1014,7 +1014,7 @@ class LocalVarTypeAccess extends @localvar_typeaccess, VarTypeAccess, LexicalAcc
  * interface Node { isLeaf(): this is Leaf; }
  * ```
  */
-class ThisVarTypeAccess extends @thisvartypeaccess, VarTypeAccess { }
+class ThisVarTypeAccess extends @thisvar_typeaccess, VarTypeAccess { }
 
 /**
  * A qualified name that refers to a variable from inside a type.
