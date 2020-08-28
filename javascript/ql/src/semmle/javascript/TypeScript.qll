@@ -1900,7 +1900,7 @@ class IntersectionType extends UnionOrIntersectionType, @intersection_type { }
  */
 class ArrayType extends Type {
   ArrayType() {
-    this instanceof @tupletype or
+    this instanceof @tuple_type or
     this.(TypeReference).hasQualifiedName("Array") or
     this.(TypeReference).hasQualifiedName("ReadonlyArray")
   }
@@ -1930,7 +1930,7 @@ class ReadonlyArrayType extends ArrayType, TypeReference {
 /**
  * A tuple type, such as `[number, string]`.
  */
-class TupleType extends ArrayType, @tupletype {
+class TupleType extends ArrayType, @tuple_type {
   /**
    * Gets the `i`th member of this tuple type, starting at 0.
    */
