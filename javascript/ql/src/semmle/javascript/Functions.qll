@@ -202,7 +202,7 @@ class Function extends @function, Parameterized, TypeParameterized, StmtContaine
   predicate hasTrailingComma() { lastTokenOfParameterList().getNextToken().getValue() = "," }
 
   /** Holds if this function is an asynchronous function. */
-  predicate isAsync() { isAsync(this) }
+  predicate isAsync() { is_async(this) }
 
   /** Gets the enclosing function or toplevel of this function. */
   override StmtContainer getEnclosingContainer() { result = getEnclosingStmt().getContainer() }
