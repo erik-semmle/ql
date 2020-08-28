@@ -13505,7 +13505,7 @@
 </dependencies>
 </relation>
 <relation>
-<name>isComputed</name>
+<name>is_computed</name>
 <cardinality>27</cardinality>
 <columnsizes>
 <e>
