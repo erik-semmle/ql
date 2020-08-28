@@ -2171,7 +2171,7 @@ class ComprehensionExpr extends @comprehensionexpr, Expr {
  * [for (x of xs) x*x]
  * ```
  */
-class ArrayComprehensionExpr extends @arraycomprehensionexpr, ComprehensionExpr { }
+class ArrayComprehensionExpr extends @array_comprehension_expr, ComprehensionExpr { }
 
 /**
  * A generator expression.
