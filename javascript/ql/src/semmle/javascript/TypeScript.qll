@@ -2115,7 +2115,7 @@ class VoidType extends Type, @void_type { }
 /**
  * The `undefined` type.
  */
-class UndefinedType extends Type, @undefinedtype { }
+class UndefinedType extends Type, @undefined_type { }
 
 /**
  * The `null` type.
