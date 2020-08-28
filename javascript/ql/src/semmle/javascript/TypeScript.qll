@@ -1994,7 +1994,7 @@ class StringType extends Type, @string_type { }
 /**
  * The predefined `number` type.
  */
-class NumberType extends Type, @numbertype { }
+class NumberType extends Type, @number_type { }
 
 /**
  * The predefined `bigint` type.
