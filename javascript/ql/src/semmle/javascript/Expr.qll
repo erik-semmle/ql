@@ -2061,7 +2061,7 @@ class PostIncExpr extends @postinc_expr, UpdateExpr {
  * --i
  * ```
  */
-class PreDecExpr extends @predecexpr, UpdateExpr {
+class PreDecExpr extends @predec_expr, UpdateExpr {
   override predicate isPrefix() { any() }
 
   override string getOperator() { result = "--" }
