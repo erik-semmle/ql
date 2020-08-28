@@ -20326,7 +20326,7 @@
 </dependencies>
 </relation>
 <relation>
-<name>isNamedCapture</name>
+<name>is_named_capture</name>
 <cardinality>1280</cardinality>
 <columnsizes>
 <e>
