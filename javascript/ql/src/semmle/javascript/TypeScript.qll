@@ -1984,7 +1984,7 @@ class AnyType extends Type, @any_type { }
 /**
  * The predefined `unknown` type.
  */
-class UnknownType extends Type, @unknowntype { }
+class UnknownType extends Type, @unknown_type { }
 
 /**
  * The predefined `string` type.
