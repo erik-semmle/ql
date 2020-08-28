@@ -1089,7 +1089,7 @@ class ConditionalTypeScope extends @conditionaltypescope, Scope {
  * In the above example, `List` is a concrete expression, `string` is a type annotation,
  * and `List<string>` is thus an expression with type arguments.
  */
-class ExpressionWithTypeArguments extends @expressionwithtypearguments, Expr {
+class ExpressionWithTypeArguments extends @expr_ession_with_type_arguments, Expr {
   /**
    * Gets the expression, such as `List` in `List<string>`.
    *
