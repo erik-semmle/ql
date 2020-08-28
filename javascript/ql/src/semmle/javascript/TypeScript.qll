@@ -1979,7 +1979,7 @@ class TupleType extends ArrayType, @tupletype {
 /**
  * The predefined `any` type.
  */
-class AnyType extends Type, @anytype { }
+class AnyType extends Type, @any_type { }
 
 /**
  * The predefined `unknown` type.
