@@ -566,7 +566,7 @@ case @typeexpr.kind of
 | 19 = @thisvar_typeaccess
 | 20 = @predicate_typeexpr
 | 21 = @interface_typeexpr
-| 22 = @typeparameter
+| 22 = @type_parameter
 | 23 = @plainfunctiontypeexpr
 | 24 = @constructortypeexpr
 | 25 = @localnamespaceaccess
