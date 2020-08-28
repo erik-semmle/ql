@@ -2110,7 +2110,7 @@ class BooleanLikeType extends Type {
 /**
  * The `void` type.
  */
-class VoidType extends Type, @voidtype { }
+class VoidType extends Type, @void_type { }
 
 /**
  * The `undefined` type.
