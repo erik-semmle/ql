@@ -1999,7 +1999,7 @@ class NumberType extends Type, @number_type { }
 /**
  * The predefined `bigint` type.
  */
-class BigIntType extends Type, @biginttype { }
+class BigIntType extends Type, @bigint_type { }
 
 /**
  * A boolean, number, or string literal type.
