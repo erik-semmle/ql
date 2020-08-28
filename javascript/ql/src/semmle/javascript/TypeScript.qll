@@ -1036,7 +1036,7 @@ class QualifiedVarTypeAccess extends @qualifiedvar_typeaccess, VarTypeAccess {
 /**
  * A conditional type annotation, such as `T extends any[] ? A : B`.
  */
-class ConditionalTypeExpr extends @conditionaltypeexpr, TypeExpr {
+class ConditionalTypeExpr extends @conditional_typeexpr, TypeExpr {
   /**
    * Gets the type to the left of the `extends` keyword, such as `T` in `T extends any[] ? A : B`.
    */
