@@ -394,7 +394,7 @@ case @expr.kind of
 @interfacedefinition = @interfacedeclaration | @interfacetypeexpr;
 @classorinterface = @classdefinition | @interfacedefinition;
 
-@lexical_decl = @vardecl | @typedecl;
+@lexical_decl = @vardecl | @type_decl;
 @lexical_access = @varaccess | @localtype_access | @localvartypeaccess | @localnamespaceaccess;
 @lexical_ref = @lexical_decl | @lexical_access;
 
@@ -471,7 +471,7 @@ decl (unique int id: @vardecl ref,
 typebind (unique int id: @typebind_id ref,
           int decl: @local_type_name ref);
 
-@typedecl_id = @typedecl | @vardecl;
+@typedecl_id = @type_decl | @vardecl;
 typedecl (unique int id: @typedecl_id ref,
           int decl: @local_type_name ref);
 
@@ -545,7 +545,7 @@ typeexprs (
 
 case @typeexpr.kind of
   0 = @localtype_access
-| 1 = @typedecl
+| 1 = @type_decl
 | 2 = @keywordtypeexpr
 | 3 = @stringliteraltypeexpr
 | 4 = @numberliteraltypeexpr
@@ -583,8 +583,8 @@ case @typeexpr.kind of
 | 36 = @readonlytypeexpr
 ;
 
-@typeref = @typeaccess | @typedecl;
-@typeidentifier = @typedecl | @localtype_access | @typelabel | @localvartypeaccess | @localnamespaceaccess;
+@typeref = @typeaccess | @type_decl;
+@typeidentifier = @type_decl | @localtype_access | @typelabel | @localvartypeaccess | @localnamespaceaccess;
 @typeexpr_parent = @expr | @stmt | @property | @typeexpr;
 @literaltypeexpr = @stringliteraltypeexpr | @numberliteraltypeexpr | @booleanliteraltypeexpr | @bigintliteraltypeexpr;
 @typeaccess = @localtype_access | @qualifiedtypeaccess | @importtypeaccess;
