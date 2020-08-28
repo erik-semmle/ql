@@ -20810,7 +20810,7 @@
 </dependencies>
 </relation>
 <relation>
-<name>namedBackref</name>
+<name>named_backref</name>
 <cardinality>11</cardinality>
 <columnsizes>
 <e>
