@@ -10028,7 +10028,7 @@
 </dependencies>
 </relation>
 <relation>
-<name>stmtContainers</name>
+<name>stmt_containers</name>
 <cardinality>1096691</cardinality>
 <columnsizes>
 <e>
