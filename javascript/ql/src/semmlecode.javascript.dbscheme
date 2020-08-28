@@ -391,7 +391,7 @@ case @expr.kind of
 @typeassertion = @astypeassertion | @prefixtypeassertion;
 
 @classdefinition = @classdeclstmt | @classexpr;
-@interfacedefinition = @interfacedeclaration | @interfacetypeexpr;
+@interfacedefinition = @interfacedeclaration | @interface_typeexpr;
 @classorinterface = @classdefinition | @interfacedefinition;
 
 @lexical_decl = @vardecl | @type_decl;
@@ -565,7 +565,7 @@ case @typeexpr.kind of
 | 18 = @qualifiedvar_typeaccess
 | 19 = @thisvar_typeaccess
 | 20 = @predicate_typeexpr
-| 21 = @interfacetypeexpr
+| 21 = @interface_typeexpr
 | 22 = @typeparameter
 | 23 = @plainfunctiontypeexpr
 | 24 = @constructortypeexpr
