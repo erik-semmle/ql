@@ -214,7 +214,7 @@ class JSXName extends Expr {
  * { /* TBD *&#47; }
  * </pre>
  */
-class JSXEmptyExpr extends Expr, @jsxemptyexpr { }
+class JSXEmptyExpr extends Expr, @jsxempty_expr { }
 
 /**
  * A legacy `@jsx` pragma.
