@@ -2018,10 +2018,10 @@ class BooleanLiteralType extends LiteralType, @booleanliteraltype {
   /**
    * Gets the boolean value represented by this type.
    */
-  boolean getValue() { if this instanceof @truetype then result = true else result = false }
+  boolean getValue() { if this instanceof @true_type then result = true else result = false }
 
   override string getStringValue() {
-    if this instanceof @truetype then result = "true" else result = "false"
+    if this instanceof @true_type then result = "true" else result = "false"
   }
 }
 
@@ -2071,7 +2071,7 @@ class BigIntLiteralType extends LiteralType {
  */
 class BooleanType extends UnionType {
   BooleanType() {
-    getAnElementType() instanceof @truetype and
+    getAnElementType() instanceof @true_type and
     getAnElementType() instanceof @falsetype and
     count(getAnElementType()) = 2
   }
