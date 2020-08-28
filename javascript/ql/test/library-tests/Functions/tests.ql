@@ -6,7 +6,7 @@ import getDefaultArguments
 import Function
 import getBody
 import getId
-import hasRestParameter
+import has_rest_parameter
 import getArgumentsVariable
 import getBodyStmt
 import is_generator
