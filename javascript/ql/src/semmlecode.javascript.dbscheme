@@ -559,7 +559,7 @@ case @typeexpr.kind of
 | 12 = @keyof_typeexpr
 | 13 = @qualified_typeaccess
 | 14 = @generic_typeexpr
-| 15 = @typelabel
+| 15 = @type_label
 | 16 = @typeoftypeexpr
 | 17 = @localvartypeaccess
 | 18 = @qualifiedvartypeaccess
@@ -584,7 +584,7 @@ case @typeexpr.kind of
 ;
 
 @typeref = @typeaccess | @type_decl;
-@typeidentifier = @type_decl | @localtype_access | @typelabel | @localvartypeaccess | @localnamespaceaccess;
+@typeidentifier = @type_decl | @localtype_access | @type_label | @localvartypeaccess | @localnamespaceaccess;
 @typeexpr_parent = @expr | @stmt | @property | @typeexpr;
 @literaltypeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigintliteraltypeexpr;
 @typeaccess = @localtype_access | @qualified_typeaccess | @importtypeaccess;
