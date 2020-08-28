@@ -1021,7 +1021,7 @@ class ThisVarTypeAccess extends @thisvartypeaccess, VarTypeAccess { }
  *
  * This can only occur as part of the operand to a `typeof` type.
  */
-class QualifiedVarTypeAccess extends @qualifiedvartypeaccess, VarTypeAccess {
+class QualifiedVarTypeAccess extends @qualifiedvar_typeaccess, VarTypeAccess {
   /**
    * Gets the qualifier in front of the name being accessed, such as `http` in `http.ServerRequest`.
    */
