@@ -564,7 +564,7 @@ case @typeexpr.kind of
 | 17 = @localvar_typeaccess
 | 18 = @qualifiedvar_typeaccess
 | 19 = @thisvar_typeaccess
-| 20 = @predicatetypeexpr
+| 20 = @predicate_typeexpr
 | 21 = @interfacetypeexpr
 | 22 = @typeparameter
 | 23 = @plainfunctiontypeexpr
@@ -642,7 +642,7 @@ case @type.kind of
 @unionorintersectiontype = @uniontype | @intersectiontype;
 @typevariabletype = @canonicaltypevariabletype | @lexicaltypevariabletype;
 
-has_asserts_keyword(int node: @predicatetypeexpr ref);
+has_asserts_keyword(int node: @predicate_typeexpr ref);
 
 @typed_ast_node = @expr | @typeexpr | @function;
 ast_node_type(
