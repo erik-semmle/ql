@@ -546,7 +546,7 @@ typeexprs (
 case @typeexpr.kind of
   0 = @localtype_access
 | 1 = @type_decl
-| 2 = @keywordtypeexpr
+| 2 = @keyword_typeexpr
 | 3 = @stringliteraltypeexpr
 | 4 = @numberliteraltypeexpr
 | 5 = @booleanliteraltypeexpr
