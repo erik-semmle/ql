@@ -931,7 +931,7 @@ class PredicateTypeExpr extends @predicatetypeexpr, TypeExpr {
   /**
    * Holds if this is a type of form `asserts E is T` or `asserts E`.
    */
-  predicate hasAssertsKeyword() { hasAssertsKeyword(this) }
+  predicate hasAssertsKeyword() { has_asserts_keyword(this) }
 }
 
 /**
