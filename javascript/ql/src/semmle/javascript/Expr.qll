@@ -1850,7 +1850,7 @@ class AssignExpr extends @assign_expr, Assignment {
 
 private class TCompoundAssignExpr =
   @assign_add_expr or @assign_sub_expr or @assign_mul_expr or @assign_div_expr or @assign_mod_expr or
-      @assignexpexpr or @assign_lshift_expr or @assignrshiftexpr or @assignurshiftexpr or
+      @assignexpexpr or @assign_lshift_expr or @assign_rshift_expr or @assignurshiftexpr or
       @assignorexpr or @assignxorexpr or @assignandexpr;
 
 /**
@@ -1951,7 +1951,7 @@ class AssignLShiftExpr extends @assign_lshift_expr, CompoundAssignExpr { }
  * qw >>= 8
  * ```
  */
-class AssignRShiftExpr extends @assignrshiftexpr, CompoundAssignExpr { }
+class AssignRShiftExpr extends @assign_rshift_expr, CompoundAssignExpr { }
 
 /**
  * A compound unsigned-right-shift-assign expression.
