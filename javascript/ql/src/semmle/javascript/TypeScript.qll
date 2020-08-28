@@ -2125,7 +2125,7 @@ class NullType extends Type, @null_type { }
 /**
  * The `never` type.
  */
-class NeverType extends Type, @nevertype { }
+class NeverType extends Type, @never_type { }
 
 /**
  * The `symbol` type or a specific `unique symbol` type.
