@@ -2377,7 +2377,7 @@ class LexicalTypeVariableType extends TypeVariableType, @lexical_type_variable_t
  * }
  * ```
  */
-class ThisType extends Type, @thistype {
+class ThisType extends Type, @this_type {
   /**
    * Gets the type containing the `this` type.
    */
