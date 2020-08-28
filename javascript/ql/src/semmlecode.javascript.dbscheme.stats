@@ -13516,7 +13516,7 @@
 <dependencies/>
 </relation>
 <relation>
-<name>isMethod</name>
+<name>is_method</name>
 <cardinality>392</cardinality>
 <columnsizes>
 <e>
