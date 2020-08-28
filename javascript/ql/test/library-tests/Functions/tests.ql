@@ -9,7 +9,7 @@ import getId
 import hasRestParameter
 import getArgumentsVariable
 import getBodyStmt
-import isGenerator
+import is_generator
 import usesArgumentsObject
 import getEnclosingStmt
 import isRestParameter
