@@ -69,7 +69,7 @@ private class TControlStmt =
 
 private class TLoopStmt = TEnhancedForLoop or @while_stmt or @dowhile_stmt or @for_stmt;
 
-private class TEnhancedForLoop = @forin_stmt or @foreachstmt or @forof_stmt;
+private class TEnhancedForLoop = @forin_stmt or @foreach_stmt or @forof_stmt;
 
 /**
  * A control statement, that is, is a loop, an if statement, a switch statement,
@@ -909,7 +909,7 @@ class ForOfStmt extends @forof_stmt, EnhancedForLoop {
  * }
  * ```
  */
-class ForEachStmt extends @foreachstmt, EnhancedForLoop { }
+class ForEachStmt extends @foreach_stmt, EnhancedForLoop { }
 
 /**
  * A `debugger` statement.
