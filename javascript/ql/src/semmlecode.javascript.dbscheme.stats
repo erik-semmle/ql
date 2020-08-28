@@ -9237,7 +9237,7 @@
 <dependencies/>
 </relation>
 <relation>
-<name>isClosureModule</name>
+<name>is_closure_module</name>
 <cardinality>21</cardinality>
 <columnsizes>
 <e>
