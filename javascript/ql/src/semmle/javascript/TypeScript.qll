@@ -2135,7 +2135,7 @@ class SymbolType extends Type, @symbol_type { }
 /**
  * The `symbol` type.
  */
-class PlainSymbolType extends SymbolType, @plainsymboltype { }
+class PlainSymbolType extends SymbolType, @plain_symbol_type { }
 
 /**
  * A `unique symbol` type.
