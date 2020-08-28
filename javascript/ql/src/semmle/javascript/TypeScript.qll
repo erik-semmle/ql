@@ -2130,7 +2130,7 @@ class NeverType extends Type, @nevertype { }
 /**
  * The `symbol` type or a specific `unique symbol` type.
  */
-class SymbolType extends Type, @symboltype { }
+class SymbolType extends Type, @symbol_type { }
 
 /**
  * The `symbol` type.
