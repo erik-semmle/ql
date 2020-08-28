@@ -1851,7 +1851,7 @@ class AssignExpr extends @assign_expr, Assignment {
 private class TCompoundAssignExpr =
   @assign_add_expr or @assign_sub_expr or @assign_mul_expr or @assign_div_expr or @assign_mod_expr or
       @assignexpexpr or @assign_lshift_expr or @assign_rshift_expr or @assign_urshift_expr or
-      @assign_or_expr or @assign_xor_expr or @assignandexpr;
+      @assign_or_expr or @assign_xor_expr or @assign_and_expr;
 
 /**
  * A compound assign expression.
@@ -1995,7 +1995,7 @@ class AssignXOrExpr extends @assign_xor_expr, CompoundAssignExpr { }
  * data &= 0xffff
  * ```
  */
-class AssignAndExpr extends @assignandexpr, CompoundAssignExpr { }
+class AssignAndExpr extends @assign_and_expr, CompoundAssignExpr { }
 
 /**
  * An update expression, that is, an increment or decrement expression.
