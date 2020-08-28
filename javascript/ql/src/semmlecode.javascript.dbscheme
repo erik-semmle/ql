@@ -395,7 +395,7 @@ case @expr.kind of
 @classorinterface = @classdefinition | @interfacedefinition;
 
 @lexical_decl = @vardecl | @type_decl;
-@lexical_access = @varaccess | @localtype_access | @localvar_typeaccess | @localnamespaceaccess;
+@lexical_access = @varaccess | @localtype_access | @localvar_typeaccess | @local_namespace_access;
 @lexical_ref = @lexical_decl | @lexical_access;
 
 @e4x_xml_attribute_selector = @e4x_xml_static_attribute_selector | @e4x_xml_dynamic_attribute_selector;
@@ -478,7 +478,7 @@ typedecl (unique int id: @typedecl_id ref,
 namespacedecl (unique int id: @vardecl ref,
                int decl: @local_namespace_name ref);
 
-@namespacebind_id = @localnamespaceaccess | @export_varaccess;
+@namespacebind_id = @local_namespace_access | @export_varaccess;
 namespacebind (unique int id: @namespacebind_id ref,
                int decl: @local_namespace_name ref);
 
@@ -569,7 +569,7 @@ case @typeexpr.kind of
 | 22 = @type_parameter
 | 23 = @plain_function_typeexpr
 | 24 = @constructor_typeexpr
-| 25 = @localnamespaceaccess
+| 25 = @local_namespace_access
 | 26 = @qualifiednamespaceaccess
 | 27 = @mappedtypeexpr
 | 28 = @conditionaltypeexpr
@@ -584,12 +584,12 @@ case @typeexpr.kind of
 ;
 
 @typeref = @typeaccess | @type_decl;
-@typeidentifier = @type_decl | @localtype_access | @type_label | @localvar_typeaccess | @localnamespaceaccess;
+@typeidentifier = @type_decl | @localtype_access | @type_label | @localvar_typeaccess | @local_namespace_access;
 @typeexpr_parent = @expr | @stmt | @property | @typeexpr;
 @literaltypeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigintliteraltypeexpr;
 @typeaccess = @localtype_access | @qualified_typeaccess | @importtypeaccess;
 @vartypeaccess = @localvar_typeaccess | @qualifiedvar_typeaccess | @thisvar_typeaccess | @importvartypeaccess;
-@namespaceaccess = @localnamespaceaccess | @qualifiednamespaceaccess | @importnamespaceaccess;
+@namespaceaccess = @local_namespace_access | @qualifiednamespaceaccess | @importnamespaceaccess;
 @importtypeexpr = @importtypeaccess | @importnamespaceaccess | @importvartypeaccess;
 
 @functiontypeexpr = @plain_function_typeexpr | @constructor_typeexpr;
