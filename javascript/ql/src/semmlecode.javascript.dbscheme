@@ -579,14 +579,14 @@ case @typeexpr.kind of
 | 32 = @import_var_typeaccess
 | 33 = @optional_typeexpr
 | 34 = @rest_typeexpr
-| 35 = @bigintliteraltypeexpr
+| 35 = @bigint_literal_typeexpr
 | 36 = @readonlytypeexpr
 ;
 
 @typeref = @typeaccess | @type_decl;
 @typeidentifier = @type_decl | @localtype_access | @type_label | @localvar_typeaccess | @local_namespace_access;
 @typeexpr_parent = @expr | @stmt | @property | @typeexpr;
-@literaltypeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigintliteraltypeexpr;
+@literaltypeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigint_literal_typeexpr;
 @typeaccess = @localtype_access | @qualified_typeaccess | @import_type_access;
 @vartypeaccess = @localvar_typeaccess | @qualifiedvar_typeaccess | @thisvar_typeaccess | @import_var_typeaccess;
 @namespaceaccess = @local_namespace_access | @qualified_namespace_access | @import_namespace_access;
