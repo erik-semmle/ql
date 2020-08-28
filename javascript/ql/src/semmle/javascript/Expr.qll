@@ -2739,6 +2739,6 @@ class OptionalChainRoot extends ChainElem {
  * let url = import.meta.url;
  * ```
  */
-class ImportMetaExpr extends @importmetaexpr, Expr {
+class ImportMetaExpr extends @import_meta_expr, Expr {
   override predicate isImpure() { none() }
 }
