@@ -575,7 +575,7 @@ case @typeexpr.kind of
 | 28 = @conditional_typeexpr
 | 29 = @infer_typeexpr
 | 30 = @import_type_access
-| 31 = @importnamespaceaccess
+| 31 = @import_namespace_access
 | 32 = @importvartypeaccess
 | 33 = @optionaltypeexpr
 | 34 = @resttypeexpr
@@ -589,8 +589,8 @@ case @typeexpr.kind of
 @literaltypeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigintliteraltypeexpr;
 @typeaccess = @localtype_access | @qualified_typeaccess | @import_type_access;
 @vartypeaccess = @localvar_typeaccess | @qualifiedvar_typeaccess | @thisvar_typeaccess | @importvartypeaccess;
-@namespaceaccess = @local_namespace_access | @qualified_namespace_access | @importnamespaceaccess;
-@importtypeexpr = @import_type_access | @importnamespaceaccess | @importvartypeaccess;
+@namespaceaccess = @local_namespace_access | @qualified_namespace_access | @import_namespace_access;
+@importtypeexpr = @import_type_access | @import_namespace_access | @importvartypeaccess;
 
 @functiontypeexpr = @plain_function_typeexpr | @constructor_typeexpr;
 
