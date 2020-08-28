@@ -378,7 +378,7 @@ case @expr.kind of
 
 @pattern = @varref | @array_pattern | @object_pattern;
 
-@comprehensionexpr = @array_comprehension_expr | @generator_expr;
+@comprehension_expr = @array_comprehension_expr | @generator_expr;
 
 @comprehensionblock = @forin_comprehension_block | @forof_comprehension_block;
 
