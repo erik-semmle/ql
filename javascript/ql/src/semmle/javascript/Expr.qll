@@ -2048,7 +2048,7 @@ class PreIncExpr extends @preinc_expr, UpdateExpr {
  * i++
  * ```
  */
-class PostIncExpr extends @postincexpr, UpdateExpr {
+class PostIncExpr extends @postinc_expr, UpdateExpr {
   override string getOperator() { result = "++" }
 }
 
