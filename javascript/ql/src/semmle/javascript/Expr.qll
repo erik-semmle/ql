@@ -1849,7 +1849,7 @@ class AssignExpr extends @assign_expr, Assignment {
 }
 
 private class TCompoundAssignExpr =
-  @assign_add_expr or @assign_sub_expr or @assign_mul_expr or @assigndivexpr or @assignmodexpr or
+  @assign_add_expr or @assign_sub_expr or @assign_mul_expr or @assign_div_expr or @assignmodexpr or
       @assignexpexpr or @assignlshiftexpr or @assignrshiftexpr or @assignurshiftexpr or
       @assignorexpr or @assignxorexpr or @assignandexpr;
 
@@ -1907,7 +1907,7 @@ class AssignMulExpr extends @assign_mul_expr, CompoundAssignExpr { }
  * n /= 10
  * ```
  */
-class AssignDivExpr extends @assigndivexpr, CompoundAssignExpr { }
+class AssignDivExpr extends @assign_div_expr, CompoundAssignExpr { }
 
 /**
  * A compound modulo-assign expression.
