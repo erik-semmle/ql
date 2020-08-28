@@ -356,7 +356,7 @@ case @expr.kind of
 @varaccess = @proper_varaccess | @export_varaccess;
 @varref = @var_decl | @varaccess;
 
-@identifier = @label | @varref | @typeidentifier;
+@identifier = @label | @varref | @type_identifier;
 
 @literal = @null_literal | @boolean_literal | @number_literal | @string_literal | @regexp_literal | @bigint_literal;
 
@@ -584,7 +584,7 @@ case @typeexpr.kind of
 ;
 
 @typeref = @typeaccess | @type_decl;
-@typeidentifier = @type_decl | @localtype_access | @type_label | @localvar_typeaccess | @local_namespace_access;
+@type_identifier = @type_decl | @localtype_access | @type_label | @localvar_typeaccess | @local_namespace_access;
 @typeexpr_parent = @expr | @stmt | @property | @typeexpr;
 @literal_typeexpr = @string_literal_typeexpr | @number_literal_typeexpr | @boolean_literal_typeexpr | @bigint_literal_typeexpr;
 @typeaccess = @localtype_access | @qualified_typeaccess | @import_type_access;
