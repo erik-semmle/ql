@@ -5,6 +5,11 @@
 import javascript
 
 module Ldapjs {
+  // TODO: qldoc
+  abstract class UsedInLDAPQueryCall extends DataFlow::Node {
+    abstract DataFlow::InvokeNode getQueryCall();
+  }
+
   /**
    * Gets a method name on an LDAPjs client that accepts a DN as the first argument.
    */
@@ -49,7 +54,7 @@ module Ldapjs {
   /**
    * A filter used in a `search` operation against the LDAP server.
    */
-  class LdapjsSearchFilter extends DataFlow::Node {
+  class LdapjsSearchFilter extends DataFlow::Node, UsedInLDAPQueryCall {
     LdapjsSearchOptions options;
 
     LdapjsSearchFilter() { this = options.getAPropertyWrite("filter").getRhs() }
@@ -57,7 +62,7 @@ module Ldapjs {
     /**
      * Gets the LDAP query call that this filter is used in.
      */
-    DataFlow::InvokeNode getQueryCall() { result = options.getQueryCall() }
+    override DataFlow::InvokeNode getQueryCall() { result = options.getQueryCall() }
   }
 
   /**
@@ -72,7 +77,7 @@ module Ldapjs {
   /**
    * A distinguished name (DN) used in a Client API call against the LDAP server.
    */
-  class LdapjsDNArgument extends DataFlow::Node {
+  class LdapjsDNArgument extends DataFlow::Node, UsedInLDAPQueryCall {
     LdapjsClientAPICall queryCall;
 
     LdapjsDNArgument() { this = queryCall.getArgument(0) }
@@ -80,7 +85,7 @@ module Ldapjs {
     /**
      * Gets the LDAP query call that this DN is used in.
      */
-    DataFlow::InvokeNode getQueryCall() { result = queryCall }
+    override DataFlow::InvokeNode getQueryCall() { result = queryCall }
   }
 
   /**

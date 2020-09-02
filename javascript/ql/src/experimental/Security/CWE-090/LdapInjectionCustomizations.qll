@@ -16,12 +16,7 @@ module LdapInjection {
   /**
    * A data flow sink for LDAP injection vulnerabilities.
    */
-  abstract class Sink extends DataFlow::Node {
-    /**
-     * Gets the LDAP query call that the sink flows into.
-     */
-    abstract DataFlow::Node getQueryCallSink();
-  }
+  abstract class Sink extends DataFlow::Node, UsedInLDAPQueryCall {}
 
   /**
    * A sanitizer for LDAP injection vulnerabilities.
@@ -38,20 +33,12 @@ module LdapInjection {
   /**
    * An LDAP filter for an API call that executes an operation against the LDAP server.
    */
-  class LdapjsSearchFilterAsSink extends Sink, LdapjsSearchFilter {
-    override DataFlow::InvokeNode getQueryCallSink() {
-      result = this.(LdapjsSearchFilter).getQueryCall()
-    }
-  }
+  class LdapjsSearchFilterAsSink extends Sink, LdapjsSearchFilter {}
 
   /**
    * An LDAP DN argument for an API call that executes an operation against the LDAP server.
    */
-  class LdapjsDNArgumentAsSink extends Sink, LdapjsDNArgument {
-    override DataFlow::InvokeNode getQueryCallSink() {
-      result = this.(LdapjsDNArgument).getQueryCall()
-    }
-  }
+  class LdapjsDNArgumentAsSink extends Sink, LdapjsDNArgument {}
 
   /**
    * A call to a function whose name suggests that it escapes LDAP search query parameter.
