@@ -20,7 +20,7 @@ module LdapInjection {
     /**
      * Gets the LDAP query call that the sink flows into.
      */
-    abstract DataFlow::Node getQueryCallSink();
+    abstract DataFlow::Node getQueryCall();
   }
 
   /**
@@ -38,8 +38,11 @@ module LdapInjection {
   /**
    * An LDAP filter for an API call that executes an operation against the LDAP server.
    */
-  class LdapjsSearchFilterAsSink extends Sink, LdapjsSearchFilter {
-    override DataFlow::InvokeNode getQueryCallSink() {
+  class LdapjsSearchFilterAsSink extends Sink {
+    LdapjsSearchFilterAsSink() {
+      this instanceof LdapjsSearchFilter
+    }
+    override DataFlow::InvokeNode getQueryCall() {
       result = this.(LdapjsSearchFilter).getQueryCall()
     }
   }
@@ -47,8 +50,11 @@ module LdapInjection {
   /**
    * An LDAP DN argument for an API call that executes an operation against the LDAP server.
    */
-  class LdapjsDNArgumentAsSink extends Sink, LdapjsDNArgument {
-    override DataFlow::InvokeNode getQueryCallSink() {
+  class LdapjsDNArgumentAsSink extends Sink {
+    LdapjsDNArgumentAsSink() {
+      this instanceof LdapjsDNArgument
+    }
+    override DataFlow::InvokeNode getQueryCall() {
       result = this.(LdapjsDNArgument).getQueryCall()
     }
   }
