@@ -1169,6 +1169,7 @@ private predicate isAdditionalLoadStoreStep(
  * 
  * Is outlined to give the compiler a hint about join-order.
  */
+pragma[noinline]
 private predicate basicRelevantLoadStep(
   DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg
 ) {
