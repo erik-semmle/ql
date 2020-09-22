@@ -23,7 +23,6 @@ import com.semmle.util.data.Pair;
 
 public class DependencyResolver {
     private AsyncFetcher fetcher;
-    private List<Constraint> constraints = new ArrayList<>();
 
     /** Packages we don't try to install because it is part of the same monorepo. */
     private Set<String> packagesInRepo;
@@ -49,12 +48,6 @@ public class DependencyResolver {
     public DependencyResolver(AsyncFetcher fetcher, Set<String> packagesInRepo) {
         this.fetcher = fetcher;
         this.packagesInRepo = packagesInRepo;
-    }
-
-    private void addConstraint(Constraint constraint) {
-        synchronized(constraints) {
-            constraints.add(constraint);
-        }
     }
 
     // Matches either a version ("2.1.x" / "3.0", etc..), or a version constraint operator ("<", "||", "~", etc...). 
@@ -112,7 +105,7 @@ public class DependencyResolver {
     /**
      * Fetches all packages and builds up the constraint system needed for resolving.
      */
-    private CompletableFuture<Void> fetchRelevantPackages(PackageJson pack, int depth) {
+    private CompletableFuture<List<Constraint>> fetchRelevantPackages(PackageJson pack, int depth, List<Constraint> constraintsAcc) {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         List<Map<String, String>> dependencyMaps = depth == 0
             ? Arrays.asList(pack.getDependencies(), pack.getPeerDependencies(), pack.getDevDependencies())
@@ -141,24 +134,28 @@ public class DependencyResolver {
 
                     if (targetName.startsWith("@types/")) {
                         // Deeply install dependencies in `@types`
-                        addConstraint(new Constraint(targetPackage, targetVersion, pack, depth));
-                        return fetchRelevantPackages(targetPackage, depth + 1);
+                        synchronized (constraintsAcc) {
+                            constraintsAcc.add(new Constraint(targetPackage, targetVersion, pack, depth));
+                        }
+                        return CompletableFuture.allOf(new CompletableFuture[]{fetchRelevantPackages(targetPackage, depth + 1, constraintsAcc)});
                     } else if (dependencies != pack.getDevDependencies() && (targetPackage.getTypes() != null || targetPackage.getTypings() != null)) {
                         // If a non-dev dependency contains its own typings, do a shallow install of that package
-                        addConstraint(new Constraint(targetPackage, targetVersion, pack, depth));
+                        synchronized (constraintsAcc) {
+                            constraintsAcc.add(new Constraint(targetPackage, targetVersion, pack, depth));
+                        }
                     }
                     return CompletableFuture.completedFuture(null);
                 }));
             });
         }
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(void_ -> constraintsAcc);
     }
 
     /**
      * Resolves the dependencies of the given package in a deterministic way.
      */
     private CompletableFuture<Map<String, PackageJson>> resolvePackages(PackageJson rootPackage) {
-        return fetchRelevantPackages(rootPackage, 0).thenApply(void_ -> {
+        return fetchRelevantPackages(rootPackage, 0, new ArrayList<>()).thenApply(constraints -> {
             // Compute the minimum depth from which each dependency is requested.
             Map<String, Integer> packageDepth = new LinkedHashMap<>();
             for (Constraint constraint : constraints) {
