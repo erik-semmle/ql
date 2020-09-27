@@ -799,6 +799,41 @@ private predicate exploratoryLoadStep(
 }
 
 /**
+ * Gets a property that is used both in a relevant load and a relevant store.
+ * A relevant load/store is one that has been found during the exploratory flow.
+ */
+pragma[noinline]
+private string getARelevantLoadAndStoreProperty(DataFlow::Configuration cfg) {
+  result = getAPropertyUsedInLoadStore(cfg)
+  or
+  result = getARelevantLoadProperty(cfg) and result = getARelevantStoreProperty(cfg)
+}
+
+/**
+ * Gets a property where a store-step with that property has been found during the exploratory flow.
+ * Outlined to give the compiler a hint about the join-order.
+ */
+pragma[noinline]
+private string getARelevantStoreProperty(DataFlow::Configuration cfg) {
+  exists(DataFlow::Node mid | isRelevant(mid, cfg) |
+    basicStoreStep(mid, _, result) or
+    isAdditionalStoreStep(mid, _, result, cfg)
+  )
+}
+
+/**
+ * Gets a property where a load-step with that property has been found during the exploratory flow.
+ * Outlined to give the compiler a hint about the join-order.
+ */
+pragma[noinline]
+private string getARelevantLoadProperty(DataFlow::Configuration cfg) {
+  exists(DataFlow::Node mid | isRelevant(mid, cfg) |
+    basicLoadStep(mid, _, result) or
+    isAdditionalLoadStep(mid, _, result, cfg)
+  )
+}
+
+/**
  * Gets a property where the forwards exploratory flow has found a relevant store-step with that property.
  * The property is therefore relevant for load-steps in the forward exploratory flow.
  *
@@ -1024,11 +1059,13 @@ private predicate storeStep(
 ) {
   isRelevant(pred, cfg) and
   basicStoreStep(pred, succ, prop) and
-  summary = PathSummary::level()
+  summary = PathSummary::level() and
+  prop = getARelevantLoadAndStoreProperty(cfg)
   or
   isRelevant(pred, cfg) and
   isAdditionalStoreStep(pred, succ, prop, cfg) and
-  summary = PathSummary::level()
+  summary = PathSummary::level() and
+  prop = getARelevantLoadAndStoreProperty(cfg)
   or
   exists(Function f, DataFlow::Node mid, DataFlow::Node invk |
     not f.isAsyncOrGenerator() and invk = succ
@@ -1041,14 +1078,17 @@ private predicate storeStep(
     // and `succ` is an invocation of `f`
     reachableFromInput(f, invk, pred, mid, cfg, summary) and
     (
-      returnedPropWrite(f, _, prop, mid)
+      returnedPropWrite(f, _, prop, mid) and
+      prop = getARelevantLoadAndStoreProperty(cfg)
       or
       exists(DataFlow::SourceNode base | base.flowsToExpr(f.getAReturnedExpr()) |
-        isAdditionalStoreStep(mid, base, prop, cfg)
+        isAdditionalStoreStep(mid, base, prop, cfg) and
+        prop = getARelevantLoadAndStoreProperty(cfg)
       )
       or
       invk instanceof DataFlow::NewNode and
-      receiverPropWrite(f, prop, mid)
+      receiverPropWrite(f, prop, mid) and
+      prop = getARelevantLoadAndStoreProperty(cfg)
     )
   )
 }
@@ -1073,9 +1113,11 @@ private predicate parameterPropRead(
   exists(DataFlow::SourceNode parm |
     callInputStep(f, invk, arg, parm, cfg) and
     (
-      read = parm.getAPropertyRead(prop)
+      read = parm.getAPropertyRead(prop) and
+      prop = getARelevantLoadAndStoreProperty(cfg)
       or
-      exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg))
+      exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg)) and
+      prop = getARelevantLoadAndStoreProperty(cfg)
     )
   )
 }
@@ -1143,7 +1185,7 @@ private predicate isAdditionalLoadStoreStep(
 /**
  * Holds there exists a basic load-step, that was found to be relevant during the exploratory flow,
  * such that property `prop` of `pred` may flow into `succ` under configuration `cfg`.
- * 
+ *
  * Is outlined to give the compiler a hint about join-order.
  */
 pragma[noinline]
@@ -1166,7 +1208,8 @@ private predicate loadStep(
   PathSummary summary
 ) {
   basicRelevantLoadStep(pred, succ, prop, cfg) and
-  summary = PathSummary::level()
+  summary = PathSummary::level() and
+  prop = getARelevantLoadAndStoreProperty(cfg)
   or
   exists(Function f, DataFlow::Node read, DataFlow::Node invk |
     not f.isAsyncOrGenerator() and invk = succ
