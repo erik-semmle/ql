@@ -1061,6 +1061,17 @@ private predicate flowThroughCall(
   )
 }
 
+// TODO: Doc
+private predicate basicRelevantStoreStep(
+  string prop, DataFlow::Configuration cfg, DataFlow::Node pred, DataFlow::Node succ
+) {
+  isRelevant(pred, cfg) and
+  basicStoreStep(pred, succ, prop)
+  or
+  isRelevant(pred, cfg) and
+  isAdditionalStoreStep(pred, succ, prop, cfg)
+}
+
 /**
  * Holds if `pred` may flow into property `prop` of `succ` under configuration `cfg`
  * along a path summarized by `summary`.
@@ -1070,13 +1081,7 @@ private predicate storeStep(
   DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg,
   PathSummary summary
 ) {
-  isRelevant(pred, cfg) and
-  basicStoreStep(pred, succ, prop) and
-  summary = PathSummary::level() and
-  prop = getARelevantLoadAndStoreProperty(cfg)
-  or
-  isRelevant(pred, cfg) and
-  isAdditionalStoreStep(pred, succ, prop, cfg) and
+  basicRelevantStoreStep(prop, cfg, pred, succ) and
   summary = PathSummary::level() and
   prop = getARelevantLoadAndStoreProperty(cfg)
   or
@@ -1091,18 +1096,23 @@ private predicate storeStep(
     // and `succ` is an invocation of `f`
     reachableFromInput(f, invk, pred, mid, cfg, summary) and
     (
-      returnedPropWrite(f, _, prop, mid) and
-      prop = getARelevantLoadAndStoreProperty(cfg)
-      or
-      exists(DataFlow::SourceNode base | base.flowsToExpr(f.getAReturnedExpr()) |
-        isAdditionalStoreStep(mid, base, prop, cfg) and
-        prop = getARelevantLoadAndStoreProperty(cfg)
-      )
+      helper(f, prop, mid, cfg)
       or
       invk instanceof DataFlow::NewNode and
       receiverPropWrite(f, prop, mid) and
       prop = getARelevantLoadAndStoreProperty(cfg)
     )
+  )
+}
+
+// TODO: Doc
+private predicate helper(Function f, string prop, DataFlow::Node mid, DataFlow::Configuration cfg) {
+  returnedPropWrite(f, _, prop, mid) and
+  prop = getARelevantLoadAndStoreProperty(cfg)
+  or
+  exists(DataFlow::SourceNode base | base.flowsToExpr(f.getAReturnedExpr()) |
+    isAdditionalStoreStep(mid, base, prop, cfg) and
+    prop = getARelevantLoadAndStoreProperty(cfg)
   )
 }
 
@@ -1211,7 +1221,6 @@ private predicate isAdditionalLoadStoreStep(
  *
  * Is outlined to give the compiler a hint about join-order.
  */
-pragma[noinline]
 private predicate basicRelevantLoadStep(
   DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg
 ) {
