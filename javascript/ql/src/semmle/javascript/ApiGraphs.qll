@@ -126,10 +126,7 @@ module API {
     /**
      * Gets the number of parameters of the function represented by this node.
      */
-    int getNumParameter() {
-      result =
-        max(string s | exists(getASuccessor(Label::parameterByStringIndex(s))) | s.toInt()) + 1
-    }
+    int getNumParameter() { result = max(int s | exists(getASuccessor(Label::parameter(s)))) + 1 }
 
     /**
      * Gets a node representing the last parameter of the function represented by this node.
@@ -146,7 +143,7 @@ module API {
      * node.
      */
     Node getAParameter() {
-      result = getASuccessor(Label::parameterByStringIndex(_)) or
+      result = getASuccessor(Label::parameter(_)) or
       result = getReceiver()
     }
 
@@ -171,13 +168,13 @@ module API {
      * Gets a node such that there is an edge in the API graph between this node and the other
      * one, and that edge is labeled with `lbl`.
      */
-    Node getASuccessor(string lbl) { Impl::edge(this, lbl, result) }
+    Node getASuccessor(Label::ApiLabel lbl) { Impl::edge(this, lbl, result) }
 
     /**
      * Gets a node such that there is an edge in the API graph between that other node and
      * this one, and that edge is labeled with `lbl`
      */
-    Node getAPredecessor(string lbl) { this = result.getASuccessor(lbl) }
+    Node getAPredecessor(Label::ApiLabel lbl) { this = result.getASuccessor(lbl) }
 
     /**
      * Gets a node such that there is an edge in the API graph between this node and the other
@@ -242,9 +239,9 @@ module API {
       length = 0 and
       result = ""
       or
-      exists(Node pred, string lbl, string predpath |
+      exists(Node pred, Label::ApiLabel lbl, string predpath |
         Impl::edge(pred, lbl, this) and
-        lbl != "" and
+        not lbl instanceof Label::LabelAlias and
         predpath = pred.getAPath(length - 1) and
         exists(string space | if length = 1 then space = "" else space = " " |
           result = "(" + lbl + space + predpath + ")" and
@@ -303,7 +300,9 @@ module API {
     abstract DataFlow::Node getARhs();
 
     /** Gets a API-node for this entry point. */
-    API::Node getNode() { result = root().getASuccessor(this) }
+    API::Node getNode() {
+      result = root().getASuccessor(any(Label::LabelEntryPoint l | l.getEntryPoint() = this))
+    }
   }
 
   /**
@@ -404,11 +403,11 @@ module API {
      * incoming edge from `base` labeled `lbl` in the API graph.
      */
     cached
-    predicate rhs(TApiNode base, string lbl, DataFlow::Node rhs) {
+    predicate rhs(TApiNode base, Label::ApiLabel lbl, DataFlow::Node rhs) {
       hasSemantics(rhs) and
       (
         base = MkRoot() and
-        rhs = lbl.(EntryPoint).getARhs()
+        rhs = lbl.(Label::LabelEntryPoint).getEntryPoint().getARhs()
         or
         exists(string m, string prop |
           base = MkModuleExport(m) and
@@ -503,11 +502,11 @@ module API {
      * `lbl` in the API graph.
      */
     cached
-    predicate use(TApiNode base, string lbl, DataFlow::Node ref) {
+    predicate use(TApiNode base, Label::ApiLabel lbl, DataFlow::Node ref) {
       hasSemantics(ref) and
       (
         base = MkRoot() and
-        ref = lbl.(EntryPoint).getAUse()
+        ref = lbl.(Label::LabelEntryPoint).getEntryPoint().getAUse()
         or
         exists(DataFlow::SourceNode src, DataFlow::SourceNode pred |
           use(base, src) and pred = trackUseNode(src)
@@ -658,7 +657,7 @@ module API {
      * Holds if there is an edge from `pred` to `succ` in the API graph that is labeled with `lbl`.
      */
     cached
-    predicate edge(TApiNode pred, string lbl, TApiNode succ) {
+    predicate edge(TApiNode pred, Label::ApiLabel lbl, TApiNode succ) {
       exists(string m |
         pred = MkRoot() and
         lbl = Label::mod(m)
@@ -728,67 +727,166 @@ module API {
     int distanceFromRoot(TApiNode nd) = shortestDistances(MkRoot/0, edge/2)(_, nd, result)
   }
 
-  import Label as EdgeLabel
-}
+  private module Label {
+    newtype TLabel =
+      MkLabelMod(string mod) {
+        exists(Impl::MkModuleExport(mod)) or
+        exists(Impl::MkModuleImport(mod))
+      } or
+      MkLabelInstance() or
+      MkLabelMember(string prop) {
+        exports(prop, _) or
+        exists(any(DataFlow::ClassNode c).getInstanceMethod(prop)) or
+        prop = "exports" or
+        prop = any(CanonicalName c).getName() or
+        prop = any(DataFlow::PropRef p).getPropertyName()
+      } or
+      MkLabelUnknownMember() or
+      MkLabelParameter(int i) {
+        i =
+          [-1 .. max(int args |
+              args = any(InvokeExpr invk).getNumArgument() or
+              args = any(Function f).getNumParameter()
+            )]
+      } or
+      MkLabelReturn() or
+      MkLabelPromised() or
+      MkLabelAlias() or
+      MkLabelEntryPoint(EntryPoint e)
 
-private module Label {
-  /** Gets the edge label for the module `m`. */
-  bindingset[m]
-  bindingset[result]
-  string mod(string m) { result = "module " + m }
+    abstract class ApiLabel extends TLabel {
+      string toString() { result = "???" }
+    }
 
-  /** Gets the `member` edge label for member `m`. */
-  bindingset[m]
-  bindingset[result]
-  string member(string m) { result = "member " + m }
+    class LabelEntryPoint extends ApiLabel {
+      EntryPoint e;
 
-  /** Gets the `member` edge label for the unknown member. */
-  string unknownMember() { result = "member *" }
+      LabelEntryPoint() { this = MkLabelEntryPoint(e) }
 
-  /** Gets the `member` edge label for the given property reference. */
-  string memberFromRef(DataFlow::PropRef pr) {
-    exists(string pn | pn = pr.getPropertyName() |
-      result = member(pn) and
-      // only consider properties with alphanumeric(-ish) names, excluding special properties
-      // and properties whose names look like they are meant to be internal
-      pn.regexpMatch("(?!prototype$|__)[a-zA-Z_$][\\w\\-.$]*")
-    )
-    or
-    not exists(pr.getPropertyName()) and
-    result = unknownMember()
+      EntryPoint getEntryPoint() { result = e }
+
+      override string toString() { result = e }
+    }
+
+    class LabelAlias extends ApiLabel {
+      LabelAlias() { this = MkLabelAlias() }
+
+      override string toString() { result = "" }
+    }
+
+    class LabelPromised extends ApiLabel {
+      LabelPromised() { this = MkLabelPromised() }
+
+      override string toString() { result = "promised" }
+    }
+
+    class LabelReturn extends ApiLabel {
+      LabelReturn() { this = MkLabelReturn() }
+
+      override string toString() { result = "return" }
+    }
+
+    class LabelMod extends ApiLabel {
+      string mod;
+
+      LabelMod() { this = MkLabelMod(mod) }
+
+      string getMod() { result = mod }
+
+      override string toString() { result = "module " + mod }
+    }
+
+    class LabelInstance extends ApiLabel {
+      LabelInstance() { this = MkLabelInstance() }
+
+      override string toString() { result = "instance" }
+    }
+
+    class LabelMember extends ApiLabel {
+      string prop;
+
+      LabelMember() { this = MkLabelMember(prop) }
+
+      string getProperty() { result = prop }
+
+      override string toString() { result = "member " + prop }
+    }
+
+    class LabelUnknownMember extends ApiLabel {
+      LabelUnknownMember() { this = MkLabelUnknownMember() }
+
+      override string toString() { result = "member *" }
+    }
+
+    class LabelParameter extends ApiLabel {
+      int i;
+
+      LabelParameter() { this = MkLabelParameter(i) }
+
+      override string toString() { result = "parameter " + i }
+
+      int getIndex() { result = i }
+    }
+
+    /** Gets the edge label for the module `m`. */
+    LabelMod mod(string m) { result.getMod() = m }
+
+    /** Gets the `member` edge label for member `m`. */
+    bindingset[m]
+    bindingset[result]
+    LabelMember member(string m) { result.getProperty() = m }
+
+    /** Gets the `member` edge label for the unknown member. */
+    LabelUnknownMember unknownMember() { any() }
+
+    /** Gets the `member` edge label for the given property reference. */
+    ApiLabel memberFromRef(DataFlow::PropRef pr) {
+      exists(string pn | pn = pr.getPropertyName() |
+        result = member(pn) and
+        // only consider properties with alphanumeric(-ish) names, excluding special properties
+        // and properties whose names look like they are meant to be internal
+        pn.regexpMatch("(?!prototype$|__)[a-zA-Z_$][\\w\\-.$]*")
+      )
+      or
+      not exists(pr.getPropertyName()) and
+      result = unknownMember()
+    }
+
+    /** Gets the `instance` edge label. */
+    LabelInstance instance() { any() }
+
+    /**
+     * Gets the `parameter` edge label for the `i`th parameter.
+     *
+     * The receiver is considered to be parameter -1.
+     */
+    LabelParameter parameter(int i) { result.getIndex() = i }
+
+    /** Gets the `parameter` edge label for the receiver. */
+    LabelParameter receiver() { result = parameter(-1) }
+
+    /** Gets the `return` edge label. */
+    LabelReturn return() { any() }
+
+    /** Gets the `alias` (empty) edge label. */
+    LabelAlias alias() { any() }
+
+    /** Gets the `promised` edge label connecting a promise to its contained value. */
+    MkLabelPromised promised() { any() }
+
+    // TODO: DUplicate
+    /** Holds if module `m` exports `rhs` under the name `prop`. */
+    private predicate exports(string prop, DataFlow::Node rhs) {
+      exists(ExportDeclaration exp |
+        rhs = exp.getSourceNode(prop)
+        or
+        exists(Variable v |
+          exp.exportsAs(v, prop) and
+          rhs = v.getAnAssignedExpr().flow()
+        )
+      )
+    }
   }
-
-  /** Gets the `instance` edge label. */
-  string instance() { result = "instance" }
-
-  /**
-   * Gets the `parameter` edge label for the parameter `s`.
-   *
-   * This is an internal helper predicate; use `parameter` instead.
-   */
-  bindingset[result]
-  bindingset[s]
-  string parameterByStringIndex(string s) {
-    result = "parameter " + s and
-    s.toInt() >= -1
-  }
-
-  /**
-   * Gets the `parameter` edge label for the `i`th parameter.
-   *
-   * The receiver is considered to be parameter -1.
-   */
-  bindingset[i]
-  string parameter(int i) { result = parameterByStringIndex(i.toString()) }
-
-  /** Gets the `parameter` edge label for the receiver. */
-  string receiver() { result = "parameter -1" }
-
-  /** Gets the `return` edge label. */
-  string return() { result = "return" }
-
-  /** Gets the `promised` edge label connecting a promise to its contained value. */
-  string promised() { result = "promised" }
 }
 
 /**
