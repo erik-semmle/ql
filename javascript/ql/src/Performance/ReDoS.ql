@@ -104,7 +104,7 @@ class RegExpRoot extends RegExpTerm {
    */
   predicate isRelevant() {
     // there is at least one repetition
-    exists(RegExpRepetition rep | getRoot(rep) = this |
+    exists(InfiniteRepetitionQuantifier rep | getRoot(rep) = this |
       // that could possibly match the same thing in multiple ways.
       exists(RegExpTerm child |
         child instanceof RegExpAlt or
@@ -117,17 +117,6 @@ class RegExpRoot extends RegExpTerm {
     not exists(RegExpLookbehind lbh | getRoot(lbh) = this) and
     // is actually used as a RegExp
     isUsedAsRegExp()
-  }
-}
-
-/**
- * A term that matches repetitions of a given pattern, that is, `E*`, `E+`, or `E{n,m}`.
- */
-class RegExpRepetition extends RegExpParent {
-  RegExpRepetition() {
-    this instanceof RegExpStar or
-    this instanceof RegExpPlus or
-    this instanceof RegExpRange
   }
 }
 
