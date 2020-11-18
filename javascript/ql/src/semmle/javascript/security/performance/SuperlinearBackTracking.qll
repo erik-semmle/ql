@@ -25,7 +25,7 @@ class InfiniteRepetitionQuantifier extends RegExpQuantifier {
  *
  * This is implemented as an under-approximation, and this predicate does not hold for sub-patterns in particular.
  */
-private predicate matchesEpsilon(RegExpTerm t) {
+predicate matchesEpsilon(RegExpTerm t) {
   t instanceof RegExpStar
   or
   t instanceof RegExpOpt

@@ -123,7 +123,8 @@ class MaybeBacktrackingRepetition extends InfiniteRepetitionQuantifier {
       child instanceof RegExpQuantifier
     |
       child.getParent+() = this
-    )
+    ) and
+    exists(RegExpTerm succ | this.getSuccessor+() = succ | not matchesEpsilon(succ))
   }
 }
 
@@ -699,7 +700,7 @@ predicate step(StatePair q, InputSymbol s1, InputSymbol s2, StatePair r) {
 /**
  * Holds if there are transitions from the components of `q` to `r1` and `r2`
  * labelled with `s1` and `s2`, respectively.
- * 
+ *
  * We only consider transitions where the resulting states `(r1, r2)` are both
  * inside a repetition that might backtrack.
  */
