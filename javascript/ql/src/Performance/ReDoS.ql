@@ -13,6 +13,7 @@
  */
 
 import javascript
+import semmle.javascript.security.performance.SuperlinearBackTracking
 
 /*
  * This query implements the analysis described in the following two papers:
@@ -153,9 +154,9 @@ newtype TInputSymbol =
     (
       recc instanceof RegExpCharacterClass and
       not recc.(RegExpCharacterClass).isUniversalClass()
+      or
+      recc instanceof RegExpCharacterClassEscape
     )
-    or
-    recc instanceof RegExpCharacterClassEscape
   } or
   /** An input symbol representing all characters matched by `.`. */
   Dot() or
