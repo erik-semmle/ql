@@ -283,7 +283,7 @@ var good31 = /(a+)*[^]{2,3}/;
 // GOOD - but we don't find that no suffix is rejected
 var good32 = /(a+)*([^]{2,}|X)$/;
 
-// GOOD - but still flagged
+// GOOD
 var good33 = /(a+)*([^]*|X)$/;
 
 // NOT GOOD
