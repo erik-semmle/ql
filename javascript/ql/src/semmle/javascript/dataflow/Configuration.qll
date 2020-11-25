@@ -1061,7 +1061,7 @@ private predicate flowThroughCall(
   )
 }
 
-// TODO: Doc
+pragma[noinline]
 private predicate basicRelevantStoreStep(
   string prop, DataFlow::Configuration cfg, DataFlow::Node pred, DataFlow::Node succ
 ) {
@@ -1144,12 +1144,10 @@ private predicate parameterPropRead(
       callInputStep(f, invk, arg, parm, cfg) and
       (
         reachesReturn(f, read, cfg, summary) and
-        read = parm.getAPropertyRead(prop) and
-        prop = getARelevantLoadAndStoreProperty(cfg)
+        read = parm.getAPropertyRead(prop)
         or
         reachesReturn(f, read, cfg, summary) and
-        exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg)) and
-        prop = getARelevantLoadAndStoreProperty(cfg)
+        exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg))
       )
     )
   )
@@ -1221,6 +1219,7 @@ private predicate isAdditionalLoadStoreStep(
  *
  * Is outlined to give the compiler a hint about join-order.
  */
+pragma[noinline]
 private predicate basicRelevantLoadStep(
   DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg
 ) {
@@ -1243,7 +1242,8 @@ private predicate loadStep(
   summary = PathSummary::level() and
   prop = getARelevantLoadAndStoreProperty(cfg)
   or
-  parameterPropRead(pred, prop, succ, cfg, summary)
+  parameterPropRead(pred, prop, succ, cfg, summary) and
+  prop = getARelevantLoadAndStoreProperty(cfg)
 }
 
 /**
