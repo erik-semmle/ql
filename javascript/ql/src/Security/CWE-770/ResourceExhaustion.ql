@@ -12,9 +12,7 @@
 
 import javascript
 import DataFlow::PathGraph
-import semmle.javascript.security.dataflow.ResourceExhaustion::ResourceExhaustion
 
-from Configuration dataflow, DataFlow::PathNode source, DataFlow::PathNode sink
-where dataflow.hasFlowPath(source, sink)
-select sink, source, sink, sink.getNode().(Sink).getProblemDescription() + " from $@.", source,
-  "here"
+from DataFlow::PathNode source, DataFlow::PathNode sink
+where none()
+select sink, source, sink, "problem from $@.", source, "here"
