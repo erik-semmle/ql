@@ -190,10 +190,7 @@ cached
 private predicate matchMarkerComment(
   Comment c, TopLevel tl, FrameworkLibraryWithMarkerComment fl, string version
 ) {
-  c.getTopLevel() = tl and
-  exists(string r | r = fl.getAMarkerCommentRegex().replaceAll("<VERSION>", versionRegex()) |
-    version = c.getText().regexpCapture(r, 1)
-  )
+  none() // TODO: Tmp.
 }
 
 /**
