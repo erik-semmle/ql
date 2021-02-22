@@ -441,6 +441,17 @@ module Vue {
       )
     }
 
+    pragma[noinline]
+    private predicate getAnES2015ExportsCandidate(AbstractValue value) {
+      exists(DataFlow::AnalyzedNode exported, ExportDeclaration export |
+        export.getEnclosingModule() = getModule() and
+        value = exported.getAValue()
+      |
+        exported = export.(BulkReExportDeclaration).getSourceNode("default") or
+        exported.asExpr() = export.(ExportDefaultDeclaration).getOperand()
+      )
+    }
+
     override DataFlow::Node getOwnOption(string name) {
       // The options of a single file component are defined by the exported object of the script element.
       // Our current module model does not support reads on this object very well, so we use custom steps for the common cases for now.
@@ -449,13 +460,7 @@ module Vue {
         m = getModule()
       |
         // ES2015 exports
-        exists(ExportDeclaration export, DataFlow::AnalyzedNode exported |
-          export.getEnclosingModule() = m and
-          abstractOptions = exported.getAValue()
-        |
-          exported = export.(BulkReExportDeclaration).getSourceNode("default") or
-          exported.asExpr() = export.(ExportDefaultDeclaration).getOperand()
-        )
+        getAnES2015ExportsCandidate(abstractOptions)
         or
         // Node.js exports
         abstractOptions = m.(NodeModule).getAModuleExportsValue()
