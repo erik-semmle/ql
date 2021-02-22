@@ -740,11 +740,7 @@ private predicate basicFlowStepNoBarrier(
   DataFlow::Node pred, DataFlow::Node succ, PathSummary summary, DataFlow::Configuration cfg
 ) {
   // Local flow
-  exists(FlowLabel predlbl, FlowLabel succlbl |
-    localFlowStep(pred, succ, cfg, predlbl, succlbl) and
-    not cfg.isBarrierEdge(pred, succ) and
-    summary = MkPathSummary(false, false, predlbl, succlbl)
-  )
+  localbasicFlowStep(pred, succ, summary, cfg)
   or
   // Flow through properties of objects
   propertyFlowStep(pred, succ) and
@@ -763,6 +759,19 @@ private predicate basicFlowStepNoBarrier(
   summary = PathSummary::return()
 }
 
+// non-recursive stuff. So recursive predicates get smaller.
+pragma[noinline]
+private predicate localbasicFlowStep(
+  DataFlow::Node pred, DataFlow::Node succ, PathSummary summary, DataFlow::Configuration cfg
+) {
+  // Local flow
+  exists(FlowLabel predlbl, FlowLabel succlbl |
+    localFlowStep(pred, succ, cfg, predlbl, succlbl) and
+    not cfg.isBarrierEdge(pred, succ) and
+    summary = MkPathSummary(false, false, predlbl, succlbl)
+  )
+}
+
 /**
  * Holds if there is a flow step from `pred` to `succ` under configuration `cfg`,
  * including both basic flow steps and steps into/out of properties.
@@ -770,7 +779,8 @@ private predicate basicFlowStepNoBarrier(
  * This predicate is field insensitive (it does not distinguish between `x` and `x.p`)
  * and hence should only be used for purposes of approximation.
  */
-pragma[inline]
+// TODO: Configuration::isRelevantBackStep#fff took 19s on vscode.
+pragma[noinline]
 private predicate exploratoryFlowStep(
   DataFlow::Node pred, DataFlow::Node succ, DataFlow::Configuration cfg
 ) {
@@ -1026,6 +1036,14 @@ private predicate flowThroughCall(
   )
   or
   // exception thrown inside an immediately awaited function call.
+  flowThroughImmidiatlyAwaitedCall(input, output, cfg, summary)
+}
+
+pragma[noinline]
+private predicate flowThroughImmidiatlyAwaitedCall(
+  DataFlow::Node input, DataFlow::Node output, DataFlow::Configuration cfg, PathSummary summary
+) {
+  // exception thrown inside an immediately awaited function call.
   exists(DataFlow::FunctionNode f, DataFlow::Node invk, DataFlow::Node ret |
     f.getFunction().isAsync()
   |
@@ -1101,15 +1119,27 @@ private predicate parameterPropRead(
     f.isAsync() and
     invk = getAwaitOperand(succ)
   |
-    exists(DataFlow::SourceNode parm |
-      callInputStep(f, invk, arg, parm, cfg) and
-      (
-        reachesReturn(f, read, cfg, summary) and
-        read = parm.getAPropertyRead(prop)
-        or
-        reachesReturn(f, read, cfg, summary) and
-        exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg))
-      )
+    parameterPropReadAux(arg, prop, cfg, summary, invk, f, read)
+  )
+}
+
+/**
+ * Holds if `f` is called at `invk` where `prop` of `arg` is read inside `f' by `read`,
+ * and that `read` reaches the return of `f' along a path summarized by `summary`.
+ */
+pragma[noinline]
+private predicate parameterPropReadAux(
+  DataFlow::Node arg, string prop, DataFlow::Configuration cfg, PathSummary summary,
+  DataFlow::Node invk, Function f, DataFlow::Node read
+) {
+  exists(DataFlow::SourceNode parm |
+    callInputStep(f, invk, arg, parm, cfg) and
+    (
+      reachesReturn(f, read, cfg, summary) and
+      read = parm.getAPropertyRead(prop)
+      or
+      reachesReturn(f, read, cfg, summary) and
+      exists(DataFlow::Node use | parm.flowsTo(use) | isAdditionalLoadStep(use, read, prop, cfg))
     )
   )
 }
@@ -1118,6 +1148,7 @@ private predicate parameterPropRead(
  * Holds if `read` may flow into a return statement of `f` under configuration `cfg`
  * (possibly through callees) along a path summarized by `summary`.
  */
+pragma[nomagic]
 private predicate reachesReturn(
   Function f, DataFlow::Node read, DataFlow::Configuration cfg, PathSummary summary
 ) {
@@ -1186,6 +1217,20 @@ private predicate loadStep(
   basicLoadStep(pred, succ, prop) and
   summary = PathSummary::level()
   or
+  /*
+   *   loadStepAux(pred, succ, prop, cfg, summary)
+   * }
+   *
+   * TODO: Really needed?
+   * /**
+   *
+   *
+   * private predicate loadStepAux(
+   *  DataFlow::Node pred, DataFlow::Node succ, string prop, DataFlow::Configuration cfg,
+   *  PathSummary summary
+   * ) {
+   */
+
   isRelevant(pred, cfg) and
   isAdditionalLoadStep(pred, succ, prop, cfg) and
   summary = PathSummary::level()
