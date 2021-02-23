@@ -517,10 +517,14 @@ class SsaExplicitDefinition extends SsaDefinition, TExplicitDef {
 
   override string prettyPrintDef() { result = getDef().toString() }
 
+  pragma[noinline]
   override predicate hasLocationInfo(
     string filepath, int startline, int startcolumn, int endline, int endcolumn
   ) {
-    getDef().getLocation().hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+    exists(Location loc |
+      pragma[only_bind_into](loc) = pragma[only_bind_into](getDef()).getLocation() and
+      loc.hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+    )
   }
 
   /**
@@ -552,7 +556,10 @@ abstract class SsaImplicitDefinition extends SsaDefinition {
   ) {
     endline = startline and
     endcolumn = startcolumn and
-    getBasicBlock().getLocation().hasLocationInfo(filepath, startline, startcolumn, _, _)
+    exists(Location loc |
+      pragma[only_bind_into](loc) = pragma[only_bind_into](getBasicBlock()).getLocation() and
+      loc.hasLocationInfo(filepath, startline, startcolumn, _, _)
+    )
   }
 }
 
@@ -598,6 +605,7 @@ class SsaVariableCapture extends SsaImplicitDefinition, TCapture {
 
   override string prettyPrintDef() { result = "capture variable " + getSourceVariable() }
 
+  pragma[noinline]
   override predicate hasLocationInfo(
     string filepath, int startline, int startcolumn, int endline, int endcolumn
   ) {
@@ -660,14 +668,6 @@ class SsaPhiNode extends SsaPseudoDefinition, TPhi {
 
   override string prettyPrintDef() { result = getSourceVariable() + " = phi(" + ppInputs() + ")" }
 
-  override predicate hasLocationInfo(
-    string filepath, int startline, int startcolumn, int endline, int endcolumn
-  ) {
-    endline = startline and
-    endcolumn = startcolumn and
-    getBasicBlock().getLocation().hasLocationInfo(filepath, startline, startcolumn, _, _)
-  }
-
   /**
    * If all inputs to this phi node are (transitive) refinements of the same variable,
    * gets that variable.
@@ -728,6 +728,7 @@ class SsaRefinementNode extends SsaPseudoDefinition, TRefinement {
     result = getSourceVariable() + " = refine[" + getGuard() + "](" + ppInputs() + ")"
   }
 
+  pragma[noinline]
   override predicate hasLocationInfo(
     string filepath, int startline, int startcolumn, int endline, int endcolumn
   ) {
