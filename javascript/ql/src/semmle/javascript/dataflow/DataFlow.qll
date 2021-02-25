@@ -106,11 +106,7 @@ module DataFlow {
 
     /** Holds if this node may evaluate to the Boolean value `b`. */
     predicate mayHaveBooleanValue(boolean b) {
-      getAPredecessor().mayHaveBooleanValue(b)
-      or
-      b = true and asExpr().(BooleanLiteral).getValue() = "true"
-      or
-      b = false and asExpr().(BooleanLiteral).getValue() = "false"
+      b = analyze().getAValue().(AbstractBoolean).getBooleanValue()
     }
 
     /** Gets the integer value of this node, if it is an integer constant. */
