@@ -161,7 +161,7 @@ class AmdModuleDefinition extends CallExpr {
   pragma[noinline]
   private AbstractValue getAnImplicitExportsValue() {
     // implicit exports: anything that is returned from the factory function
-    result = getModuleExpr().analyze().getAValue()
+    pragma[only_bind_into](result) = getModuleExpr().analyze().getAValue()
   }
 
   pragma[noinline]
@@ -305,19 +305,11 @@ class AmdModule extends Module {
 
   pragma[noinline]
   override DataFlow::Node getAnExportedValue(string name) {
-    exists(DataFlow::AnalyzedNode base |
-      result = getAnExportsCandidate(name, base) and
-      base.getAValue() = getDefine().getAModuleExportsValue()
+    exists(DataFlow::AnalyzedNode base, DataFlow::PropWrite write |
+      write.writes(base, name, result) and
+      base.getAValue() = pragma[only_bind_into](getDefine().getAModuleExportsValue())
     )
   }
-}
-
-// TODO: this is basically DataFlow::PropWrite::writes
-private DataFlow::Node getAnExportsCandidate(string name, DataFlow::AnalyzedNode base) {
-  exists(DataFlow::PropWrite pwn | result = pwn.getRhs() |
-    base = pwn.getBase().analyze() and
-    name = pwn.getPropertyName()
-  )
 }
 
 /**
