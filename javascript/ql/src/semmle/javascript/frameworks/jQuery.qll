@@ -544,17 +544,17 @@ module JQuery {
   }
 
   /** A source of jQuery objects from the AST-based `JQueryObject` class. */
-  private DataFlow::SourceNode legacyObjectSource() {
-    result = any(JQueryObjectInternal e).flow().getALocalSource()
-  }
+  private DataFlow::Node legacyObjectSource() { result = any(JQueryObjectInternal e).flow() }
 
   /** Gets a source of jQuery objects. */
   private DataFlow::SourceNode objectSource(DataFlow::TypeTracker t) {
     t.start() and
     result instanceof ObjectSource::Range
     or
-    t.start() and
-    result = legacyObjectSource()
+    exists(DataFlow::TypeTracker init |
+      init.start() and
+      t = init.smallstep(legacyObjectSource(), result)
+    )
   }
 
   /** Gets a data flow node referring to a jQuery object. */
