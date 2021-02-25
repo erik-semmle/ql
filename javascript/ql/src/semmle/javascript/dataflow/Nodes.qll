@@ -165,14 +165,7 @@ class InvokeNode extends DataFlow::SourceNode {
   private ObjectLiteralNode getOptionsArgument(int i) { result.flowsTo(getArgument(i)) }
 
   /** Gets an abstract value representing possible callees of this call site. */
-  pragma[noopt]
-  final AbstractValue getACalleeValue() {
-    exists(DataFlow::Node callee, DataFlow::AnalyzedNode analyzed |
-      callee = getCalleeNode() and
-      callee.analyze() = analyzed and
-      result = analyzed.getAValue()
-    )
-  }
+  final AbstractValue getACalleeValue() { result = getCalleeNode().analyze().getAValue() }
 
   /**
    * Gets a potential callee of this call site.
@@ -1158,17 +1151,6 @@ module ClassNode {
     result.getFile() = f
   }
 
-  pragma[noopt]
-  private DataFlow::Node base(AbstractValue func) {
-    exists(DataFlow::SourceNode source, DataFlow::AnalyzedNode analyzed |
-      exists(source.getAPropertyReference("prototype")) and
-      analyzed = source.analyze() and
-      analyzed.getAValue() = func and
-      func instanceof AbstractFunction and
-      source.flowsTo(result)
-    )
-  }
-
   /**
    * A function definition with prototype manipulation as a `ClassNode` instance.
    */
@@ -1181,7 +1163,7 @@ module ClassNode {
       (
         exists(DataFlow::PropRef read |
           read.getPropertyName() = "prototype" and
-          read.getBase() = base(function)
+          read.getBase().analyze().getAValue() = function
         )
         or
         exists(string name |
@@ -1243,7 +1225,7 @@ module ClassNode {
      * Gets a reference to the prototype of this class.
      */
     DataFlow::SourceNode getAPrototypeReference() {
-      exists(DataFlow::SourceNode base | base = base(function) |
+      exists(DataFlow::SourceNode base | base.analyze().getAValue() = function |
         result = base.getAPropertyRead("prototype")
         or
         result = base.getAPropertySource("prototype")
