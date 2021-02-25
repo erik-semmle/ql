@@ -33,7 +33,7 @@ class BDDTest extends Test, @call_expr {
     exists(CallExpr call | call = this |
       call.getCallee().(VarAccess).getName() = "it" and
       exists(call.getArgument(0).getStringValue()) and
-      exists(call.getArgument(1).flow().getAFunctionValue(0))
+      call.getArgument(1).analyze().getAValue() instanceof AbstractFunction
     )
   }
 }
@@ -60,7 +60,7 @@ class JestTest extends Test, @call_expr {
     exists(CallExpr call | call = this |
       call.getCallee().(GlobalVarAccess).getName() = "test" and
       exists(call.getArgument(0).getStringValue()) and
-      exists(call.getArgument(1).flow().getAFunctionValue(0))
+      call.getArgument(1).analyze().getAValue() instanceof AbstractFunction
     ) and
     getFile() = getTestFile(any(File f), "test")
   }
@@ -94,7 +94,7 @@ class CucumberTest extends Test, @call_expr {
     exists(DataFlow::ModuleImportNode m, CallExpr call |
       m.getPath() = "cucumber" and
       call = m.getAnInvocation().asExpr() and
-      exists(call.getArgument(0).flow().getAFunctionValue()) and
+      call.getArgument(0).analyze().getAValue() instanceof AbstractFunction and
       this = call
     )
   }
