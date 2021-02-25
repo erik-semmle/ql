@@ -738,7 +738,9 @@ module API {
         boundArgs in [0 .. 10]
       )
       or
-      t = useStep(nd, promisified, boundArgs, result)
+      exists(StepSummary summary |
+        t = useStep(nd, promisified, boundArgs, result, summary).append(summary)
+      )
     }
 
     private import semmle.javascript.dataflow.internal.StepSummary
@@ -746,19 +748,15 @@ module API {
     /**
      * Holds if `nd`, which is a use of an API-graph node, flows in zero or more potentially
      * inter-procedural steps to some intermediate node, and then from that intermediate node to
-     * `res` in one step described by the resulting TypeTracker.
+     * `res` in one step described by `summary`.
      *
      * This predicate exists solely to enforce a better join order in `trackUseNode` above.
      */
-    pragma[noopt]
+    pragma[noinline]
     private DataFlow::TypeTracker useStep(
-      DataFlow::Node nd, boolean promisified, int boundArgs, DataFlow::Node res
+      DataFlow::Node nd, boolean promisified, int boundArgs, DataFlow::Node res, StepSummary summary
     ) {
-      exists(DataFlow::TypeTracker t, StepSummary summary, DataFlow::SourceNode prev |
-        prev = trackUseNode(nd, promisified, boundArgs, t) and
-        StepSummary::step(prev, res, summary) and
-        result = t.append(summary)
-      )
+      StepSummary::step(trackUseNode(nd, promisified, boundArgs, result), res, summary)
     }
 
     private DataFlow::SourceNode trackUseNode(
