@@ -107,7 +107,6 @@ abstract class Module extends TopLevel {
    * Symbols defined in another module that are re-exported by
    * this module are only sometimes considered.
    */
-  cached
   abstract DataFlow::Node getAnExportedValue(string name);
 
   /**
