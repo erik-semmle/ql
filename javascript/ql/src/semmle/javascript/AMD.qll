@@ -303,21 +303,12 @@ class AmdModule extends Module {
   /** Gets the definition of this module. */
   AmdModuleDefinition getDefine() { amdModuleTopLevel(result, this) }
 
-  pragma[noinline]
   override DataFlow::Node getAnExportedValue(string name) {
-    exists(DataFlow::AnalyzedNode base |
-      result = getAnExportsCandidate(name, base) and
-      base.getAValue() = getDefine().getAModuleExportsValue()
+    exists(DataFlow::PropWrite pwn | result = pwn.getRhs() |
+      pwn.getBase().analyze().getAValue() = getDefine().getAModuleExportsValue() and
+      name = pwn.getPropertyName()
     )
   }
-}
-
-// TODO: this is basically DataFlow::PropWrite::writes
-private DataFlow::Node getAnExportsCandidate(string name, DataFlow::AnalyzedNode base) {
-  exists(DataFlow::PropWrite pwn | result = pwn.getRhs() |
-    base = pwn.getBase().analyze() and
-    name = pwn.getPropertyName()
-  )
 }
 
 /**
