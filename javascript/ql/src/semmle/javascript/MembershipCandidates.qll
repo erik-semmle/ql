@@ -222,27 +222,27 @@ module MembershipCandidate {
    */
   class ObjectPropertyNameMembershipCandidate extends MembershipCandidate::Range,
     DataFlow::ValueNode {
-    Expr test;
-    Expr membersNode;
+    DataFlow::ValueNode test;
+    DataFlow::ValueNode membersNode;
 
     ObjectPropertyNameMembershipCandidate() {
       exists(InExpr inExpr |
         this = inExpr.getLeftOperand().flow() and
-        test = inExpr and
-        membersNode = inExpr.getRightOperand()
+        test = inExpr.flow() and
+        membersNode = inExpr.getRightOperand().flow()
       )
       or
-      exists(MethodCallExpr hasOwn |
-        this = hasOwn.getArgument(0).flow() and
+      exists(DataFlow::MethodCallNode hasOwn |
+        this = hasOwn.getArgument(0) and
         test = hasOwn and
         hasOwn.calls(membersNode, "hasOwnProperty")
       )
     }
 
-    override DataFlow::Node getTest() { result = test.flow() }
+    override DataFlow::Node getTest() { result = test }
 
     override string getAMemberString() {
-      exists(membersNode.flow().getALocalSource().getAPropertyWrite(result))
+      exists(membersNode.getALocalSource().getAPropertyWrite(result))
     }
   }
 
