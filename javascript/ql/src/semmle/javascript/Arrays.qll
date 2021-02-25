@@ -156,8 +156,9 @@ private module ArrayDataFlow {
 
     ArrayIndexingStep() {
       read = this and
-      TTNumber() =
-        unique(InferredType type | type = read.getPropertyNameExpr().flow().analyze().getAType()) and
+      forex(InferredType type | type = read.getPropertyNameExpr().flow().analyze().getAType() |
+        type = TTNumber()
+      ) and
       exists(VarAccess i, ExprOrVarDecl init |
         i = read.getPropertyNameExpr() and init = any(ForStmt f).getInit()
       |
