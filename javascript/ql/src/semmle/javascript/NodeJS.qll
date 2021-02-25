@@ -33,25 +33,31 @@ class NodeModule extends Module {
    * Gets an abstract value representing one or more values that may flow
    * into this module's `module.exports` property.
    */
-  pragma[noinline]
   DefiniteAbstractValue getAModuleExportsValue() {
-    result = getAModuleExportsProperty().getAValue()
-  }
-
-  pragma[noinline]
-  private AbstractProperty getAModuleExportsProperty() {
-    result.getBase().(AbstractModuleObject).getModule() = this and
-    result.getPropertyName() = "exports"
+    exists(AbstractProperty moduleExports |
+      moduleExports.getBase().(AbstractModuleObject).getModule() = this and
+      moduleExports.getPropertyName() = "exports"
+    |
+      result = moduleExports.getAValue()
+    )
   }
 
   /**
    * Gets an expression that is an alias for `module.exports`.
-   * For performance this predicate only computes relevant expressions (in `getAModuleExportsCandidate`).
+   * For performance this predicate only computes relevant expressions.
    * So if using this predicate - consider expanding the list of relevant expressions.
    */
-  DataFlow::AnalyzedNode getAModuleExportsNode() {
-    result = getAModuleExportsCandidate() and
-    result.getAValue() = getAModuleExportsValue()
+  pragma[noinline]
+  DataFlow::Node getAModuleExportsNode() {
+    (
+      // A bit of manual magic
+      result = any(DataFlow::PropWrite w | exists(w.getPropertyName())).getBase()
+      or
+      result = DataFlow::valueNode(any(PropAccess p | exists(p.getPropertyName())).getBase())
+      or
+      result = DataFlow::valueNode(any(ObjectExpr obj))
+    ) and
+    result.analyze().getAValue() = getAModuleExportsValue()
   }
 
   /** Gets a symbol exported by this module. */
@@ -140,21 +146,6 @@ class NodeModule extends Module {
       findNodeModulesFolder(getFile().getParentContainer(), searchRoot, priority)
     )
   }
-}
-
-/**
- * Gets an expression that syntactically could be a alias for `module.exports`.
- * This predicate exists to reduce the size of `getAModuleExportsNode`,
- * while keeping all the tuples that could be relevant in later computations.
- */
-pragma[noinline]
-private DataFlow::Node getAModuleExportsCandidate() {
-  // A bit of manual magic
-  result = any(DataFlow::PropWrite w | exists(w.getPropertyName())).getBase()
-  or
-  result = DataFlow::valueNode(any(PropAccess p | exists(p.getPropertyName())).getBase())
-  or
-  result = DataFlow::valueNode(any(ObjectExpr obj))
 }
 
 /**
