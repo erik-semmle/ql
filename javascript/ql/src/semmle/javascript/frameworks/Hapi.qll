@@ -196,13 +196,10 @@ module Hapi {
 
     private DataFlow::SourceNode getARouteHandler(DataFlow::TypeBackTracker t) {
       t.start() and
-      result = getRouteHandler().getALocalSource()
+      result = handler.flow().getALocalSource()
       or
       exists(DataFlow::TypeBackTracker t2 | result = getARouteHandler(t2).backtrack(t2, t))
     }
-
-    pragma[noinline]
-    private DataFlow::Node getRouteHandler() { result = handler.flow() }
 
     Expr getRouteHandlerExpr() { result = handler }
 
