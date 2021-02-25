@@ -5,29 +5,33 @@
 
 import javascript
 
-pragma[noinline]
-private predicate execApi(
-  string mod, string fn, int cmdArg, int optionsArg, boolean shell, boolean sync
-) {
-  sync = getSync(fn) and
+private predicate execApi(string mod, string fn, int cmdArg, int optionsArg, boolean shell) {
+  mod = "cross-spawn" and
+  fn = "sync" and
+  cmdArg = 0 and
+  shell = false and
+  optionsArg = -1
+  or
+  mod = "execa" and
+  optionsArg = -1 and
   (
-    mod = "cross-spawn" and
-    fn = "sync" and
-    cmdArg = 0 and
     shell = false and
-    optionsArg = -1
-    or
-    mod = "execa" and
-    optionsArg = -1 and
     (
-      shell = false and
-      fn = ["node", "stdout", "stderr", "sync"]
-      or
-      shell = true and
-      fn = ["command", "commandSync", "shell", "shellSync"]
-    ) and
-    cmdArg = 0
-  )
+      fn = "node" or
+      fn = "stdout" or
+      fn = "stderr" or
+      fn = "sync"
+    )
+    or
+    shell = true and
+    (
+      fn = "command" or
+      fn = "commandSync" or
+      fn = "shell" or
+      fn = "shellSync"
+    )
+  ) and
+  cmdArg = 0
 }
 
 private predicate execApi(string mod, int cmdArg, int optionsArg, boolean shell) {
@@ -57,16 +61,17 @@ private class SystemCommandExecutors extends SystemCommandExecution, DataFlow::I
   SystemCommandExecutors() {
     exists(string mod |
       exists(string fn |
-        execApi(mod, fn, cmdArg, optionsArg, shell, sync) and
-        this = API::moduleImport(mod).getMember(fn).getAnInvocation()
+        execApi(mod, fn, cmdArg, optionsArg, shell) and
+        sync = getSync(fn) and
+        this = API::moduleImport(mod).getMember(fn).getReturn().getAUse()
       )
       or
       execApi(mod, cmdArg, optionsArg, shell) and
       sync = false and
-      this = API::moduleImport(mod).getAnInvocation()
+      this = API::moduleImport(mod).getReturn().getAUse()
     )
     or
-    this = API::moduleImport("foreground-child").getACall() and
+    this = API::moduleImport("foreground-child").getReturn().getAUse() and
     cmdArg = 0 and
     optionsArg = 1 and
     shell = false and
@@ -110,19 +115,19 @@ private class RemoteCommandExecutor extends SystemCommandExecution, DataFlow::In
   int cmdArg;
 
   RemoteCommandExecutor() {
-    this = API::moduleImport("remote-exec").getACall() and
+    this = API::moduleImport("remote-exec").getReturn().getAUse() and
     cmdArg = 1
     or
     exists(API::Node ssh2, API::Node client |
       ssh2 = API::moduleImport("ssh2") and
       client in [ssh2, ssh2.getMember("Client")] and
-      this = client.getInstance().getMember("exec").getACall() and
+      this = client.getInstance().getMember("exec").getReturn().getAUse() and
       cmdArg = 0
     )
     or
     exists(API::Node ssh2stream |
       ssh2stream = API::moduleImport("ssh2-streams").getMember("SSH2Stream") and
-      this = ssh2stream.getInstance().getMember("exec").getACall() and
+      this = ssh2stream.getInstance().getMember("exec").getReturn().getAUse() and
       cmdArg = 1
     )
   }
@@ -137,7 +142,7 @@ private class RemoteCommandExecutor extends SystemCommandExecution, DataFlow::In
 }
 
 private class Opener extends SystemCommandExecution, DataFlow::InvokeNode {
-  Opener() { this = API::moduleImport("opener").getACall() }
+  Opener() { this = API::moduleImport("opener").getReturn().getAUse() }
 
   override DataFlow::Node getACommandArgument() { result = getOptionArgument(1, "command") }
 
