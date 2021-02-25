@@ -372,38 +372,22 @@ DataFlow::SourceNode globalObjectRef() {
   )
   or
   // DOM
-  result = globalVariable("window")
+  result = globalVarRef("window")
   or
   // Node.js
-  result = globalVariable("global")
+  result = globalVarRef("global")
   or
   // DOM and service workers
-  result = globalVariable("self")
+  result = globalVarRef("self")
   or
   // ECMAScript 2020
-  result = globalVariable("globalThis")
+  result = globalVarRef("globalThis")
   or
   // `require("global")`
   result = moduleImport("global")
   or
   // Closure library - based on AST to avoid recursion with Closure library model
-  result = globalVariable("goog").getAPropertyRead("global")
-}
-
-/**
- * Gets a reference to a global variable `name`.
- * For example, if `name` is "foo":
- * ```js
- * foo
- * require('global/foo')
- * ```
- */
-private DataFlow::SourceNode globalVariable(string name) {
-  result.(GlobalVarRefNode).getName() = name
-  or
-  // `require("global/document")` or `require("global/window")`
-  (name = "document" or name = "window") and
-  result = moduleImport("global/" + name)
+  result = globalVarRef("goog").getAPropertyRead("global")
 }
 
 /**
@@ -421,9 +405,13 @@ private DataFlow::SourceNode globalVariable(string name) {
  */
 pragma[nomagic]
 DataFlow::SourceNode globalVarRef(string name) {
-  result = globalVariable(name)
+  result.(GlobalVarRefNode).getName() = name
   or
   result = globalObjectRef().getAPropertyReference(name)
+  or
+  // `require("global/document")` or `require("global/window")`
+  (name = "document" or name = "window") and
+  result = moduleImport("global/" + name)
 }
 
 /**
