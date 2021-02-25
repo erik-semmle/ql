@@ -1305,9 +1305,12 @@ private predicate summarizedHigherOrderCall(
     Function f, DataFlow::InvokeNode outer, DataFlow::InvokeNode inner, int j,
     DataFlow::Node innerArg, DataFlow::SourceNode cbParm, PathSummary oldSummary
   |
+    reachableFromInput(f, outer, arg, innerArg, cfg, oldSummary) and
+    // Only track actual parameter flow.
     // Captured flow does not need to be summarized - it is handled by the local case in `higherOrderCall`.
     not arg = DataFlow::capturedVariableNode(_) and
-    summarizedHigherOrderCallAux(f, outer, arg, innerArg, cfg, oldSummary, cbParm, inner, j, cb)
+    argumentPassing(outer, cb, f, cbParm) and
+    innerArg = inner.getArgument(j)
   |
     // direct higher-order call
     cbParm.flowsTo(inner.getCalleeNode()) and
@@ -1321,21 +1324,6 @@ private predicate summarizedHigherOrderCall(
       summary = oldSummary.append(PathSummary::call()).append(newSummary)
     )
   )
-}
-
-/**
- * @see `summarizedHigherOrderCall`.
- */
-pragma[noinline]
-private predicate summarizedHigherOrderCallAux(
-  Function f, DataFlow::InvokeNode outer, DataFlow::Node arg, DataFlow::Node innerArg,
-  DataFlow::Configuration cfg, PathSummary oldSummary, DataFlow::SourceNode cbParm,
-  DataFlow::InvokeNode inner, int j, DataFlow::Node cb
-) {
-  reachableFromInput(f, outer, arg, innerArg, cfg, oldSummary) and
-  // Only track actual parameter flow.
-  argumentPassing(outer, cb, f, cbParm) and
-  innerArg = inner.getArgument(j)
 }
 
 /**
