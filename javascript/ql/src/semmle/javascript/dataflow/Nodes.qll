@@ -727,7 +727,7 @@ module ModuleImportNode {
  *
  * This predicate can be extended by subclassing `ModuleImportNode::Range`.
  */
-cached
+pragma[noinline]
 ModuleImportNode moduleImport(string path) { result.getPath() = path }
 
 /**
@@ -952,7 +952,7 @@ class ClassNode extends DataFlow::SourceNode {
   /**
    * Gets a dataflow node that refers to this class object.
    */
-  cached
+  pragma[noinline]
   final DataFlow::SourceNode getAClassReference() {
     result = getAClassReference(DataFlow::TypeTracker::end())
   }
@@ -996,7 +996,7 @@ class ClassNode extends DataFlow::SourceNode {
   /**
    * Gets a dataflow node that refers to an instance of this class.
    */
-  cached
+  pragma[noinline]
   final DataFlow::SourceNode getAnInstanceReference() {
     result = getAnInstanceReference(DataFlow::TypeTracker::end())
   }

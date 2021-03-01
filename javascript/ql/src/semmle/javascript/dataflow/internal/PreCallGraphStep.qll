@@ -45,7 +45,7 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from `pred` to `succ`.
    */
-  cached
+  pragma[noinline]
   predicate step(DataFlow::Node pred, DataFlow::Node succ) {
     any(PreCallGraphStep s).step(pred, succ)
   }
@@ -53,7 +53,7 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from `pred` into the `prop` property of `succ`.
    */
-  cached
+  pragma[noinline]
   predicate storeStep(DataFlow::Node pred, DataFlow::SourceNode succ, string prop) {
     any(PreCallGraphStep s).storeStep(pred, succ, prop)
   }
@@ -61,7 +61,7 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from the `prop` property of `pred` to `succ`.
    */
-  cached
+  pragma[noinline]
   predicate loadStep(DataFlow::Node pred, DataFlow::Node succ, string prop) {
     any(PreCallGraphStep s).loadStep(pred, succ, prop)
   }
@@ -69,7 +69,7 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from the `prop` property of `pred` to the same property in `succ`.
    */
-  cached
+  pragma[noinline]
   predicate loadStoreStep(DataFlow::Node pred, DataFlow::SourceNode succ, string prop) {
     any(PreCallGraphStep s).loadStoreStep(pred, succ, prop)
   }

@@ -8,7 +8,7 @@ import semmle.files.FileSystem
  * Returns the `File` matching the given source file name as encoded by the VS
  * Code extension.
  */
-cached
+pragma[noinline]
 File getFileBySourceArchiveName(string name) {
   // The name provided for a file in the source archive by the VS Code extension
   // has some differences from the absolute path in the database:

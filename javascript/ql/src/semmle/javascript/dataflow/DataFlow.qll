@@ -174,7 +174,7 @@ module DataFlow {
      * A node with an immediate predecessor can usually only have the value that flows
      * into its from its immediate predecessor.
      */
-    cached
+    pragma[noinline]
     DataFlow::Node getImmediatePredecessor() {
       lvalueFlowStep(result, this) and
       not lvalueDefaultFlowStep(_, this)
@@ -1487,7 +1487,7 @@ module DataFlow {
   /**
    * Holds if data can flow from `pred` to `succ` in one local step.
    */
-  cached
+  pragma[noinline]
   predicate localFlowStep(Node pred, Node succ) {
     // flow from RHS into LHS
     lvalueFlowStep(pred, succ)

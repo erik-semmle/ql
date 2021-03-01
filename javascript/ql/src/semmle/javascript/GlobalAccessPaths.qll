@@ -137,7 +137,7 @@ module AccessPath {
    * }
    * ```
    */
-  cached
+  pragma[noinline]
   private string fromReference(DataFlow::Node node, Root root) {
     root = node and
     not root.isGlobal() and
@@ -248,7 +248,7 @@ module AccessPath {
    * }
    * ```
    */
-  cached
+  pragma[noinline]
   private string fromRhs(DataFlow::Node node, Root root) {
     exists(DataFlow::PropWrite write, string baseName |
       node = write.getRhs() and
@@ -429,7 +429,6 @@ module AccessPath {
     /**
      * A classification of acccess paths into reads and writes.
      */
-    cached
     private newtype AccessPathKind =
       AccessPathRead() or
       AccessPathWrite()
@@ -537,7 +536,7 @@ module AccessPath {
      *
      * Holds for `read` if there exists a previous write to the same access-path that dominates this read.
      */
-    cached
+    pragma[noinline]
     predicate hasDominatingWrite(DataFlow::PropRead read) {
       // within the same basic block.
       exists(ReachableBasicBlock bb, Root root, string path, int ranking |

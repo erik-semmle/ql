@@ -195,14 +195,13 @@ class SourceNode extends DataFlow::Node {
 /**
  * Cached predicates used by the member predicates in `SourceNode`.
  */
-cached
 private module Cached {
   /**
    * Holds if `source` is a `SourceNode` that can reach `sink` via local flow steps.
    *
    * The slightly backwards parametering ordering is to force correct indexing.
    */
-  cached
+  pragma[noinline]
   predicate hasLocalSource(DataFlow::Node sink, DataFlow::Node source) {
     // Declaring `source` to be a `SourceNode` currently causes a redundant check in the
     // recursive case, so instead we check it explicitly here.
@@ -218,7 +217,7 @@ private module Cached {
   /**
    * Holds if `base` flows to the base of `ref` and `ref` has property name `prop`.
    */
-  cached
+  pragma[noinline]
   predicate namedPropRef(DataFlow::SourceNode base, string prop, DataFlow::PropRef ref) {
     hasLocalSource(ref.getBase(), base) and
     ref.getPropertyName() = prop
@@ -227,7 +226,7 @@ private module Cached {
   /**
    * Holds if `base` flows to the base of `ref` and `ref` has no known property name.
    */
-  cached
+  pragma[noinline]
   predicate dynamicPropRef(DataFlow::SourceNode base, DataFlow::PropRef ref) {
     hasLocalSource(ref.getBase(), base) and
     not exists(ref.getPropertyName())
@@ -236,7 +235,7 @@ private module Cached {
   /**
    * Holds if `func` flows to the callee of `invoke`.
    */
-  cached
+  pragma[noinline]
   predicate invocation(DataFlow::SourceNode func, DataFlow::InvokeNode invoke) {
     hasLocalSource(invoke.getCalleeNode(), func)
   }
@@ -244,7 +243,7 @@ private module Cached {
   /**
    * Holds if `invoke` has the syntactic shape of a method call.
    */
-  cached
+  pragma[noinline]
   predicate isSyntacticMethodCall(DataFlow::CallNode call) {
     call.getCalleeNode().asExpr().getUnderlyingReference() instanceof PropAccess
   }
@@ -257,7 +256,6 @@ module SourceNode {
    * Subclass this class to introduce new kinds of source nodes. If you want to refine
    * the definition of existing source nodes, subclass `DataFlow::SourceNode` instead.
    */
-  cached
   abstract class Range extends DataFlow::Node { }
 
   /**

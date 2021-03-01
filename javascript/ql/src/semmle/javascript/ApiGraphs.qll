@@ -359,9 +359,7 @@ module API {
    * course, unavoidable). We pick as canonical the alphabetically least access path with
    * shortest length.
    */
-  cached
   private module Impl {
-    cached
     newtype TApiNode =
       MkRoot() or
       MkModuleDef(string m) { exists(MkModuleExport(m)) } or
@@ -478,7 +476,7 @@ module API {
      * Holds if `rhs` is the right-hand side of a definition of a node that should have an
      * incoming edge from `base` labeled `lbl` in the API graph.
      */
-    cached
+    pragma[noinline]
     predicate rhs(TApiNode base, string lbl, DataFlow::Node rhs) {
       hasSemantics(rhs) and
       (
@@ -572,7 +570,7 @@ module API {
     /**
      * Holds if `rhs` is the right-hand side of a definition of node `nd`.
      */
-    cached
+    pragma[noinline]
     predicate rhs(TApiNode nd, DataFlow::Node rhs) {
       exists(string m | nd = MkModuleExport(m) | exports(m, rhs))
       or
@@ -588,7 +586,7 @@ module API {
      * Holds if `ref` is a use of a node that should have an incoming edge from `base` labeled
      * `lbl` in the API graph.
      */
-    cached
+    pragma[noinline]
     predicate use(TApiNode base, string lbl, DataFlow::Node ref) {
       hasSemantics(ref) and
       (
@@ -650,7 +648,7 @@ module API {
     /**
      * Holds if `ref` is a use of node `nd`.
      */
-    cached
+    pragma[noinline]
     predicate use(TApiNode nd, DataFlow::Node ref) {
       exists(string m, Module mod | nd = MkModuleDef(m) and mod = importableModule(m) |
         ref.(ModuleAsSourceNode).getModule() = mod
@@ -770,7 +768,7 @@ module API {
     /**
      * Gets a node that is inter-procedurally reachable from `nd`, which is a use of some node.
      */
-    cached
+    pragma[noinline]
     DataFlow::SourceNode trackUseNode(DataFlow::SourceNode nd) {
       result = trackUseNode(nd, false, 0)
     }
@@ -812,7 +810,7 @@ module API {
     /**
      * Gets a node that inter-procedurally flows into `nd`, which is a definition of some node.
      */
-    cached
+    pragma[noinline]
     DataFlow::SourceNode trackDefNode(DataFlow::Node nd) {
       result = trackDefNode(nd, DataFlow::TypeBackTracker::end())
     }
@@ -842,7 +840,7 @@ module API {
     /**
      * Holds if there is an edge from `pred` to `succ` in the API graph that is labeled with `lbl`.
      */
-    cached
+    pragma[noinline]
     predicate edge(TApiNode pred, string lbl, TApiNode succ) {
       exists(string m |
         pred = MkRoot() and
@@ -906,7 +904,7 @@ module API {
     private predicate edge(TApiNode pred, TApiNode succ) { edge(pred, _, succ) }
 
     /** Gets the shortest distance from the root to `nd` in the API graph. */
-    cached
+    pragma[noinline]
     int distanceFromRoot(TApiNode nd) = shortestDistances(MkRoot/0, edge/2)(_, nd, result)
   }
 

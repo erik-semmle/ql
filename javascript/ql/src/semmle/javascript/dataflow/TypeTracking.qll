@@ -49,7 +49,7 @@ class TypeTracker extends TTypeTracker {
   TypeTracker() { this = MkTypeTracker(hasCall, prop) }
 
   /** Gets the summary resulting from appending `step` to this type-tracking summary. */
-  cached
+  pragma[noinline]
   TypeTracker append(StepSummary step) {
     step = LevelStep() and result = this
     or

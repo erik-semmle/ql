@@ -7,7 +7,7 @@
 
 private import javascript
 
-cached
+pragma[noinline]
 private StmtContainer getStmtContainer(NodeInStmtContainer node) {
   expr_containers(node, result)
   or

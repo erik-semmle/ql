@@ -108,7 +108,7 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
   int getIntValue() { none() }
 
   /** Gets the constant string value this expression evaluates to, if any. */
-  cached
+  pragma[noinline]
   string getStringValue() { result = getStringValue(this) }
 
   /** Holds if this expression is impure, that is, its evaluation could have side effects. */
@@ -255,7 +255,7 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
   }
 }
 
-cached
+pragma[noinline]
 private DataFlow::Node getCatchParameterFromStmt(Stmt stmt) {
   result =
     DataFlow::parameterNode(stmt.getEnclosingTryCatchStmt().getACatchClause().getAParameter())

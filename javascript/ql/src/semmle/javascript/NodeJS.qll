@@ -205,7 +205,7 @@ private predicate moduleInFile(Module m, File f) { m.getFile() = f }
 /**
  * Holds if `nd` may refer to `require`, either directly or modulo local data flow.
  */
-cached
+pragma[noinline]
 private predicate isRequire(DataFlow::Node nd) {
   nd.asExpr() = any(RequireVariable req).getAnAccess() and
   // `mjs` files explicitly disallow `require`

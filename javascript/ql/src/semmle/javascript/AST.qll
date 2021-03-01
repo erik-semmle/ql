@@ -74,7 +74,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
   }
 
   /** Gets the toplevel syntactic unit to which this element belongs. */
-  cached
+  pragma[noinline]
   TopLevel getTopLevel() { result = getParent().getTopLevel() }
 
   /**
@@ -118,7 +118,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
   int getNumChildStmt() { result = count(getAChildStmt()) }
 
   /** Gets the parent node of this node, if any. */
-  cached
+  pragma[noinline]
   ASTNode getParent() { this = result.getAChild() }
 
   /** Gets the first control flow node belonging to this syntactic entity. */
@@ -133,7 +133,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
    * Since the overwhelming majority of ambient nodes are `TypeExpr` or inside `.d.ts` files,
    * we avoid caching them.
    */
-  cached
+  pragma[noinline]
   private predicate isAmbientInternal() {
     getParent().isAmbientInternal()
     or
@@ -185,7 +185,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
 /**
  * Holds if the given file is a `.d.ts` file.
  */
-cached
+pragma[noinline]
 private predicate isAmbientTopLevel(TopLevel tl) { tl.getFile().getBaseName().matches("%.d.ts") }
 
 /**
@@ -371,7 +371,7 @@ class ExprOrStmt extends @expr_or_stmt, ControlFlowNode, ASTNode { }
  */
 class StmtContainer extends @stmt_container, ASTNode {
   /** Gets the innermost enclosing container in which this container is nested. */
-  cached
+  pragma[noinline]
   StmtContainer getEnclosingContainer() { none() }
 
   /**

@@ -82,7 +82,6 @@ private import semmle.javascript.dataflow.Refinements
  */
 class SsaSourceVariable extends LocalVariable { }
 
-cached
 private module Internal {
   /**
    * A data type representing SSA definitions.
@@ -105,7 +104,6 @@ private module Internal {
    * unreachable code has no SSA definitions associated with it, and neither
    * have dead assignments (that is, assignments whose value is never read).
    */
-  cached
   newtype TSsaDefinition =
     TExplicitDef(ReachableBasicBlock bb, int i, VarDef d, SsaSourceVariable v) {
       bb.defAt(i, v, d) and
@@ -205,7 +203,6 @@ private module Internal {
   /**
    * A classification of variable references into reads and writes.
    */
-  cached
   newtype RefKind =
     Read() or
     Write()
@@ -352,7 +349,7 @@ private module Internal {
   /**
    * Gets an SSA definition of `v` that reaches the end of basic block `bb`.
    */
-  cached
+  pragma[noinline]
   SsaDefinition getDefReachingEndOf(ReachableBasicBlock bb, SsaSourceVariable v) {
     exists(int lastRef | lastRef = max(int i | ssaRef(bb, i, v, _)) |
       result = getLocalDefinition(bb, lastRef, v)
@@ -377,7 +374,7 @@ private module Internal {
    * Gets the unique SSA definition of `v` whose value reaches the `i`th node of `bb`,
    * which is a use of `v`.
    */
-  cached
+  pragma[noinline]
   SsaDefinition getDefinition(ReachableBasicBlock bb, int i, SsaSourceVariable v) {
     result = getLocalDefinition(bb, i, v)
     or

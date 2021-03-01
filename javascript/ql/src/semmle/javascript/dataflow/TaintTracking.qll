@@ -214,13 +214,12 @@ module TaintTracking {
    * of the standard library. Override `Configuration::isAdditionalTaintStep`
    * for analysis-specific taint steps.
    */
-  cached
   abstract class AdditionalTaintStep extends DataFlow::Node {
     /**
      * Holds if `pred` &rarr; `succ` should be considered a taint-propagating
      * data flow edge.
      */
-    cached
+    pragma[noinline]
     abstract predicate step(DataFlow::Node pred, DataFlow::Node succ);
   }
 

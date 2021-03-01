@@ -6,16 +6,15 @@ private import javascript
 private import semmle.javascript.dataflow.internal.StepSummary
 private import semmle.javascript.dataflow.internal.PreCallGraphStep
 
-cached
 module CallGraph {
   /** Gets the function referenced by `node`, as determined by the type inference. */
-  cached
+  pragma[noinline]
   Function getAFunctionValue(AnalyzedNode node) {
     result = node.getAValue().(AbstractCallable).getFunction()
   }
 
   /** Holds if the type inferred for `node` is indefinite due to global flow. */
-  cached
+  pragma[noinline]
   predicate isIndefiniteGlobal(AnalyzedNode node) {
     node.analyze().getAValue().isIndefinite("global")
   }
@@ -74,7 +73,7 @@ module CallGraph {
     )
   }
 
-  cached
+  pragma[noinline]
   private predicate locallyReturnedFunction(
     DataFlow::FunctionNode outer, DataFlow::FunctionNode inner
   ) {
@@ -84,7 +83,7 @@ module CallGraph {
   /**
    * Gets a data flow node that refers to the given function.
    */
-  cached
+  pragma[noinline]
   DataFlow::SourceNode getAFunctionReference(DataFlow::FunctionNode function, int imprecision) {
     result = getAFunctionReference(function, imprecision, DataFlow::TypeTracker::end())
   }
@@ -122,7 +121,7 @@ module CallGraph {
    * Gets a data flow node that refers to the result of the given partial function invocation,
    * with `function` as the underlying function.
    */
-  cached
+  pragma[noinline]
   DataFlow::SourceNode getABoundFunctionReference(
     DataFlow::FunctionNode function, int boundArgs, boolean contextDependent
   ) {
@@ -158,7 +157,7 @@ module CallGraph {
    *
    * Does not include custom call edges.
    */
-  cached
+  pragma[noinline]
   DataFlow::FunctionNode getACallee(DataFlow::InvokeNode node, int imprecision) {
     getAFunctionReference(result, imprecision).flowsTo(node.getCalleeNode())
     or

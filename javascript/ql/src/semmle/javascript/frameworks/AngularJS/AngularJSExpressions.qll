@@ -747,7 +747,6 @@ private module Parser {
   /**
    * NgAst node types. Associated with a range of tokens.
    */
-  cached
   newtype TNode =
     TNgAst(NgToken start, NgToken end, boolean oneTime, NgExprStmt stmt) {
       not exists(start.pre()) and

@@ -35,7 +35,6 @@ private predicate entryBB(BasicBlock bb) { bb.getFirstNode() instanceof ControlF
 /** Holds if `bb` is an exit basic block. */
 private predicate exitBB(BasicBlock bb) { bb.getLastNode() instanceof ControlFlowExitNode }
 
-cached
 private module Internal {
   /**
    * Holds if `succ` is a control flow successor of `nd` within the same basic block.
@@ -51,19 +50,19 @@ private module Internal {
    * In other words, `i` is the shortest distance from a node `bb`
    * that starts a basic block to `nd` along the `intraBBSucc` relation.
    */
-  cached
+  pragma[noinline]
   predicate bbIndex(BasicBlock bb, ControlFlowNode nd, int i) =
     shortestDistances(startsBB/1, intraBBSucc/2)(bb, nd, i)
 
-  cached
+  pragma[noinline]
   int bbLength(BasicBlock bb) { result = strictcount(ControlFlowNode nd | bbIndex(bb, nd, _)) }
 
-  cached
+  pragma[noinline]
   predicate useAt(BasicBlock bb, int i, Variable v, VarUse u) {
     v = u.getVariable() and bbIndex(bb, u, i)
   }
 
-  cached
+  pragma[noinline]
   predicate defAt(BasicBlock bb, int i, Variable v, VarDef d) {
     exists(VarRef lhs |
       lhs = d.getTarget().(BindingPattern).getABindingVarRef() and
@@ -89,7 +88,7 @@ private module Internal {
     )
   }
 
-  cached
+  pragma[noinline]
   predicate reachableBB(BasicBlock bb) {
     entryBB(bb)
     or
@@ -100,12 +99,12 @@ private module Internal {
 private import Internal
 
 /** Holds if `dom` is an immediate dominator of `bb`. */
-cached
+pragma[noinline]
 private predicate bbIDominates(BasicBlock dom, BasicBlock bb) =
   idominance(entryBB/1, succBB/2)(_, dom, bb)
 
 /** Holds if `dom` is an immediate post-dominator of `bb`. */
-cached
+pragma[noinline]
 private predicate bbIPostDominates(BasicBlock dom, BasicBlock bb) =
   idominance(exitBB/1, predBB/2)(_, dom, bb)
 
@@ -303,7 +302,7 @@ class ReachableBasicBlock extends BasicBlock {
   /**
    * Holds if this basic block strictly dominates `bb`.
    */
-  cached
+  pragma[noinline]
   predicate strictlyDominates(ReachableBasicBlock bb) { bbIDominates+(this, bb) }
 
   /**
@@ -319,7 +318,7 @@ class ReachableBasicBlock extends BasicBlock {
   /**
    * Holds if this basic block strictly post-dominates `bb`.
    */
-  cached
+  pragma[noinline]
   predicate strictlyPostDominates(ReachableBasicBlock bb) { bbIPostDominates+(this, bb) }
 
   /**

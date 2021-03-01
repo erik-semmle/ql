@@ -75,7 +75,7 @@ module StepSummary {
   /**
    * INTERNAL: Use `SourceNode.track()` or `SourceNode.backtrack()` instead.
    */
-  cached
+  pragma[noinline]
   predicate step(DataFlow::SourceNode pred, DataFlow::SourceNode succ, StepSummary summary) {
     exists(DataFlow::Node mid | pred.flowsTo(mid) | smallstep(mid, succ, summary))
   }

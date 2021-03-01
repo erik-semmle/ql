@@ -48,7 +48,6 @@ private newtype TPortal =
 /**
  * A portal, that is, an interface point between different npm packages.
  */
-cached
 class Portal extends TPortal {
   /**
    * Gets an exit node for this portal, that is, a node from which data
@@ -56,7 +55,7 @@ class Portal extends TPortal {
    * indicates whether data read from this node may come from a different
    * package.
    */
-  cached
+  pragma[noinline]
   abstract DataFlow::SourceNode getAnExitNode(boolean isRemote);
 
   /**
@@ -64,13 +63,13 @@ class Portal extends TPortal {
    * enters the portal. The flag `escapes` indicates whether data written to
    * the node may escape to a different package.
    */
-  cached
+  pragma[noinline]
   abstract DataFlow::Node getAnEntryNode(boolean escapes);
 
   /**
    * Gets the member portal with the given `name` of this portal, if any.
    */
-  cached
+  pragma[noinline]
   MemberPortal getMember(string name) {
     result.getName() = name and
     result.getBasePortal() = this
@@ -79,13 +78,13 @@ class Portal extends TPortal {
   /**
    * Gets the instance portal of this portal, if any.
    */
-  cached
+  pragma[noinline]
   InstancePortal getInstance() { result.getBasePortal() = this }
 
   /**
    * Gets the portal of parameter `idx` of this portal, if any.
    */
-  cached
+  pragma[noinline]
   ParameterPortal getParameter(int idx) {
     result.getIndex() = idx and
     result.getBasePortal() = this
@@ -94,7 +93,7 @@ class Portal extends TPortal {
   /**
    * Gets the return value portal of this portal, if any.
    */
-  cached
+  pragma[noinline]
   ReturnPortal getReturn() { result.getBasePortal() = this }
 
   /**
@@ -103,7 +102,7 @@ class Portal extends TPortal {
    * The `0`th base portal is the portal itself, the `n+1`st base portal is the `n`th base portal
    * of the portal `p` of which this is a member, instance, parameter, or return portal.
    */
-  cached
+  pragma[noinline]
   Portal getBasePortal(int i) {
     i = 0 and
     result = this
@@ -117,7 +116,7 @@ class Portal extends TPortal {
    * Different portals must have different `toString`s, so the result of
    * this predicate can be used to uniquely identify a portal.
    */
-  cached
+  pragma[noinline]
   abstract string toString();
 
   /**
@@ -126,7 +125,7 @@ class Portal extends TPortal {
    * The constructor depth of this portal, used to limit the number of
    * portals.
    */
-  cached
+  pragma[noinline]
   abstract int depth();
 }
 

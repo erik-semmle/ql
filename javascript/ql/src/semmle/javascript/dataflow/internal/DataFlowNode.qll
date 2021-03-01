@@ -9,7 +9,6 @@ private import javascript
 /**
  * The raw data type underlying `DataFlow::Node`.
  */
-cached
 newtype TNode =
   TValueNode(AST::ValueNode nd) or
   TSsaDefNode(SsaDefinition d) or

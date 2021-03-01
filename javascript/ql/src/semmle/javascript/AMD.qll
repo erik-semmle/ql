@@ -297,7 +297,7 @@ private class AmdDependencyImport extends Import {
  * ```
  */
 class AmdModule extends Module {
-  cached
+  pragma[noinline]
   AmdModule() { exists(unique(AmdModuleDefinition def | amdModuleTopLevel(def, this))) }
 
   /** Gets the definition of this module. */
