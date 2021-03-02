@@ -437,7 +437,7 @@ module DOM {
         or
         this = DataFlow::globalVarRef("location")
         or
-        this = any(DataFlow::Node n | n.hasUnderlyingType("Location")).getALocalSource() and
+        this = locationTypedSource() and
         not this = nonFirstLocationType(DataFlow::TypeTracker::end()) // only start from the source, and not the locations we can type-track to.
       }
     }
@@ -447,13 +447,20 @@ module DOM {
    * Get a reference to a node of type `Location` that has gone through at least 1 type-tracking step.
    */
   private DataFlow::SourceNode nonFirstLocationType(DataFlow::TypeTracker t) {
-    // One step inlined in the beginning.
-    exists(DataFlow::TypeTracker t2 |
-      result =
-        any(DataFlow::Node n | n.hasUnderlyingType("Location")).getALocalSource().track(t2, t)
+    exists(DataFlow::TypeTracker t2, DataFlow::SourceNode prev |
+      prev = nonFirstLocationType(t2)
+      or
+      prev = locationTypedSource() and t2.start()
+    |
+      result = prev.track(t2, t)
     )
-    or
-    exists(DataFlow::TypeTracker t2 | result = nonFirstLocationType(t2).track(t2, t))
+  }
+
+  /**
+   * Gets a reference to a node of type `Location`.
+   */
+  private DataFlow::SourceNode locationTypedSource() {
+    result = any(DataFlow::Node n | n.hasUnderlyingType("Location")).getALocalSource()
   }
 
   /** Gets a data flow node that directly refers to a DOM `location` object. */
