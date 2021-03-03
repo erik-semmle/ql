@@ -109,7 +109,7 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
 
   /** Gets the constant string value this expression evaluates to, if any. */
   cached
-  string getStringValue() { result = getStringValue(this) }
+  string getStringValue() { ExtendedStaging::ast() and result = getStringValue(this) }
 
   /** Holds if this expression is impure, that is, its evaluation could have side effects. */
   predicate isImpure() { any() }
@@ -255,8 +255,12 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
   }
 }
 
+/**
+ * Gets the catch parameter from an enclosing try-catch statement.
+ */
 cached
-private DataFlow::Node getCatchParameterFromStmt(Stmt stmt) {
+DataFlow::Node getCatchParameterFromStmt(Stmt stmt) {
+  ExtendedStaging::dataflow() and
   result =
     DataFlow::parameterNode(stmt.getEnclosingTryCatchStmt().getACatchClause().getAParameter())
 }
