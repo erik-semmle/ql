@@ -9,6 +9,7 @@ private import javascript
 
 cached
 private StmtContainer getStmtContainer(NodeInStmtContainer node) {
+  ExtendedStaging::ast() and
   expr_containers(node, result)
   or
   stmt_containers(node, result)
