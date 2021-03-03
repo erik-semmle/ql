@@ -75,7 +75,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
 
   /** Gets the toplevel syntactic unit to which this element belongs. */
   cached
-  TopLevel getTopLevel() { result = getParent().getTopLevel() }
+  TopLevel getTopLevel() { ExtendedStaging::ast() and result = getParent().getTopLevel() }
 
   /**
    * Gets the `i`th child node of this node.
@@ -119,7 +119,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
 
   /** Gets the parent node of this node, if any. */
   cached
-  ASTNode getParent() { this = result.getAChild() }
+  ASTNode getParent() { ExtendedStaging::ast() and this = result.getAChild() }
 
   /** Gets the first control flow node belonging to this syntactic entity. */
   ControlFlowNode getFirstControlFlowNode() { result = this }
@@ -186,7 +186,9 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
  * Holds if the given file is a `.d.ts` file.
  */
 cached
-private predicate isAmbientTopLevel(TopLevel tl) { tl.getFile().getBaseName().matches("%.d.ts") }
+private predicate isAmbientTopLevel(TopLevel tl) {
+  ExtendedStaging::ast() and tl.getFile().getBaseName().matches("%.d.ts")
+}
 
 /**
  * A toplevel syntactic unit; that is, a stand-alone script, an inline script
@@ -372,7 +374,7 @@ class ExprOrStmt extends @expr_or_stmt, ControlFlowNode, ASTNode { }
 class StmtContainer extends @stmt_container, ASTNode {
   /** Gets the innermost enclosing container in which this container is nested. */
   cached
-  StmtContainer getEnclosingContainer() { none() }
+  StmtContainer getEnclosingContainer() { ExtendedStaging::ast() and none() }
 
   /**
    * Gets the innermost enclosing function or top-level,

@@ -110,7 +110,9 @@ private class ExternalRemoteFlowSourceSpecEntryPoint extends API::EntryPoint {
 private class ExternalRemoteFlowSource extends RemoteFlowSource {
   RemoteFlowSourceAccessPath ap;
 
-  ExternalRemoteFlowSource() { this = ap.resolve().getAnImmediateUse() }
+  ExternalRemoteFlowSource() {
+    ExtendedStaging::taint() and this = ap.resolve().getAnImmediateUse()
+  }
 
   override string getSourceType() { result = ap.getSourceType() }
 }
