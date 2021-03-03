@@ -62,10 +62,14 @@ private class RemoteFlowSourceAccessPath extends JSONString {
     exists(string raw | raw = this.getValue().splitAt(".", i + 1) |
       i = 0 and
       result = "ExternalRemoteFlowSourceSpec " + raw
-      or
-      i > 0 and
-      result = API::EdgeLabel::member(raw)
-    )
+      /*
+       * or
+       *      i > 0 and
+       *      result = API::EdgeLabel::member(raw)
+       */
+
+      // Broken!
+      )
   }
 
   /** Gets the index of the last component of this access path. */
@@ -80,7 +84,7 @@ private class RemoteFlowSourceAccessPath extends JSONString {
     i = -1 and
     result = API::root()
     or
-    result = resolveUpTo(i - 1).getASuccessor(getComponent(i))
+    result = resolveUpTo(i - 1).getMember(getComponent(i)) // TODO: This is broken now.
   }
 
   /** Gets the API node to which this access path resolves. */
