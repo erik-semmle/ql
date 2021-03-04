@@ -108,12 +108,21 @@ module ExtendedStaging {
    */
   cached
   module Ast {
+    /**
+     * Always holds. Adds a dependency to the ast stage.
+     */
     cached
     predicate backref() { ast() }
 
+    /**
+     * Always holds. Calling this adds a dependency to the ast stage.
+     */
     cached
     predicate isAmbientInternal() { 1 = 1 }
 
+    /**
+     * Adds a dependency to the `isAmbientInternal` predicate, such that it is grouped into the ast stage.
+     */
     cached
     predicate isAmbientInternalBackref() { any(ASTNode node).isAmbientInternal() }
   }
