@@ -134,7 +134,8 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
    * we avoid caching them.
    */
   cached
-  private predicate isAmbientInternal() {
+  predicate isAmbientInternal() {
+    ExtendedStaging::Ast::isAmbientInternal() and
     getParent().isAmbientInternal()
     or
     not isAmbientTopLevel(getTopLevel()) and

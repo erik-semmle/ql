@@ -71,9 +71,8 @@ module ExtendedStaging {
    *   AST::isAmbientTopLevel
    * substage 7:
    *   Expr::Expr::getStringValue // maybe doesn't belong here?
-   *
-   * `AST::ASTNode::isAmbientInternal` could also fit into this stage.
-   * But there exists a negative dependency from `isAmbientInternal`, and it is therefore not possible to add that predicate in this extended stage.
+   * substage 8:
+   *   AST::ASTNode::isAmbientInternal
    */
   predicate ast() {
     1 = 1
@@ -93,6 +92,30 @@ module ExtendedStaging {
     exists(any(NodeInStmtContainer n).getContainer())
     or
     exists(any(Expr e).getStringValue())
+    or
+    Ast::backref()
+  }
+
+  /**
+   * A cached module for including `cached` predicates into the ast stage,
+   * where those predicates have negative edges to the other predicates in the stage.
+   *
+   * By having a `cached` module we can group stages together,
+   * without having the predicates depend recursively on each other.
+   * (The predicates referenced in the module depend negatively on the other predicates in the `ast` extended stage.)
+   *
+   * These predicates are visible at runtime.
+   */
+  cached
+  module Ast {
+    cached
+    predicate backref() { ast() }
+
+    cached
+    predicate isAmbientInternal() { 1 = 1 }
+
+    cached
+    predicate isAmbientInternalBackref() { any(ASTNode node).isAmbientInternal() }
   }
 
   /**
@@ -161,8 +184,8 @@ module ExtendedStaging {
    *   GlobalAccessPaths::AccessPath::fromReference
    *   GlobalAccessPaths::AccessPath::fromRhs
    *
-   * `Nodes::moduleImport` and `Modules::Import::getImportedModule` would also be a good fit into this extended stage.
-   * But they have negative dependencies on the predicates in the above substages, so it is not possible to add those stages into this extended stage.
+   * `Modules::Import::getImportedModule` and `Nodes::moduleImport` would also be nice here.
+   * But including those trips the BDD limit.
    */
   predicate typetracking() {
     1 = 1
