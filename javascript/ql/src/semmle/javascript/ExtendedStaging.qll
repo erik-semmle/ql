@@ -171,6 +171,37 @@ module ExtendedStaging {
   }
 
   /**
+   * The `imports` extended stage.
+   * Consists of 2 substages (as of writing this).
+   *
+   * substage 1:
+   *   Modules::Import::getImportedModule
+   * substage 2:
+   *   Nodes::moduleImport
+   *
+   * Implemented as a cached module as there is a negative dependency between the predicates.
+   *
+   * It would have been preferable to include these predicates in the dataflow or typetracking stage.
+   * But that trips the BDD limit.
+   */
+  cached
+  module Imports {
+    cached
+    predicate ensureStaging() {
+      1 = 1
+      or
+      not dataflow()
+    }
+
+    cached
+    predicate backrefs() {
+      exists(any(Import i).getImportedModule())
+      or
+      exists(DataFlow::moduleImport(_))
+    }
+  }
+
+  /**
    * The `typetracking` extended stage.
    * Consists of 2 substages (as of writing this).
    *
@@ -192,16 +223,13 @@ module ExtendedStaging {
    *   TypeInference::AnalyzedNode::getAValue
    *   GlobalAccessPaths::AccessPath::fromReference
    *   GlobalAccessPaths::AccessPath::fromRhs
-   *
-   * `Modules::Import::getImportedModule` and `Nodes::moduleImport` would also be nice here.
-   * But including those trips the BDD limit.
    */
   predicate typetracking() {
     1 = 1
     or
     typetrackingSubstages()
     or
-    not dataflow()
+    not Imports::backrefs()
   }
 
   private predicate typetrackingSubstages() {
