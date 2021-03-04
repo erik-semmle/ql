@@ -374,7 +374,7 @@ class ExprOrStmt extends @expr_or_stmt, ControlFlowNode, ASTNode { }
 class StmtContainer extends @stmt_container, ASTNode {
   /** Gets the innermost enclosing container in which this container is nested. */
   cached
-  StmtContainer getEnclosingContainer() { ExtendedStaging::ast() and none() }
+  StmtContainer getEnclosingContainer() { none() }
 
   /**
    * Gets the innermost enclosing function or top-level,
