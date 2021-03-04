@@ -111,7 +111,7 @@ private class ExternalRemoteFlowSource extends RemoteFlowSource {
   RemoteFlowSourceAccessPath ap;
 
   ExternalRemoteFlowSource() {
-    ExtendedStaging::taint() and this = ap.resolve().getAnImmediateUse()
+    ExtendedStaging::TheStage::ref() and this = ap.resolve().getAnImmediateUse()
   }
 
   override string getSourceType() { result = ap.getSourceType() }

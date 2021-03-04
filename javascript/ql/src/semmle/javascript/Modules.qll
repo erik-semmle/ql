@@ -239,7 +239,6 @@ abstract class Import extends ASTNode {
    */
   cached
   Module getImportedModule() {
-    ExtendedStaging::Imports::ensureStaging() and
     if exists(resolveExternsImport())
     then result = resolveExternsImport()
     else (

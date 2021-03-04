@@ -75,7 +75,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
 
   /** Gets the toplevel syntactic unit to which this element belongs. */
   cached
-  TopLevel getTopLevel() { ExtendedStaging::ast() and result = getParent().getTopLevel() }
+  TopLevel getTopLevel() { ExtendedStaging::TheStage::ref() and result = getParent().getTopLevel() }
 
   /**
    * Gets the `i`th child node of this node.
@@ -119,7 +119,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
 
   /** Gets the parent node of this node, if any. */
   cached
-  ASTNode getParent() { ExtendedStaging::ast() and this = result.getAChild() }
+  ASTNode getParent() { ExtendedStaging::TheStage::ref() and this = result.getAChild() }
 
   /** Gets the first control flow node belonging to this syntactic entity. */
   ControlFlowNode getFirstControlFlowNode() { result = this }
@@ -135,7 +135,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
    */
   cached
   predicate isAmbientInternal() {
-    ExtendedStaging::Ast::isAmbientInternal() and
+    ExtendedStaging::TheStage::ref() and
     getParent().isAmbientInternal()
     or
     not isAmbientTopLevel(getTopLevel()) and
@@ -188,7 +188,7 @@ class ASTNode extends @ast_node, NodeInStmtContainer {
  */
 cached
 private predicate isAmbientTopLevel(TopLevel tl) {
-  ExtendedStaging::ast() and tl.getFile().getBaseName().matches("%.d.ts")
+  ExtendedStaging::TheStage::ref() and tl.getFile().getBaseName().matches("%.d.ts")
 }
 
 /**

@@ -51,7 +51,7 @@ class TypeTracker extends TTypeTracker {
   /** Gets the summary resulting from appending `step` to this type-tracking summary. */
   cached
   TypeTracker append(StepSummary step) {
-    ExtendedStaging::typetracking() and
+    ExtendedStaging::TheStage::ref() and
     step = LevelStep() and
     result = this
     or
@@ -218,7 +218,7 @@ class TypeBackTracker extends TTypeBackTracker {
   /** Gets the summary resulting from prepending `step` to this type-tracking summary. */
   cached
   TypeBackTracker prepend(StepSummary step) {
-    ExtendedStaging::typetracking() and
+    ExtendedStaging::TheStage::ref() and
     step = LevelStep() and
     result = this
     or
