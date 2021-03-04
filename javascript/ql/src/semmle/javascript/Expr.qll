@@ -810,7 +810,9 @@ class FunctionExpr extends @function_expr, Expr, Function {
   /** Gets the statement in which this function expression appears. */
   override Stmt getEnclosingStmt() { result = Expr.super.getEnclosingStmt() }
 
-  override StmtContainer getEnclosingContainer() { result = Expr.super.getContainer() }
+  override StmtContainer getEnclosingContainer() {
+    ExtendedStaging::ast() and result = Expr.super.getContainer()
+  }
 
   override predicate isImpure() { none() }
 
