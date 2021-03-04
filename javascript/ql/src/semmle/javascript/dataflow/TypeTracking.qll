@@ -51,7 +51,9 @@ class TypeTracker extends TTypeTracker {
   /** Gets the summary resulting from appending `step` to this type-tracking summary. */
   cached
   TypeTracker append(StepSummary step) {
-    step = LevelStep() and result = this
+    ExtendedStaging::typetracking() and
+    step = LevelStep() and
+    result = this
     or
     exists(string toProp | step = LoadStoreStep(prop, toProp) |
       result = MkTypeTracker(hasCall, toProp)
@@ -216,7 +218,9 @@ class TypeBackTracker extends TTypeBackTracker {
   /** Gets the summary resulting from prepending `step` to this type-tracking summary. */
   cached
   TypeBackTracker prepend(StepSummary step) {
-    step = LevelStep() and result = this
+    ExtendedStaging::typetracking() and
+    step = LevelStep() and
+    result = this
     or
     exists(string fromProp | step = LoadStoreStep(fromProp, prop) |
       result = MkTypeBackTracker(hasReturn, fromProp)

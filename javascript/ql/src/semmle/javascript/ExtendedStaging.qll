@@ -208,6 +208,10 @@ module ExtendedStaging {
     PreCallGraphStep::loadStep(_, _, _)
     or
     basicLoadStep(_, _, _)
+    or
+    exists(any(DataFlow::TypeTracker t).append(_))
+    or
+    exists(any(DataFlow::TypeBackTracker t).prepend(_))
   }
 
   /**
