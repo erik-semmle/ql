@@ -128,6 +128,33 @@ module ExtendedStaging {
   }
 
   /**
+   * The `basicblocks` extended stage.
+   * Consists of 2 substages (as of writing this).
+   *
+   * substage 1:
+   *   BasicBlocks::Internal::bbLength#ff
+   *   BasicBlocks::Internal::useAt#ffff
+   *   BasicBlocks::Internal::defAt#ffff
+   *   BasicBlocks::Internal::reachableBB#f
+   *   BasicBlocks::Internal::bbIndex#fff
+   * substage 2:
+   *   BasicBlocks::bbIDominates#ff
+   */
+  predicate basicblocks() {
+    1 = 1
+    or
+    basicblocksSubstages()
+    or
+    not ast()
+  }
+
+  private predicate basicblocksSubstages() {
+    any(ReachableBasicBlock bb).dominates(_)
+    or
+    exists(any(BasicBlock bb).getNode(_))
+  }
+
+  /**
    * The `dataflow` extended stage.
    * Consists of 6 substages (as of writing this).
    *
@@ -155,7 +182,7 @@ module ExtendedStaging {
     or
     dataflowSubstages()
     or
-    not ast()
+    not basicblocks()
   }
 
   private predicate dataflowSubstages() {
