@@ -214,17 +214,14 @@ module ExtendedStaging {
   cached
   module Imports {
     cached
-    predicate ensureStaging() {
-      1 = 1
-      or
-      not dataflow()
-    }
+    predicate ensureStaging() { 1 = 1 }
 
     cached
     predicate backrefs() {
-      exists(any(Import i).getImportedModule())
-      or
-      exists(DataFlow::moduleImport(_))
+      //exists(any(Import i).getImportedModule())
+      //or
+      // or
+      typetracking()
     }
   }
 
@@ -255,14 +252,17 @@ module ExtendedStaging {
     1 = 1
     or
     typetrackingSubstages()
-    or
-    not Imports::backrefs()
   }
 
   private predicate typetrackingSubstages() {
     PreCallGraphStep::loadStep(_, _, _)
     or
     basicLoadStep(_, _, _)
+    or
+    Imports::ensureStaging()
+    or
+    exists(DataFlow::moduleImport(_))
+    // or exists(any(Import i).getImportedModule())
   }
 
   /**
