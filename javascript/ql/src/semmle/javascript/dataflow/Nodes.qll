@@ -735,7 +735,7 @@ module ModuleImportNode {
  */
 cached
 ModuleImportNode moduleImport(string path) {
-  ExtendedStaging::Imports::ensureStaging() and result.getPath() = path
+  ExtendedStaging::Imports::ref() and result.getPath() = path
 }
 
 /**

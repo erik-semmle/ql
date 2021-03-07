@@ -74,57 +74,27 @@ module ExtendedStaging {
    * substage 8:
    *   AST::ASTNode::isAmbientInternal
    */
-  predicate ast() {
-    1 = 1
-    or
-    astSubstages()
-  }
-
-  private predicate astSubstages() {
-    exists(any(ASTNode a).getTopLevel())
-    or
-    exists(any(ASTNode a).getParent())
-    or
-    exists(any(StmtContainer c).getEnclosingContainer())
-    or
-    exists(any(Documentable d).getDocumentation())
-    or
-    exists(any(NodeInStmtContainer n).getContainer())
-    or
-    exists(any(Expr e).getStringValue())
-    or
-    Ast::backref()
-  }
-
-  /**
-   * A cached module for including `cached` predicates into the ast stage,
-   * where those predicates have negative edges to the other predicates in the stage.
-   *
-   * By having a `cached` module we can group stages together,
-   * without having the predicates depend recursively on each other.
-   * (The predicates referenced in the module depend negatively on the other predicates in the `ast` extended stage.)
-   *
-   * These predicates are visible at runtime.
-   */
   cached
   module Ast {
-    /**
-     * Always holds. Adds a dependency to the ast stage.
-     */
     cached
-    predicate backref() { ast() }
+    predicate ref() { 1 = 1 }
 
-    /**
-     * Always holds. Calling this adds a dependency to the ast stage.
-     */
     cached
-    predicate isAmbientInternal() { 1 = 1 }
-
-    /**
-     * Adds a dependency to the `isAmbientInternal` predicate, such that it is grouped into the ast stage.
-     */
-    cached
-    predicate isAmbientInternalBackref() { any(ASTNode node).isAmbientInternal() }
+    predicate backref() {
+      exists(any(ASTNode a).getTopLevel())
+      or
+      exists(any(ASTNode a).getParent())
+      or
+      exists(any(StmtContainer c).getEnclosingContainer())
+      or
+      exists(any(Documentable d).getDocumentation())
+      or
+      exists(any(NodeInStmtContainer n).getContainer())
+      or
+      exists(any(Expr e).getStringValue())
+      or
+      any(ASTNode node).isAmbientInternal()
+    }
   }
 
   /**
@@ -140,18 +110,17 @@ module ExtendedStaging {
    * substage 2:
    *   BasicBlocks::bbIDominates#ff
    */
-  predicate basicblocks() {
-    1 = 1
-    or
-    basicblocksSubstages()
-    or
-    not ast()
-  }
+  cached
+  module BasicBlocks {
+    cached
+    predicate ref() { 1 = 1 }
 
-  private predicate basicblocksSubstages() {
-    any(ReachableBasicBlock bb).dominates(_)
-    or
-    exists(any(BasicBlock bb).getNode(_))
+    cached
+    predicate backref() {
+      any(ReachableBasicBlock bb).dominates(_)
+      or
+      exists(any(BasicBlock bb).getNode(_))
+    }
   }
 
   /**
@@ -177,24 +146,23 @@ module ExtendedStaging {
    * substage 6:
    *   Expr::getCatchParameterFromStmt // maybe doesn't belong here?
    */
-  predicate dataflow() {
-    1 = 1
-    or
-    dataflowSubstages()
-    or
-    not basicblocks()
-  }
+  cached
+  module DataFlowStage {
+    cached
+    predicate ref() { 1 = 1 }
 
-  private predicate dataflowSubstages() {
-    exists(AmdModule a)
-    or
-    DataFlow::localFlowStep(_, _)
-    or
-    exists(any(DataFlow::SourceNode s).getAPropertyReference("foo"))
-    or
-    exists(getCatchParameterFromStmt(_))
-    or
-    exists(DataFlow::ssaDefinitionNode(_))
+    cached
+    predicate backref() {
+      exists(AmdModule a)
+      or
+      DataFlow::localFlowStep(_, _)
+      or
+      exists(any(DataFlow::SourceNode s).getAPropertyReference("foo"))
+      or
+      exists(getCatchParameterFromStmt(_))
+      or
+      exists(DataFlow::ssaDefinitionNode(_))
+    }
   }
 
   /**
@@ -214,11 +182,7 @@ module ExtendedStaging {
   cached
   module Imports {
     cached
-    predicate ensureStaging() {
-      1 = 1
-      or
-      not dataflow()
-    }
+    predicate ref() { 1 = 1 }
 
     cached
     predicate backrefs() {
@@ -251,18 +215,17 @@ module ExtendedStaging {
    *   GlobalAccessPaths::AccessPath::fromReference
    *   GlobalAccessPaths::AccessPath::fromRhs
    */
-  predicate typetracking() {
-    1 = 1
-    or
-    typetrackingSubstages()
-    or
-    not Imports::backrefs()
-  }
+  cached
+  module TypeTracking {
+    cached
+    predicate ref() { 1 = 1 }
 
-  private predicate typetrackingSubstages() {
-    PreCallGraphStep::loadStep(_, _, _)
-    or
-    basicLoadStep(_, _, _)
+    cached
+    predicate backref() {
+      PreCallGraphStep::loadStep(_, _, _)
+      or
+      basicLoadStep(_, _, _)
+    }
   }
 
   /**
@@ -277,18 +240,17 @@ module ExtendedStaging {
    * substage 2:
    *   GlobalAccessPaths::AccessPath::DominatingPaths::hasDominatingWrite
    */
-  predicate flowsteps() {
-    1 = 1
-    or
-    flowstepsSubstages()
-    or
-    not typetracking()
-  }
+  cached
+  module FlowSteps {
+    cached
+    predicate ref() { 1 = 1 }
 
-  private predicate flowstepsSubstages() {
-    AccessPath::DominatingPaths::hasDominatingWrite(_)
-    or
-    any(DataFlow::AdditionalFlowStep s).step(_, _)
+    cached
+    predicate backref() {
+      AccessPath::DominatingPaths::hasDominatingWrite(_)
+      or
+      any(DataFlow::AdditionalFlowStep s).step(_, _)
+    }
   }
 
   /**
@@ -300,17 +262,16 @@ module ExtendedStaging {
    * substage 2:
    *   RemoteFlowSources::RemoteFlowSource
    */
-  predicate taint() {
-    1 = 1
-    or
-    taintSubstages()
-    or
-    not flowsteps()
-  }
+  cached
+  module Taint {
+    cached
+    predicate ref() { 1 = 1 }
 
-  private predicate taintSubstages() {
-    any(TaintTracking::AdditionalTaintStep step).step(_, _)
-    or
-    exists(RemoteFlowSource r)
+    cached
+    predicate backref() {
+      any(TaintTracking::AdditionalTaintStep step).step(_, _)
+      or
+      exists(RemoteFlowSource r)
+    }
   }
 }
