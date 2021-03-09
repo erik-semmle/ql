@@ -12,9 +12,8 @@
 
 import javascript
 import DataFlow::PathGraph
-import semmle.javascript.security.dataflow.TemplateObjectInjection::TemplateObjectInjection
 
-from DataFlow::Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink
-where cfg.hasFlowPath(source, sink)
+from DataFlow::PathNode source, DataFlow::PathNode sink
+where none()
 select sink.getNode(), source, sink, "Template object injection due to $@.", source.getNode(),
   "user-provided value"
