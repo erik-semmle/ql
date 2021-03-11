@@ -68,6 +68,8 @@ module Stages {
       exists(any(Expr e).getStringValue())
       or
       any(ASTNode node).isAmbient()
+      or
+      exists(any(Locatable l).getFile())
     }
   }
 

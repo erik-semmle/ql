@@ -1,6 +1,7 @@
 /** Provides classes for working with locations and program elements that have locations. */
 
 import javascript
+private import semmle.javascript.internal.CachedStages
 
 /**
  * A location as given by a file, a start line, a start column,
@@ -85,12 +86,22 @@ class Location extends @location {
 /** A program element with a location. */
 class Locatable extends @locatable {
   /** Gets the file this program element comes from. */
-  File getFile() { result = getLocation().getFile() }
+  cached
+  File getFile() {
+    Stages::Ast::ref() and
+    result = getLocation().getFile()
+  }
 
   /** Gets this element's location. */
+  cached
   Location getLocation() {
-    // overridden by subclasses
-    none()
+    xmllocations(this, result)
+    or
+    hasLocation(this, result)
+    or
+    json_locations(this, result)
+    or
+    yaml_locations(this, result)
   }
 
   /**
@@ -136,17 +147,4 @@ class Locatable extends @locatable {
    * Gets the primary QL class for the Locatable.
    */
   string getAPrimaryQlClass() { result = "???" }
-}
-
-/**
- * A `File`, considered as a `Locatable`.
- *
- * For reasons of backwards compatibility, @file is a subtype of @locatable. This class exists to
- * provide an override of `Locatable.getLocation()` for @files, since it would otherwise default
- * to `none()`, which is unhelpful.
- */
-private class FileLocatable extends File, Locatable {
-  override Location getLocation() { result = File.super.getLocation() }
-
-  override string toString() { result = File.super.toString() }
 }
