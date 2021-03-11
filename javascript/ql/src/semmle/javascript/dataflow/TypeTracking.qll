@@ -127,8 +127,8 @@ class TypeTracker extends TTypeTracker {
   pragma[inline]
   TypeTracker step(DataFlow::SourceNode pred, DataFlow::SourceNode succ) {
     exists(StepSummary summary |
-      StepSummary::step(pragma[only_bind_into](pred), succ, summary) and
-      result = this.append(summary)
+      StepSummary::step(pragma[only_bind_into](pred), succ, pragma[only_bind_into](summary)) and
+      result = this.append(pragma[only_bind_into](summary))
     )
   }
 
@@ -159,8 +159,8 @@ class TypeTracker extends TTypeTracker {
   pragma[inline]
   TypeTracker smallstep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(StepSummary summary |
-      StepSummary::smallstep(pragma[only_bind_into](pred), succ, summary) and
-      result = this.append(summary)
+      StepSummary::smallstep(pragma[only_bind_into](pred), succ, pragma[only_bind_into](summary)) and
+      result = this.append(pragma[only_bind_into](summary))
     )
     or
     succ = pred.getASuccessor() and
@@ -273,8 +273,8 @@ class TypeBackTracker extends TTypeBackTracker {
   pragma[inline]
   TypeBackTracker step(DataFlow::SourceNode pred, DataFlow::SourceNode succ) {
     exists(StepSummary summary |
-      StepSummary::step(pred, pragma[only_bind_into](succ), summary) and
-      this = result.prepend(summary)
+      StepSummary::step(pred, pragma[only_bind_into](succ), pragma[only_bind_into](summary)) and
+      this = result.prepend(pragma[only_bind_into](summary))
     )
   }
 
@@ -305,8 +305,8 @@ class TypeBackTracker extends TTypeBackTracker {
   pragma[inline]
   TypeBackTracker smallstep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(StepSummary summary |
-      StepSummary::smallstep(pred, pragma[only_bind_into](succ), summary) and
-      this = result.prepend(summary)
+      StepSummary::smallstep(pred, pragma[only_bind_into](succ), pragma[only_bind_into](summary)) and
+      this = result.prepend(pragma[only_bind_into](summary))
     )
     or
     pred = succ.getAPredecessor() and
