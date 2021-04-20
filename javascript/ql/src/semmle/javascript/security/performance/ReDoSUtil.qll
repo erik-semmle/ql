@@ -936,6 +936,7 @@ private module SuffixConstruction {
    * Gets a state that can be reached from pumpable `fork` consuming all
    * chars in `w` any number of times followed by the first `i+1` characters of `w`.
    */
+  pragma[noopt]
   private State process(State fork, string w, int i) {
     exists(State prev | prev = getProcessPrevious(fork, i, w) |
       exists(string char, InputSymbol sym |
