@@ -250,7 +250,6 @@ private DataFlow::AnalyzedValueNode getAddOperand(Expr e, int n) {
 /**
  * Gets a primitive type of the `n`th operand of the given `+` or `+=` expression.
  */
-pragma[noopt]
 private PrimitiveType getAnAddOperandPrimitiveType(Expr e, int n) {
   exists(DataFlow::AnalyzedValueNode operand, AbstractValue value, AbstractValue prim |
     operand = getAddOperand(e, n) and

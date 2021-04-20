@@ -56,9 +56,7 @@ module LazyCache {
 
     private LazyCacheVariable getVariable() { result = cache }
 
-    pragma[noopt]
     override DataFlow::Node getImportedModuleNode() {
-      this instanceof LazyCacheImport and
       result = this.flow()
       or
       exists(LazyCacheVariable variable, Expr base, PropAccess access, string localName |

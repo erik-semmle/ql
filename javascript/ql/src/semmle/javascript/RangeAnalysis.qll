@@ -578,7 +578,6 @@ module RangeAnalysis {
    *
    * This means negative-weight cycles (contradictions) can be detected using simple cycle detection.
    */
-  pragma[noopt]
   private predicate extendedEdge(
     DataFlow::Node a, int asign, DataFlow::Node b, int bsign, Bias c, boolean sharp,
     ControlFlowNode cfg
@@ -655,7 +654,6 @@ module RangeAnalysis {
    *
    * The initial outgoing edge from `src` must be derived at `cfg`.
    */
-  pragma[noopt]
   private predicate reachableByNegativeEdges(
     DataFlow::Node a, int asign, DataFlow::Node b, int bsign, ControlFlowNode cfg
   ) {

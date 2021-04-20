@@ -862,7 +862,6 @@ private module SuffixConstruction {
   /**
    * Holds if there is likely a non-empty suffix leading to rejection starting in `s`.
    */
-  pragma[noopt]
   predicate hasEdgeToLikelyRejectable(StateInPumpableRegexp s) {
     // all edges (at least one) with some char leads to another state that is rejectable.
     // the `next` states might not share a common suffix, which can cause FPs.
@@ -937,7 +936,6 @@ private module SuffixConstruction {
    * Gets a state that can be reached from pumpable `fork` consuming all
    * chars in `w` any number of times followed by the first `i+1` characters of `w`.
    */
-  pragma[noopt]
   private State process(State fork, string w, int i) {
     exists(State prev | prev = getProcessPrevious(fork, i, w) |
       exists(string char, InputSymbol sym |

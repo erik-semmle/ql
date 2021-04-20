@@ -8,7 +8,6 @@ module AsyncPackage {
   /**
    * Gets a reference the given member of the `async` or `async-es` package.
    */
-  pragma[noopt]
   DataFlow::SourceNode member(string name) {
     result = DataFlow::moduleMember("async", name) or
     result = DataFlow::moduleMember("async-es", name)

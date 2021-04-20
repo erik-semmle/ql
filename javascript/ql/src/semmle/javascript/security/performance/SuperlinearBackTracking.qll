@@ -189,7 +189,6 @@ predicate step(StateTuple q, InputSymbol s1, InputSymbol s2, InputSymbol s3, Sta
  * Holds if there are transitions from the components of `q` to `r1`, `r2`, and `r3
  * labelled with `s1`, `s2`, and `s3`, respectively.
  */
-pragma[noopt]
 predicate step(
   StateTuple q, InputSymbol s1, InputSymbol s2, InputSymbol s3, State r1, State r2, State r3
 ) {
@@ -197,8 +196,8 @@ predicate step(
     deltaClosed(q1, s1, r1) and
     deltaClosed(q2, s2, r2) and
     deltaClosed(q3, s3, r3) and
-    // use noopt to force the join on `getAThreewayIntersect` to happen last.
-    exists(getAThreewayIntersect(s1, s2, s3))
+    // use pragmas to make the join on `getAThreewayIntersect` happen last-ish.
+    exists(pragma[only_bind_out](getAThreewayIntersect(s1, s2, s3)))
   )
 }
 

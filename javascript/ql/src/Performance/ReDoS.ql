@@ -168,7 +168,6 @@ int statePairDist(StatePair q, StatePair r) =
  * that have at least one repetition quantifier in them (otherwise the
  * expression cannot be vulnerable to ReDoS attacks anyway).
  */
-pragma[noopt]
 predicate isFork(State q, InputSymbol s1, InputSymbol s2, State r1, State r2) {
   stateInsideBacktracking(q) and
   exists(State q1, State q2 |
@@ -176,9 +175,6 @@ predicate isFork(State q, InputSymbol s1, InputSymbol s2, State r1, State r2) {
     delta(q1, s1, r1) and
     q2 = epsilonSucc*(q) and
     delta(q2, s2, r2) and
-    // Use pragma[noopt] to prevent intersect(s1,s2) from being the starting point of the join.
-    // From (s1,s2) it would find a huge number of intermediate state pairs (q1,q2) originating from different literals,
-    // and discover at the end that no `q` can reach both `q1` and `q2` by epsilon transitions.
     exists(intersect(s1, s2))
   |
     s1 != s2
@@ -238,7 +234,6 @@ predicate step(StatePair q, InputSymbol s1, InputSymbol s2, StatePair r) {
  * We only consider transitions where the resulting states `(r1, r2)` are both
  * inside a repetition that might backtrack.
  */
-pragma[noopt]
 predicate step(StatePair q, InputSymbol s1, InputSymbol s2, State r1, State r2) {
   exists(State q1, State q2 | q.getLeft() = q1 and q.getRight() = q2 |
     deltaClosed(q1, s1, r1) and

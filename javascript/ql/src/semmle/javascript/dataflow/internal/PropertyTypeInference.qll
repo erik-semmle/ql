@@ -132,7 +132,6 @@ private class AnalyzedExplicitPropertyWrite extends AnalyzedPropertyWrite {
   }
 }
 
-pragma[noopt]
 private predicate explicitPropertyWrite(
   DataFlow::PropWrite pw, AbstractValue base, string prop, DataFlow::Node source
 ) {
