@@ -119,8 +119,7 @@ private predicate bbIPostDominates(BasicBlock dom, BasicBlock bb) =
  * At the database level, a basic block is represented by its first control flow node.
  */
 class BasicBlock extends @cfg_node, NodeInStmtContainer {
-  cached
-  BasicBlock() { Stages::BasicBlocks::ref() and startsBB(this) }
+  BasicBlock() { startsBB(this) }
 
   /** Gets a basic block succeeding this one. */
   BasicBlock getASuccessor() { succBB(this, result) }
