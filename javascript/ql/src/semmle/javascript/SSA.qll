@@ -627,7 +627,6 @@ abstract class SsaPseudoDefinition extends SsaImplicitDefinition {
   /**
    * Gets an input of this pseudo-definition.
    */
-  cached
   abstract SsaVariable getAnInput();
 
   override VarDef getAContributingVarDef() {
@@ -650,7 +649,6 @@ class SsaPhiNode extends SsaPseudoDefinition, TPhi {
   /**
    * Gets the input to this phi node coming from the given predecessor block.
    */
-  cached
   SsaVariable getInputFromBlock(BasicBlock bb) {
     bb = getBasicBlock().getAPredecessor() and
     result = getDefReachingEndOf(bb, getSourceVariable())
