@@ -5,10 +5,16 @@
 
 import javascript
 
+/**
+ * Classes and predicates for the unsafe HTML constructed from library input query.
+ */
 module UnsafeHtmlConstruction {
   private import semmle.javascript.security.dataflow.DomBasedXss::DomBasedXss as DomBasedXss
   import UnsafeHtmlConstructionCustomizations::UnsafeHtmlConstruction
 
+  /**
+   * A taint-tracking configuration for reasoning about unsafe HTML constructed from library input vulnerabilities.
+   */
   class Configration extends TaintTracking::Configuration {
     Configration() { this = "UnsafeHtmlConstruction" }
 
