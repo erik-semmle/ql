@@ -12,6 +12,7 @@ import javascript
 module UnsafeHtmlConstruction {
   private import semmle.javascript.security.dataflow.DomBasedXss::DomBasedXss as DomBasedXss
   private import semmle.javascript.PackageExports as Exports
+  private import semmle.javascript.security.dataflow.UnsafeJQueryPlugin::UnsafeJQueryPlugin as UnsafeJQueryPlugin
 
   /**
    * A source for unsafe HTML constructed from library input.
@@ -26,6 +27,13 @@ module UnsafeHtmlConstruction {
       this = Exports::getALibraryInputParameter() and
       not this = JQuery::dollarSource()
     }
+  }
+
+  /**
+   * A jQuery plugin options object, seen as a source for unsafe HTML constructed from input.
+   */
+  class JQueryPluginOptionsAsSource extends Source {
+    JQueryPluginOptionsAsSource() { this instanceof UnsafeJQueryPlugin::JQueryPluginOptions }
   }
 
   /**
