@@ -40,7 +40,7 @@ module UnsafeShellCommandConstruction {
     }
 
     override predicate isAdditionalTaintStep(DataFlow::Node pred, DataFlow::Node succ) {
-      UnsafeHtmlConstruction::classFieldStep(pred, succ)
+      DataFlow::localFieldStep(pred, succ)
     }
   }
 }

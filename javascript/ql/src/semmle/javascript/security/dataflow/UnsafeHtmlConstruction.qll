@@ -35,7 +35,7 @@ module UnsafeHtmlConstruction {
     }
 
     override predicate isAdditionalTaintStep(DataFlow::Node pred, DataFlow::Node succ) {
-      classFieldStep(pred, succ)
+      DataFlow::localFieldStep(pred, succ)
     }
   }
 }
