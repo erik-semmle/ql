@@ -38,7 +38,8 @@ module UnsafeJQueryPlugin {
     DomBasedXss::JQueryHtmlOrSelectorArgument {
     AmbiguousHtmlOrSelectorArgument() {
       // any fixed prefix makes the call unambiguous
-      not exists(getAPrefix())
+      // not exists(getAPrefix())
+      any()
     }
   }
 
