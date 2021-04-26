@@ -24,7 +24,6 @@ import javascript
 private import StmtContainers
 private import semmle.javascript.dataflow.internal.PreCallGraphStep
 private import semmle.javascript.dataflow.internal.FlowSteps
-private import semmle.javascript.dataflow.internal.AccessPaths
 
 /**
  * Contains a `cached module` for each stage.
@@ -131,10 +130,6 @@ module Stages {
       any(DataFlow::Node node).hasLocationInfo(_, _, _, _, _)
       or
       exists(any(DataFlow::Node node).toString())
-      or
-      exists(any(AccessPath a).getAnInstanceIn(_))
-      or
-      exists(any(DataFlow::PropRef ref).getBase())
     }
   }
 
