@@ -13,10 +13,8 @@
 
 import javascript
 import DataFlow::PathGraph
-import semmle.javascript.security.dataflow.UnsafeHtmlConstruction::UnsafeHtmlConstruction
 
-from DataFlow::Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink, Sink sinkNode
-where cfg.hasFlowPath(source, sink) and sink.getNode() = sinkNode
-select sinkNode, source, sink, "$@ based on $@ might later cause $@.", sinkNode,
-  sinkNode.describe(), source.getNode(), "library input", sinkNode.getSink(),
-  sinkNode.getVulnerabilityKind().toLowerCase()
+from DataFlow::PathNode source, DataFlow::PathNode sink, DataFlow::Node sinkNode
+where none() and sink.getNode() = sinkNode
+select sinkNode, source, sink, "$@ based on $@ might later cause $@.", sinkNode, "descrive",
+  source.getNode(), "library input", sinkNode, "kind"
