@@ -25,7 +25,7 @@ module TaintedPath {
    * A taint-tracking configuration for reasoning about tainted-path vulnerabilities.
    */
   class Configuration extends DataFlow::Configuration {
-    Configuration() { this = "TaintedPath" }
+    Configuration() { this = "TaintedPath2" }
 
     override predicate isSource(DataFlow::Node source, DataFlow::FlowLabel label) {
       label = source.(Source).getAFlowLabel()
