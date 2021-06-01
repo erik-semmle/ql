@@ -95,7 +95,7 @@ class RegExpRoot extends RegExpTerm {
    */
   predicate isRelevant() {
     // there is at least one repetition
-    getRoot(any(InfiniteRepetitionQuantifier q)) = this and
+    // getRoot(any(InfiniteRepetitionQuantifier q)) = this and
     // there are no lookbehinds
     not exists(RegExpLookbehind lbh | getRoot(lbh) = this) and
     // is actually used as a RegExp
@@ -463,7 +463,7 @@ private State before(RegExpTerm t) { result = Match(t, 0) }
 /**
  * Gets a state the NFA may be in after matching `t`.
  */
-private State after(RegExpTerm t) {
+State after(RegExpTerm t) {
   exists(RegExpAlt alt | t = alt.getAChild() | result = after(alt))
   or
   exists(RegExpSequence seq, int i | t = seq.getChild(i) |
@@ -578,7 +578,7 @@ RegExpRoot getRoot(RegExpTerm term) {
   result = getRoot(term.getParent())
 }
 
-private newtype TState =
+newtype TState =
   Match(RegExpTerm t, int i) {
     getRoot(t).isRelevant() and
     (
