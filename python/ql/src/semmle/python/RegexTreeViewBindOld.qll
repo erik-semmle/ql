@@ -250,9 +250,68 @@ class RegExpEscape extends RegExpNormalChar {
 
   /**
    * Gets the name of the escaped; for example, `w` for `\w`.
-   * TODO: Handle unicode and named escapes.
+   * TODO: Handle named escapes.
    */
-  override string getValue() { result = re.getText().substring(start + 1, end) }
+  override string getValue() {
+    not isUnicode() and
+    result = getText().suffix(1)
+    or
+    isUnicode() and
+    result = getUnicode()
+  }
+
+  /**
+   * Gets the text for this escape. That is e.g. "\w".
+   */
+  private string getText() { result = re.getText().substring(start, end) }
+
+  /**
+   * Holds if this is a unicode escape.
+   */
+  private predicate isUnicode() { getText().prefix(2) = ["\\u", "\\U"] }
+
+  /**
+   * Gets the unicode char for this escape.
+   * E.g. for `\u0061` this returns "a".
+   */
+  private string getUnicode() {
+    exists(int codepoint | codepoint = sum(getHexValueFromUnicode(_)) |
+      result = codepoint.toUnicode()
+    )
+  }
+
+  /**
+   * Gets int value for the `index`th char in the hex number of the unicode escape.
+   * E.g. for `\u0061` and `index = 2` this returns 96 (the number `6` interpreted as hex).
+   */
+  private int getHexValueFromUnicode(int index) {
+    isUnicode() and
+    exists(string hex, string char | hex = getText().suffix(2) |
+      char = hex.charAt(index) and
+      result = 16.pow(hex.length() - index - 1) * toHex(char)
+    )
+  }
+}
+
+/**
+ * Gets the hex number for the `hex` char.
+ */
+private int toHex(string hex) {
+  result = [0 .. 9] and
+  result = hex.toInt() and
+  hex = [0 .. 9].toString() // fixing binding
+  or
+  result = 10 and hex = ["a", "A"]
+  or
+  result = 11 and hex = ["b", "B"]
+  or
+  result = 12 and hex = ["c", "C"]
+  or
+  result = 13 and hex = ["d", "D"]
+  or
+  result = 14 and hex = ["e", "E"]
+  or
+  result = 15 and hex = ["f", "F"]
 }
 
 /**
