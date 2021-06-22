@@ -338,6 +338,7 @@ class ExponentialReDoSConfiguration extends ReDoSConfiguration {
   override predicate isReDoSCandidate(State state, string pump) { isPumpable(state, pump) }
 }
 
+// NOTHING TO SEE HERE
 from RegExpTerm t, string pump, State s, string prefixMsg
 where hasReDoSResult(t, pump, s, prefixMsg)
 select t,
