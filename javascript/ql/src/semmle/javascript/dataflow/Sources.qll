@@ -65,6 +65,11 @@ class SourceNode extends DataFlow::Node {
   }
 
   /**
+   * Gets an API node for this node.
+   */
+  API::Node getAPINode() { result.getAnImmediateUse() = this }
+
+  /**
    * Gets a read of property `propName` on this node.
    */
   DataFlow::PropRead getAPropertyRead(string propName) { result = getAPropertyReference(propName) }

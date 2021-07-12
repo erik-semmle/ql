@@ -391,8 +391,16 @@ module API {
       MkAsyncFuncResult(DataFlow::FunctionNode f) {
         f = trackDefNode(_) and f.getFunction().isAsync() and hasSemantics(f)
       } or
-      MkDef(DataFlow::Node nd) { rhs(_, _, nd) } or
-      MkUse(DataFlow::Node nd) { use(_, _, nd) } or
+      MkDef(DataFlow::Node nd) {
+        rhs(_, _, nd)
+        or
+        nd instanceof DataFlow::SourceNode
+      } or
+      MkUse(DataFlow::Node nd) {
+        use(_, _, nd)
+        or
+        nd instanceof DataFlow::SourceNode
+      } or
       /** A use of a TypeScript type. */
       MkTypeUse(string moduleName, string exportName) {
         any(TypeAnnotation n).hasQualifiedName(moduleName, exportName)
