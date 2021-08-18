@@ -1182,11 +1182,20 @@ module DataFlow {
 
       override DataFlow::Node getArgument(int i) {
         i >= 0 and kind = "call" and result = originalCall.getArgument(i + 1)
+        or
+        i >= 0 and
+        kind = "apply" and
+        exists(DataFlow::SourceNode array | array = originalCall.getArgument(1).getALocalSource() |
+          exists(string prop |
+            i = prop.toInt() and
+            result = array.getAPropertyWrite(prop).getRhs()
+          )
+          or
+          result = array.(DataFlow::ArrayCreationNode).getElement(i)
+        )
       }
 
-      override DataFlow::Node getAnArgument() {
-        kind = "call" and result = originalCall.getAnArgument() and result != getReceiver()
-      }
+      override DataFlow::Node getAnArgument() { result = getArgument(_) }
 
       override DataFlow::Node getASpreadArgument() {
         kind = "apply" and
@@ -1198,6 +1207,13 @@ module DataFlow {
 
       override int getNumArgument() {
         result >= 0 and kind = "call" and result = originalCall.getNumArgument() - 1
+        or
+        kind = "apply" and
+        exists(DataFlow::ArrayLiteralNode arr |
+          arr = originalCall.getArgument(1).getALocalSource()
+        |
+          result = arr.getSize()
+        )
       }
     }
   }

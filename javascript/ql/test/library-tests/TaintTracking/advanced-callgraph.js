@@ -11,3 +11,17 @@
     }
     nest1()()(x);
 });
+
+(function () {
+    var source = source();
+
+    function foo(x) {
+        sink(x);
+    }
+    foo.apply(null, [source]);
+
+    function bar(x) {
+        sink(x);
+    }
+    bar.call(null, source);
+})();

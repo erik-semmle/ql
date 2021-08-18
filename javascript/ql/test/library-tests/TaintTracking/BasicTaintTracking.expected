@@ -5,6 +5,8 @@ typeInferenceMismatch
 | addexpr.js:4:10:4:17 | source() | addexpr.js:7:8:7:8 | x |
 | addexpr.js:11:15:11:22 | source() | addexpr.js:21:8:21:12 | value |
 | advanced-callgraph.js:2:13:2:20 | source() | advanced-callgraph.js:6:22:6:22 | v |
+| advanced-callgraph.js:16:18:16:25 | source() | advanced-callgraph.js:19:14:19:14 | x |
+| advanced-callgraph.js:16:18:16:25 | source() | advanced-callgraph.js:24:14:24:14 | x |
 | array-callback.js:2:23:2:30 | source() | array-callback.js:4:10:4:10 | x |
 | array-mutation.js:19:18:19:25 | source() | array-mutation.js:20:8:20:8 | e |
 | array-mutation.js:23:13:23:20 | source() | array-mutation.js:24:8:24:8 | f |

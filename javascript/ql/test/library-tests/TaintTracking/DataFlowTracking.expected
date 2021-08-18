@@ -1,5 +1,7 @@
 | access-path-sanitizer.js:2:18:2:25 | source() | access-path-sanitizer.js:4:8:4:12 | obj.x |
 | advanced-callgraph.js:2:13:2:20 | source() | advanced-callgraph.js:6:22:6:22 | v |
+| advanced-callgraph.js:16:18:16:25 | source() | advanced-callgraph.js:19:14:19:14 | x |
+| advanced-callgraph.js:16:18:16:25 | source() | advanced-callgraph.js:24:14:24:14 | x |
 | booleanOps.js:2:11:2:18 | source() | booleanOps.js:4:8:4:8 | x |
 | booleanOps.js:2:11:2:18 | source() | booleanOps.js:7:10:7:10 | x |
 | booleanOps.js:2:11:2:18 | source() | booleanOps.js:10:10:10:10 | x |
