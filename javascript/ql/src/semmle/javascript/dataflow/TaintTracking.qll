@@ -1300,3 +1300,16 @@ module TaintTracking {
     sharedTaintStep(pred, succ)
   }
 }
+
+private class ApplyCallStep extends DataFlow::SharedFlowStep {
+  override predicate loadStep(DataFlow::Node pred, DataFlow::Node succ, string prop) {
+    exists(DataFlow::MethodCallNode call, DataFlow::FunctionNode func, int i |
+      call.getMethodName() = "apply" and
+      call.getReceiver().getABoundFunctionValue(_) = func and
+      prop = DataFlow::PseudoProperties::arrayElement(i) and
+      not prop = DataFlow::PseudoProperties::arrayElement() and
+      pred = call.getArgument(1).getALocalSource() and
+      succ = func.getParameter(i)
+    )
+  }
+}
