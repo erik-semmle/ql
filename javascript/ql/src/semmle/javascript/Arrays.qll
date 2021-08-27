@@ -252,9 +252,24 @@ private module ArrayDataFlow {
       exists(DataFlow::ArrayCreationNode array, int i |
         element = array.getElement(i) and
         obj = array and
-        prop = arrayElement(i)
+        // arrayElement(i) = prop
+        if
+          array = any(PromiseAllCreation c).getArrayNode() or
+          array = reachesApplyCall(DataFlow::TypeBackTracker::end())
+        then prop = arrayElement(i)
+        else prop = arrayElement()
       )
     }
+  }
+
+  private DataFlow::SourceNode reachesApplyCall(DataFlow::TypeBackTracker t) {
+    t.start() and
+    exists(DataFlow::MethodCallNode call |
+      call.getMethodName() = "apply" and
+      result = call.getArgument(1).getALocalSource()
+    )
+    or
+    exists(DataFlow::TypeBackTracker t2 | result = reachesApplyCall(t2).backtrack(t2, t))
   }
 
   /**
