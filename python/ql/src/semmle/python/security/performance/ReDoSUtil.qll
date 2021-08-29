@@ -106,6 +106,13 @@ class RegExpRoot extends RegExpTerm {
 }
 
 /**
+ * A regexp term that is relevant for this ReDoS analysis.
+ */
+class RelevantRegExpTerm extends RegExpTerm {
+  RelevantRegExpTerm() { getRoot(this).isRelevant() }
+}
+
+/**
  * A constant in a regular expression that represents valid Unicode character(s).
  */
 private class RegexpCharacterConstant extends RegExpConstant {
@@ -114,6 +121,7 @@ private class RegexpCharacterConstant extends RegExpConstant {
 
 /**
  * Holds if `term` is the chosen canonical representative for all terms with string representation `str`.
+ * The string representation includes which flags are used with the regular expression.
  *
  * Using canonical representatives gives a huge performance boost when working with tuples containing multiple `InputSymbol`s.
  * The number of `InputSymbol`s is decreased by 3 orders of magnitude or more in some larger benchmarks.
@@ -123,10 +131,25 @@ private predicate isCanonicalTerm(RegExpTerm term, string str) {
     rank[1](RegExpTerm t, Location loc, File file |
       loc = t.getLocation() and
       file = t.getFile() and
-      str = t.getRawValue()
+      str = t.getRawValue() + "|" + getCanonicalizationFlags(t.getRootTerm())
     |
       t order by t.getFile().getRelativePath(), loc.getStartLine(), loc.getStartColumn()
     )
+}
+
+/**
+ * Gets a string reperesentation of the flags used with the regular expression.
+ * Only the flags that are relevant for the canonicalization are included.
+ */
+string getCanonicalizationFlags(RegExpTerm root) {
+  root.isRootTerm() and
+  (
+    RegExpFlags::isIgnoreCase(root) and
+    result = "i"
+    or
+    not RegExpFlags::isIgnoreCase(root) and
+    result = ""
+  )
 }
 
 /**
@@ -135,15 +158,31 @@ private predicate isCanonicalTerm(RegExpTerm term, string str) {
 private newtype TInputSymbol =
   /** An input symbol corresponding to character `c`. */
   Char(string c) {
-    c = any(RegexpCharacterConstant cc | getRoot(cc).isRelevant()).getValue().charAt(_)
+    c =
+      any(RegexpCharacterConstant cc |
+        cc instanceof RelevantRegExpTerm and
+        not RegExpFlags::isIgnoreCase(cc.getRootTerm())
+      ).getValue().charAt(_)
+    or
+    // normalize to lower case if the regexp is case insensitive
+    c =
+      any(RegexpCharacterConstant cc, string char |
+        cc instanceof RelevantRegExpTerm and
+        RegExpFlags::isIgnoreCase(cc.getRootTerm()) and
+        char = cc.getValue().charAt(_)
+      |
+        char.toLowerCase()
+      )
   } or
   /**
    * An input symbol representing all characters matched by
    * a (non-universal) character class that has string representation `charClassString`.
    */
   CharClass(string charClassString) {
-    exists(RegExpTerm term | term.getRawValue() = charClassString | getRoot(term).isRelevant()) and
-    exists(RegExpTerm recc | isCanonicalTerm(recc, charClassString) |
+    exists(RelevantRegExpTerm term |
+      term.getRawValue() + "|" + getCanonicalizationFlags(term.getRootTerm()) = charClassString
+    ) and
+    exists(RelevantRegExpTerm recc | isCanonicalTerm(recc, charClassString) |
       recc instanceof RegExpCharacterClass and
       not recc.(RegExpCharacterClass).isUniversalClass()
       or
@@ -240,9 +279,23 @@ abstract private class CharacterClass extends InputSymbol {
 private module CharacterClasses {
   /**
    * Holds if the character class `cc` has a child (constant or range) that matches `char`.
+   * Ignores whether the character class is inside a regular expression that ignores casing.
    */
   pragma[noinline]
   predicate hasChildThatMatches(RegExpCharacterClass cc, string char) {
+    if RegExpFlags::isIgnoreCase(cc.getRootTerm())
+    then
+      // normalize everything to lower case if the regexp is case insensitive
+      exists(string c | hasChildThatMatchesNoCase(cc, c) | char = c.toLowerCase())
+    else hasChildThatMatchesNoCase(cc, char)
+  }
+
+  /**
+   * Holds if the character class `cc` has a child (constant or range) that matches `char`.
+   * Ignores whether the character class is inside a regular expression that ignores casing.
+   */
+  pragma[noinline]
+  predicate hasChildThatMatchesNoCase(RegExpCharacterClass cc, string char) {
     exists(getCanonicalCharClass(cc)) and
     exists(RegExpTerm child | child = cc.getAChild() |
       char = child.(RegexpCharacterConstant).getValue()
@@ -463,7 +516,7 @@ private State before(RegExpTerm t) { result = Match(t, 0) }
 /**
  * Gets a state the NFA may be in after matching `t`.
  */
-private State after(RegExpTerm t) {
+State after(RegExpTerm t) {
   exists(RegExpAlt alt | t = alt.getAChild() | result = after(alt))
   or
   exists(RegExpSequence seq, int i | t = seq.getChild(i) |
@@ -492,7 +545,13 @@ private State after(RegExpTerm t) {
 predicate delta(State q1, EdgeLabel lbl, State q2) {
   exists(RegexpCharacterConstant s, int i |
     q1 = Match(s, i) and
-    lbl = Char(s.getValue().charAt(i)) and
+    (
+      not RegExpFlags::isIgnoreCase(s.getRootTerm()) and
+      lbl = Char(s.getValue().charAt(i))
+      or
+      RegExpFlags::isIgnoreCase(s.getRootTerm()) and
+      exists(string c | c = s.getValue().charAt(i) | lbl = Char(c.toLowerCase()))
+    ) and
     (
       q2 = Match(s, i + 1)
       or
@@ -502,20 +561,20 @@ predicate delta(State q1, EdgeLabel lbl, State q2) {
   )
   or
   exists(RegExpDot dot | q1 = before(dot) and q2 = after(dot) |
-    if dot.getLiteral().isDotAll() then lbl = Any() else lbl = Dot()
+    if RegExpFlags::isDotAll(dot.getRootTerm()) then lbl = Any() else lbl = Dot()
   )
   or
   exists(RegExpCharacterClass cc |
     cc.isUniversalClass() and q1 = before(cc) and lbl = Any() and q2 = after(cc)
     or
     q1 = before(cc) and
-    lbl = CharClass(cc.getRawValue()) and
+    lbl = CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm())) and
     q2 = after(cc)
   )
   or
   exists(RegExpCharacterClassEscape cc |
     q1 = before(cc) and
-    lbl = CharClass(cc.getRawValue()) and
+    lbl = CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm())) and
     q2 = after(cc)
   )
   or
@@ -578,16 +637,27 @@ RegExpRoot getRoot(RegExpTerm term) {
   result = getRoot(term.getParent())
 }
 
-private newtype TState =
-  Match(RegExpTerm t, int i) {
-    getRoot(t).isRelevant() and
-    (
-      i = 0
-      or
-      exists(t.(RegexpCharacterConstant).getValue().charAt(i))
-    )
+/**
+ * A state in the NFA.
+ */
+newtype TState =
+  /**
+   * A state representing that the NFA is about to match a term.
+   * `i` is used to index into multi-char literals.
+   */
+  Match(RelevantRegExpTerm t, int i) {
+    i = 0
+    or
+    exists(t.(RegexpCharacterConstant).getValue().charAt(i))
   } or
+  /**
+   * An accept state, where exactly the given input string is accepted.
+   */
   Accept(RegExpRoot l) { l.isRelevant() } or
+  /**
+   * An accept state, where the given input string, or any string that has this
+   * string as a prefix, is accepted.
+   */
   AcceptAnySuffix(RegExpRoot l) { l.isRelevant() }
 
 /**

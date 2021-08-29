@@ -460,5 +460,9 @@
   "ReDoS Polynomial Python/JS": [
     "javascript/ql/src/semmle/javascript/security/performance/SuperlinearBackTracking.qll",
     "python/ql/src/semmle/python/security/performance/SuperlinearBackTracking.qll"
+  ],
+  "BadTagFilterQuery Python/JS": [
+    "javascript/ql/src/semmle/javascript/security/BadTagFilterQuery.qll",
+    "python/ql/src/semmle/python/security/BadTagFilterQuery.qll"
   ]
 }

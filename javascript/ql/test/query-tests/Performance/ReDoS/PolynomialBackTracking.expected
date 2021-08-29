@@ -123,7 +123,6 @@
 | regexplib/address.js:51:616:51:618 | \\w+ | Strings starting with '9 a C/O ' and with many repetitions of 'a' can start matching anywhere after the start of the preceeding \\x20* |
 | regexplib/address.js:51:727:51:740 | [a-zA-Z0-9\\-]+ | Strings starting with '9 a 9 a#' and with many repetitions of 'FL0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/address.js:51:796:51:798 | \\s+ | Strings starting with '9 a ' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s+ |
-| regexplib/address.js:51:803:51:811 | [A-Za-z]+ | Strings starting with '9 a  ' and with many repetitions of 'A' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/address.js:67:379:67:755 | [a-zA-Z0-9&#192;&#193;&#194;&#195;&#196;&#197;&#198;&#199;&#200;&#201;&#202;&#203;&#204;&#205;&#206;&#207;&#208;&#209;&#210;&#211;&#212;&#213;&#214;&#216;&#217;&#218;&#219;&#220;&#221;&#223;&#224;&#225;&#226;&#227;&#228;&#229;&#230;&#231;&#232;&#233;&#234;&#235;&#236;&#237;&#238;&#239;&#241;&#242;&#243;&#244;&#245;&#246;&#248;&#249;&#250;&#251;&#252;&#253;&#255;\\.\\,\\-\\/\\' ]+ | Strings starting with '#' and with many repetitions of '#' can start matching anywhere after the start of the preceeding [a-zA-Z0-9&#192;&#193;&#194;&#195;&#196;&#197;&#198;&#199;&#200;&#201;&#202;&#203;&#204;&#205;&#206;&#207;&#208;&#209;&#210;&#211;&#212;&#213;&#214;&#216;&#217;&#218;&#219;&#220;&#221;&#223;&#224;&#225;&#226;&#227;&#228;&#229;&#230;&#231;&#232;&#233;&#234;&#235;&#236;&#237;&#238;&#239;&#241;&#242;&#243;&#244;&#245;&#246;&#248;&#249;&#250;&#251;&#252;&#253;&#255;\\.\\,\\-\\/\\']+ |
 | regexplib/address.js:69:3:69:5 | \\s* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (\\s*\\(?0\\d{4}\\)?(\\s*\|-)\\d{3}(\\s*\|-)\\d{3}\\s*) |
 | regexplib/address.js:69:48:69:50 | \\s* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (\\s*\\(?0\\d{3}\\)?(\\s*\|-)\\d{3}(\\s*\|-)\\d{4}\\s*) |
@@ -136,18 +135,14 @@
 | regexplib/address.js:75:616:75:618 | \\w+ | Strings starting with '9 a C/O ' and with many repetitions of 'a' can start matching anywhere after the start of the preceeding \\x20* |
 | regexplib/address.js:75:727:75:740 | [a-zA-Z0-9\\-]+ | Strings starting with '9 a 9 a#' and with many repetitions of 'FL0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/address.js:75:796:75:798 | \\s+ | Strings starting with '9 a ' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s+ |
-| regexplib/address.js:75:803:75:811 | [A-Za-z]+ | Strings starting with '9 a  ' and with many repetitions of 'A' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/address.js:85:15:85:49 | ([0-9]\|[ ]\|[-]\|[\\(]\|[\\)]\|ext.\|[,])+ | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (?<Telephone>([0-9]\|[ ]\|[-]\|[\\(]\|[\\)]\|ext.\|[,])+)([ ]\|[:]\|\\t\|[-])*(?<Where>Home\|Office\|Work\|Away\|Fax\|FAX\|Phone) |
-| regexplib/address.js:85:51:85:67 | ([ ]\|[:]\|\\t\|[-])* | Strings starting with '0' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding ([0-9]\|[ ]\|[-]\|[\\(]\|[\\)]\|ext.\|[,])+ |
+| regexplib/address.js:85:51:85:67 | ([ ]\|[:]\|\\t\|[-])* | Strings starting with ' ' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding ([0-9]\|[ ]\|[-]\|[\\(]\|[\\)]\|ext.\|[,])+ |
 | regexplib/address.js:93:3:93:5 | \\s* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (\\s*\\(?0\\d{4}\\)?(\\s*\|-)\\d{3}(\\s*\|-)\\d{3}\\s*) |
 | regexplib/address.js:93:48:93:50 | \\s* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (\\s*\\(?0\\d{3}\\)?(\\s*\|-)\\d{3}(\\s*\|-)\\d{4}\\s*) |
 | regexplib/address.js:93:93:93:95 | \\s* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding (\\s*(7\|8)(\\d{7}\|\\d{3}(\\-\|\\s{1})\\d{4})\\s*) |
 | regexplib/address.js:95:379:95:755 | [a-zA-Z0-9&#192;&#193;&#194;&#195;&#196;&#197;&#198;&#199;&#200;&#201;&#202;&#203;&#204;&#205;&#206;&#207;&#208;&#209;&#210;&#211;&#212;&#213;&#214;&#216;&#217;&#218;&#219;&#220;&#221;&#223;&#224;&#225;&#226;&#227;&#228;&#229;&#230;&#231;&#232;&#233;&#234;&#235;&#236;&#237;&#238;&#239;&#241;&#242;&#243;&#244;&#245;&#246;&#248;&#249;&#250;&#251;&#252;&#253;&#255;\\.\\,\\-\\/\\' ]+ | Strings starting with '#' and with many repetitions of '#' can start matching anywhere after the start of the preceeding [a-zA-Z0-9&#192;&#193;&#194;&#195;&#196;&#197;&#198;&#199;&#200;&#201;&#202;&#203;&#204;&#205;&#206;&#207;&#208;&#209;&#210;&#211;&#212;&#213;&#214;&#216;&#217;&#218;&#219;&#220;&#221;&#223;&#224;&#225;&#226;&#227;&#228;&#229;&#230;&#231;&#232;&#233;&#234;&#235;&#236;&#237;&#238;&#239;&#241;&#242;&#243;&#244;&#245;&#246;&#248;&#249;&#250;&#251;&#252;&#253;&#255;\\.\\,\\-\\/\\']+ |
-| regexplib/address.js:99:19:99:24 | [0-9]* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]* |
 | regexplib/email.js:1:16:1:22 | [-.\\w]* | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([-.\\w]*[0-9a-zA-Z])* |
 | regexplib/email.js:2:5:2:12 | [-._\\w]* | Strings starting with 'a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding (\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3}) |
-| regexplib/email.js:5:24:5:35 | [a-zA-Z0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([_\\.\\-]?[a-zA-Z0-9]+)* |
-| regexplib/email.js:5:63:5:74 | [a-zA-Z0-9]+ | Strings starting with '0@0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [A-Za-z0-9]+ |
 | regexplib/email.js:8:16:8:49 | [^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+ | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding (?<user>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\"))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\")))*)@(?<domain>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\]))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\])))*) |
 | regexplib/email.js:8:57:8:84 | (?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))* | Strings starting with '"' and with many repetitions of '\\\\"' can start matching anywhere after the start of the preceeding (?<user>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\"))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\")))*)@(?<domain>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\]))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\])))*) |
 | regexplib/email.js:8:89:8:174 | (?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\")))* | Strings starting with '!' and with many repetitions of '.!' can start matching anywhere after the start of the preceeding (?<user>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\"))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\"(?:(?:[^\\"\\\\\\r\\n])\|(?:\\\\.))*\\")))*)@(?<domain>(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\]))(?:\\.(?:(?:[^ \\t\\(\\)\\<\\>@,;\\:\\\\\\"\\.\\[\\]\\r\\n]+)\|(?:\\[(?:(?:[^\\[\\]\\\\\\r\\n])\|(?:\\\\.))*\\])))*) |
@@ -160,22 +155,14 @@
 | regexplib/email.js:15:6:15:13 | [\\w-\\.]* | Strings starting with 'a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/email.js:15:28:15:30 | \\w* | Strings starting with 'a@a' and with many repetitions of 'aa' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/email.js:20:3:20:6 | \\w+? | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (\\w+?@\\w+?\\x2E.+) |
-| regexplib/email.js:25:67:25:78 | [a-zA-Z0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([_\\.\\-]?[a-zA-Z0-9]+)* |
-| regexplib/email.js:25:106:25:117 | [a-zA-Z0-9]+ | Strings starting with '0@0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [A-Za-z0-9]+ |
-| regexplib/email.js:25:212:25:223 | [a-zA-Z0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding ([_\\.\\-]?[a-zA-Z0-9]+)* |
-| regexplib/email.js:25:251:25:262 | [a-zA-Z0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [A-Za-z0-9]+ |
 | regexplib/email.js:28:2:28:4 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding \\w+[\\w-\\.]*\\@\\w+((-\\w+)\|(\\w*))\\.[a-z]{2,3}$ |
 | regexplib/email.js:28:5:28:12 | [\\w-\\.]* | Strings starting with 'a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/email.js:28:27:28:29 | \\w* | Strings starting with 'a@a' and with many repetitions of 'aa' can start matching anywhere after the start of the preceeding \\w+ |
-| regexplib/email.js:28:73:28:87 | [0-9a-zA-Z'\\.]+ | Strings with many repetitions of ''' can start matching anywhere after the start of the preceeding ([0-9a-zA-Z'\\.]+)@([0-9a-zA-Z']+)\\.([0-9a-zA-Z']+)$ |
-| regexplib/email.js:28:125:28:139 | [0-9a-zA-Z'\\.]+ | Strings with many repetitions of ''' can start matching anywhere after the start of the preceeding ([0-9a-zA-Z'\\.]+)@([0-9a-zA-Z']+)\\*+$ |
 | regexplib/email.js:29:2:29:7 | [\\w-]+ | Strings with many repetitions of '-' can start matching anywhere after the start of the preceeding [\\w-]+@([\\w-]+\\.)+[\\w-]+ |
 | regexplib/email.js:31:197:31:224 | [^\\x01-\\x1F\\\\""\\*\\?<>:\|\\\\/]* | Strings starting with '!' and with many repetitions of '!' can start matching anywhere after the start of the preceeding [^\\x01-\\x1F\\\\""\\*\\?\|><:\\\\/]* |
 | regexplib/email.js:33:16:33:22 | [-.\\w]* | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([-.\\w]*[0-9a-zA-Z])* |
 | regexplib/email.js:33:38:33:51 | ([0-9a-zA-Z])+ | Strings starting with '0@' and with many repetitions of '0.0' can start matching anywhere after the start of the preceeding [-\\w]* |
 | regexplib/email.js:33:53:33:58 | [-\\w]* | Strings starting with '0@0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([0-9a-zA-Z])+ |
-| regexplib/email.js:34:24:34:35 | [a-zA-Z0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding ([_\\.\\-]?[a-zA-Z0-9]+)* |
-| regexplib/email.js:34:63:34:74 | [a-zA-Z0-9]+ | Strings starting with '0@0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [A-Za-z0-9]+ |
 | regexplib/email.js:38:11:38:12 | .* | Strings starting with 'a@-' and with many repetitions of 'a@-' can start matching anywhere after the start of the preceeding .+ |
 | regexplib/markup.js:1:11:1:12 | .* | Strings starting with '<' and with many repetitions of '=' can start matching anywhere after the start of the preceeding [^>]* |
 | regexplib/markup.js:1:21:1:22 | .* | Strings starting with '<=' and with many repetitions of '==' can start matching anywhere after the start of the preceeding .* |
@@ -183,7 +170,7 @@
 | regexplib/markup.js:2:3:2:7 | [^>]* | Strings starting with '<' and with many repetitions of '<' can start matching anywhere after the start of the preceeding <[^>]*> |
 | regexplib/markup.js:3:440:3:456 | (\\s(?<attr>.+?))* | Strings starting with '<?i:q' and with many repetitions of ' a' can start matching anywhere after the start of the preceeding .+? |
 | regexplib/markup.js:3:451:3:453 | .+? | Strings starting with '<?i:q ' and with many repetitions of ' a' can start matching anywhere after the start of the preceeding (\\s(?<attr>.+?))* |
-| regexplib/markup.js:5:1525:5:1527 | \\s* | Strings starting with '?'DateLiteral' ?# Per the VB Spec : DateLiteral ::= '#'   DateOrTime   '#'  # ?'DateOrTime'  DateValue    ?# TimeValue ::= HourValue : MinuteValue        10 ?# Hour 01 - 24  : 60 ?# Minute 01 - 60  :  ?# Optional Minute :01 - :60       ' and with many repetitions of '     ' can start matching anywhere after the start of the preceeding \\s* |
+| regexplib/markup.js:5:1525:5:1527 | \\s* | Strings with many repetitions of '     ' can start matching anywhere after the start of the preceeding \\s* |
 | regexplib/markup.js:6:11:6:25 | [\\w\\*\\)\\(\\,\\s]+ | Strings starting with 'SELECT ' and with many repetitions of 'SELECT\\t' can start matching anywhere after the start of the preceeding (SELECT\\s[\\w\\*\\)\\(\\,\\s]+\\sFROM\\s[\\w]+) |
 | regexplib/markup.js:6:99:6:113 | [\\s\\w\\d\\)\\(\\,]* | Strings starting with ' INSERT INTO 0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [\\d\\w]+ |
 | regexplib/markup.js:7:15:7:21 | [^\\\\"]* | Strings starting with '"!' and with many repetitions of '\\\\"!!' can start matching anywhere after the start of the preceeding "([^"](?:\\\\.\|[^\\\\"]*)*)" |
@@ -212,7 +199,7 @@
 | regexplib/markup.js:25:11:25:15 | [^>]* | Strings starting with '<A' and with many repetitions of '<A' can start matching anywhere after the start of the preceeding <[a-zA-Z][^>]*\\son\\w+=(\\w+\|'[^']*'\|"[^"]*")[^>]*> |
 | regexplib/markup.js:25:45:25:49 | [^>]* | Strings starting with '<A ona=a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/markup.js:27:3:27:7 | [^>]* | Strings starting with '<' and with many repetitions of '<' can start matching anywhere after the start of the preceeding <[^>]*name[\\s]*=[\\s]*"?[^\\w_]*"?[^>]*> |
-| regexplib/markup.js:27:34:27:38 | [^>]* | Strings starting with '<name=' and with many repetitions of '\\t' can start matching anywhere after the start of the preceeding [\\s]* |
+| regexplib/markup.js:27:34:27:38 | [^>]* | Strings starting with '<name=' and with many repetitions of '"' can start matching anywhere after the start of the preceeding [^>]* |
 | regexplib/markup.js:29:6:29:13 | [\\d\\D]*? | Strings starting with '/*' and with many repetitions of 'a/*' can start matching anywhere after the start of the preceeding \\/\\*[\\d\\D]*?\\*\\/ |
 | regexplib/markup.js:33:10:33:11 | .* | Strings starting with '?s/*' and with many repetitions of '?s/*' can start matching anywhere after the start of the preceeding (?s)\\/\\*.*\\*\\/ |
 | regexplib/markup.js:34:4:34:10 | [^\\s>]* | Strings starting with '<' and with many repetitions of '<!' can start matching anywhere after the start of the preceeding <([^\\s>]*)(\\s[^<]*)> |
@@ -222,34 +209,23 @@
 | regexplib/markup.js:43:11:43:15 | [^>]* | Strings starting with '<A' and with many repetitions of '<A' can start matching anywhere after the start of the preceeding <[a-zA-Z][^>]*\\son\\w+=(\\w+\|'[^']*'\|"[^"]*")[^>]*> |
 | regexplib/markup.js:43:45:43:49 | [^>]* | Strings starting with '<A ona=a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/markup.js:44:3:44:7 | [^>]* | Strings starting with '<' and with many repetitions of '<' can start matching anywhere after the start of the preceeding <[^>]*name[\\s]*=[\\s]*"?[^\\w_]*"?[^>]*> |
-| regexplib/markup.js:44:34:44:38 | [^>]* | Strings starting with '<name=' and with many repetitions of '\\t' can start matching anywhere after the start of the preceeding [\\s]* |
+| regexplib/markup.js:44:34:44:38 | [^>]* | Strings starting with '<name=' and with many repetitions of '"' can start matching anywhere after the start of the preceeding [^>]* |
 | regexplib/markup.js:45:6:45:13 | [\\d\\D]*? | Strings starting with '/*' and with many repetitions of 'a/*' can start matching anywhere after the start of the preceeding \\/\\*[\\d\\D]*?\\*\\/ |
 | regexplib/markup.js:48:6:48:13 | [\\s\\S]*? | Strings starting with '<!--' and with many repetitions of '<!--' can start matching anywhere after the start of the preceeding <!--[\\s\\S]*?--> |
 | regexplib/markup.js:53:15:53:19 | [\\w]* | Strings starting with '[a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\w+ |
 | regexplib/markup.js:56:23:56:25 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (\\/?(?<step>\\w+))+ |
 | regexplib/markup.js:56:59:56:61 | \\s* | Strings starting with 'a[' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s* |
-| regexplib/markup.js:61:74:61:79 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/markup.js:61:91:61:96 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/markup.js:61:98:61:103 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/markup.js:61:115:61:120 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/markup.js:61:122:61:127 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/markup.js:61:129:61:134 | [0-9]+ | Strings starting with '<Assembly:AssemblyVersion("0a0a0a' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
 | regexplib/markup.js:61:147:61:148 | .* | Strings starting with '<Assembly:AssemblyVersion("*")>' and with many repetitions of '<Assembly:AssemblyVersion("*")>' can start matching anywhere after the start of the preceeding [^']*? |
-| regexplib/markup.js:62:9:62:14 | [^>]*? | Strings starting with '<a\\t' and with many repetitions of '\\t' can start matching anywhere after the start of the preceeding [\\s]+ |
-| regexplib/markup.js:62:39:62:45 | [\\"\\']+ | Strings starting with '<a\\thref=\\t' and with many repetitions of '"' can start matching anywhere after the start of the preceeding .*? |
-| regexplib/markup.js:62:46:62:48 | .*? | Strings starting with '<a\\thref=\\t"' and with many repetitions of '"' can start matching anywhere after the start of the preceeding .*? |
-| regexplib/markup.js:62:51:62:55 | [^<]+ | Strings starting with '<a\\thref=\\t">' and with many repetitions of '>;' can start matching anywhere after the start of the preceeding .*? |
-| regexplib/markup.js:62:57:62:59 | .*? | Strings starting with '<a\\thref=\\t">' and with many repetitions of '>a' can start matching anywhere after the start of the preceeding .*? |
+| regexplib/markup.js:62:39:62:45 | [\\"\\']+ | Strings with many repetitions of '"' can start matching anywhere after the start of the preceeding .*? |
+| regexplib/markup.js:62:46:62:48 | .*? | Strings with many repetitions of '"' can start matching anywhere after the start of the preceeding .*? |
+| regexplib/markup.js:62:51:62:55 | [^<]+ | Strings with many repetitions of '>;' can start matching anywhere after the start of the preceeding .*? |
+| regexplib/markup.js:62:57:62:59 | .*? | Strings with many repetitions of '>a' can start matching anywhere after the start of the preceeding .*? |
 | regexplib/markup.js:63:70:63:77 | [\\w\\W]*? | Strings with many repetitions of 'a/*' can start matching anywhere after the start of the preceeding (?<commentblock>((?m:^[\\t ]*\\/{2}[^\\n\\r\\v\\f]+[\\n\\r\\v\\f]*){2,})\|(\\/\\*[\\w\\W]*?\\*\\/)) |
 | regexplib/misc.js:4:36:4:44 | [a-zA-Z]* | Strings starting with 'A' and with many repetitions of 'AA' can start matching anywhere after the start of the preceeding [a-zA-Z]+ |
 | regexplib/misc.js:76:2:76:27 | (AUX\|PRN\|NUL\|COM\\d\|LPT\\d)+ | Strings with many repetitions of 'AUX' can start matching anywhere after the start of the preceeding (AUX\|PRN\|NUL\|COM\\d\|LPT\\d)+\\s*$ |
 | regexplib/misc.js:81:31:81:45 | [^a-z\\:\\,\\(\\)]* | Strings starting with '#' and with many repetitions of '#' can start matching anywhere after the start of the preceeding ([A-Z&#228;&#246;&#252;0-9\\/][^a-z\\:\\,\\(\\)]*[A-Z&#228;&#246;&#252;0-9])($\|[\\.\\:\\,\\;\\)\\-\\ \\+]\|s\\b) |
-| regexplib/misc.js:83:18:83:23 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:83:24:83:26 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:83:36:83:38 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/misc.js:83:72:83:77 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:83:78:83:80 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:83:90:83:92 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]+ |
+| regexplib/misc.js:83:15:83:17 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
+| regexplib/misc.js:83:69:83:71 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
 | regexplib/misc.js:90:4:90:11 | ([a-z])+ | Strings with many repetitions of 'aa' can start matching anywhere after the start of the preceeding (([a-z])+.)+ |
 | regexplib/misc.js:93:3:93:4 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (.*\\.([wW][mM][aA])\|([mM][pP][3])$) |
 | regexplib/misc.js:95:25:95:26 | .+ | Strings starting with 'at ' and with many repetitions of 'at a' can start matching anywhere after the start of the preceeding (at\\s)(?<fullClassName>.+)(\\.)(?<methodName>[^\\.]*)(\\()(?<parameters>[^\\)]*)(\\))((\\sin\\s)(?<fileName>.+)(:line )(?<lineNumber>[\\d]*))? |
@@ -262,7 +238,6 @@
 | regexplib/misc.js:116:3:116:4 | .* | Strings starting with '{' and with many repetitions of '{' can start matching anywhere after the start of the preceeding {.*} |
 | regexplib/misc.js:117:25:117:26 | .+ | Strings starting with '{a}' and with many repetitions of 'a)' can start matching anywhere after the start of the preceeding .+ |
 | regexplib/misc.js:119:20:119:22 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (NOT)?(\\s*\\(*)\\s*(\\w+)\\s*(=\|<>\|<\|>\|LIKE\|IN)\\s*(\\(([^\\)]*)\\)\|'([^']*)'\|(-?\\d*\\.?\\d+))(\\s*\\)*\\s*)(AND\|OR)? |
-| regexplib/misc.js:123:36:123:38 | .*? | Strings starting with '?se[A' and with many repetitions of '?se[Aa' can start matching anywhere after the start of the preceeding (?s)(?:\\e\\[(?:(\\d+);?)*([A-Za-z])(.*?))(?=\\e\\[\|\\z) |
 | regexplib/misc.js:126:15:126:20 | [a-z]+ | Strings starting with 'a' and with many repetitions of 'aa' can start matching anywhere after the start of the preceeding [a-z]+ |
 | regexplib/misc.js:141:15:141:19 | [^;]+ | Strings starting with '{\\\\f\\\\' and with many repetitions of '{\\\\f\\\\:' can start matching anywhere after the start of the preceeding (\\{\\\\f\\d*)\\\\([^;]+;) |
 | regexplib/misc.js:144:52:144:70 | [a-z0-9\\/\\.\\?\\=\\&]* | Strings starting with '".htm' and with many repetitions of '.asp' can start matching anywhere after the start of the preceeding [a-z0-9\\/\\.\\?\\=\\&]* |
@@ -272,25 +247,16 @@
 | regexplib/misc.js:148:34:148:38 | [^"]* | Strings starting with '<! !="' and with many repetitions of '<" !="' can start matching anywhere after the start of the preceeding \\w?<\\s?\\/?[^\\s>]+(\\s+[^"'=]+(=("[^"]*")\|('[^\\']*')\|([^\\s"'>]*))?)*\\s*\\/?> |
 | regexplib/misc.js:148:44:148:49 | [^\\']* | Strings starting with '<! !'' and with many repetitions of '<' !'' can start matching anywhere after the start of the preceeding \\w?<\\s?\\/?[^\\s>]+(\\s+[^"'=]+(=("[^"]*")\|('[^\\']*')\|([^\\s"'>]*))?)*\\s*\\/?> |
 | regexplib/misc.js:148:68:148:70 | \\s* | Strings starting with '<!' and with many repetitions of '  ' can start matching anywhere after the start of the preceeding \\s+ |
-| regexplib/misc.js:162:18:162:23 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:162:24:162:26 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:162:36:162:38 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]+ |
-| regexplib/misc.js:162:72:162:77 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:162:78:162:80 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/misc.js:162:90:162:92 | \\d* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]+ |
+| regexplib/misc.js:162:15:162:17 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
+| regexplib/misc.js:162:69:162:71 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
 | regexplib/misc.js:163:41:163:43 | \\s* | Strings starting with 'SR' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s* |
 | regexplib/misc.js:163:75:163:77 | \\s* | Strings starting with '99' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s* |
 | regexplib/misc.js:164:31:164:45 | [^a-z\\:\\,\\(\\)]* | Strings starting with '#' and with many repetitions of '#' can start matching anywhere after the start of the preceeding ([A-Z&#228;&#246;&#252;0-9\\/][^a-z\\:\\,\\(\\)]*[A-Z&#228;&#246;&#252;0-9])($\|[\\.\\:\\,\\;\\)\\-\\ \\+]\|s\\b) |
 | regexplib/misc.js:168:3:168:4 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (.*\\.([wW][mM][aA])\|([mM][pP][3])$) |
 | regexplib/misc.js:173:4:173:11 | ([a-z])+ | Strings with many repetitions of 'aa' can start matching anywhere after the start of the preceeding (([a-z])+.)+ |
-| regexplib/numbers.js:1:19:1:22 | [0]* | Strings starting with '1' and with many repetitions of '0' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/numbers.js:3:14:3:19 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]* |
-| regexplib/numbers.js:5:18:5:23 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-9]* |
-| regexplib/numbers.js:5:34:5:39 | [0-9]* | Strings starting with '0' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [0-9]+ |
 | regexplib/numbers.js:6:10:6:12 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding (\\d\|,)* |
 | regexplib/numbers.js:9:14:9:16 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
 | regexplib/numbers.js:13:9:13:11 | \\d* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding \\d* |
-| regexplib/numbers.js:16:14:16:16 | \\d* | Strings starting with '0a' and with many repetitions of '09' can start matching anywhere after the start of the preceeding \\d* |
 | regexplib/strings.js:2:2:2:3 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding .*[Pp]en[Ii1][\\$s].* |
 | regexplib/strings.js:14:35:14:37 | \\w* | Strings starting with 'A' and with many repetitions of 'A' can start matching anywhere after the start of the preceeding \\w* |
 | regexplib/strings.js:14:61:14:63 | \\w* | Strings starting with 'AA' and with many repetitions of 'A' can start matching anywhere after the start of the preceeding \\w* |
@@ -313,7 +279,6 @@
 | regexplib/strings.js:53:65:53:73 | [a-z0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [a-z0-9]+ |
 | regexplib/strings.js:54:20:54:22 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (NOT)?(\\s*\\(*)\\s*(\\w+)\\s*(=\|<>\|<\|>\|LIKE\|IN)\\s*(\\(([^\\)]*)\\)\|'([^']*)'\|(-?\\d*\\.?\\d+))(\\s*\\)*\\s*)(AND\|OR)? |
 | regexplib/strings.js:56:52:56:53 | .+ | Strings starting with 'PRN.' and with many repetitions of '.' can start matching anywhere after the start of the preceeding .* |
-| regexplib/strings.js:57:36:57:38 | .*? | Strings starting with '?se[A' and with many repetitions of '?se[Aa' can start matching anywhere after the start of the preceeding (?s)(?:\\e\\[(?:(\\d+);?)*([A-Za-z])(.*?))(?=\\e\\[\|\\z) |
 | regexplib/strings.js:64:3:64:5 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (\\w+)\\s+\\1 |
 | regexplib/strings.js:70:6:70:17 | [a-zA-Z,\\s]+ | Strings with many repetitions of '\\t' can start matching anywhere after the start of the preceeding \\s* |
 | regexplib/strings.js:70:18:70:20 | \\s* | Strings starting with '\\t' and with many repetitions of '\\t' can start matching anywhere after the start of the preceeding \\s* |
@@ -324,7 +289,6 @@
 | regexplib/strings.js:74:2:74:3 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding .*[Pp]re[Ss\\$]cr[iI1]pt.* |
 | regexplib/strings.js:75:2:75:3 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding .*[Vv][Ii1]agr.* |
 | regexplib/strings.js:76:2:76:3 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding .*[Oo0][Ee][Mm].* |
-| regexplib/strings.js:81:36:81:38 | .*? | Strings starting with '?se[A' and with many repetitions of '?se[Aa' can start matching anywhere after the start of the preceeding (?s)(?:\\e\\[(?:(\\d+);?)*([A-Za-z])(.*?))(?=\\e\\[\|\\z) |
 | regexplib/strings.js:82:20:82:22 | \\w+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (NOT)?(\\s*\\(*)\\s*(\\w+)\\s*(=\|<>\|<\|>\|LIKE\|IN)\\s*(\\(([^\\)]*)\\)\|'([^']*)'\|(-?\\d*\\.?\\d+))(\\s*\\)*\\s*)(AND\|OR)? |
 | regexplib/strings.js:88:3:88:12 | [^\\.\\?\\!]* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding ([^\\.\\?\\!]*)[\\.\\?\\!] |
 | regexplib/strings.js:89:3:89:5 | \\S+ | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding (\\S+)\\x20{2,}(?=\\S+) |
@@ -339,44 +303,24 @@
 | regexplib/uri.js:18:4:18:46 | ([A-Za-z0-9'~`!@#$%&^_+=\\(\\){},\\-\\[\\]\\;])+? | Strings starting with 'A' and with many repetitions of 'A' can start matching anywhere after the start of the preceeding \\A([A-Za-z0-9'~`!@#$%&^_+=\\(\\){},\\-\\[\\]\\;])+?([ A-Za-z0-9'~` !@#$%&^_+=\\(\\){},\\-\\[\\];]\|([.]))*?(?(3)(([ A-Za-z0-9'~`!@#$ %&^_+=\\(\\){},\\-\\[\\]\\;]*?)([A-Za-z0-9'~`!@#$%&^_+=\\(\\){},\\-\\[ \\];])+\\z)\|(\\z)) |
 | regexplib/uri.js:18:47:18:96 | ([ A-Za-z0-9'~` !@#$%&^_+=\\(\\){},\\-\\[\\];]\|([.]))*? | Strings starting with 'A!' and with many repetitions of '!' can start matching anywhere after the start of the preceeding ([A-Za-z0-9'~`!@#$%&^_+=\\(\\){},\\-\\[\\]\\;])+? |
 | regexplib/uri.js:18:148:18:189 | ([A-Za-z0-9'~`!@#$%&^_+=\\(\\){},\\-\\[ \\];])+ | Strings starting with 'A!?3' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding [ A-Za-z0-9'~`!@#$ %&^_+=\\(\\){},\\-\\[\\]\\;]*? |
-| regexplib/uri.js:20:11:20:16 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:17:20:22 | [0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:33:20:38 | [0-9]+ | Strings starting with '00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:39:20:44 | [0-9]+ | Strings starting with '00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:55:20:60 | [0-9]+ | Strings starting with '00.00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:61:20:66 | [0-9]+ | Strings starting with '00.00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:77:20:82 | [0-9]+ | Strings starting with '00.00.00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:20:83:20:88 | [0-9]+ | Strings starting with '00.00.00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
 | regexplib/uri.js:23:2:23:74 | (((file\|gopher\|news\|nntp\|telnet\|http\|ftp\|https\|ftps\|sftp):\\/\\/)\|(www\\.))+ | Strings with many repetitions of 'www.' can start matching anywhere after the start of the preceeding (((file\|gopher\|news\|nntp\|telnet\|http\|ftp\|https\|ftps\|sftp):\\/\\/)\|(www\\.))+(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})\|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(\\/[a-zA-Z0-9\\&%_\\./-~-]*)? |
 | regexplib/uri.js:23:77:23:92 | [a-zA-Z0-9\\._-]+ | Strings starting with 'www.' and with many repetitions of 'www.-' can start matching anywhere after the start of the preceeding (((file\|gopher\|news\|nntp\|telnet\|http\|ftp\|https\|ftps\|sftp):\\/\\/)\|(www\\.))+ |
-| regexplib/uri.js:24:11:24:16 | [0-9]+ | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:17:24:22 | [0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:33:24:38 | [0-9]+ | Strings starting with '00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:39:24:44 | [0-9]+ | Strings starting with '00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:55:24:60 | [0-9]+ | Strings starting with '00.00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:61:24:66 | [0-9]+ | Strings starting with '00.00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:77:24:82 | [0-9]+ | Strings starting with '00.00.00.' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
-| regexplib/uri.js:24:83:24:88 | [0-9]+ | Strings starting with '00.00.00.0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [0-2]* |
 | regexplib/uri.js:29:2:29:45 | ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+ | Strings with many repetitions of 'wwwa' can start matching anywhere after the start of the preceeding ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+(([a-zA-Z0-9\\.-]+\\.[a-zA-Z]{2,4})\|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(\\/[a-zA-Z0-9%:/-_\\?\\.'~]*)? |
 | regexplib/uri.js:29:48:29:62 | [a-zA-Z0-9\\.-]+ | Strings starting with 'wwwa' and with many repetitions of 'www--' can start matching anywhere after the start of the preceeding ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+ |
 | regexplib/uri.js:31:65:31:69 | [^<]+ | Strings starting with 'href=! >' and with many repetitions of 'href=! >;' can start matching anywhere after the start of the preceeding href\\s*=\\s*(?:(?:\\"(?<url>[^\\"]*)\\")\|(?<url>[^\\s*] ))>(?<title>[^<]+)<\\/\\w> |
-| regexplib/uri.js:36:40:36:42 | \\d* | Strings starting with '$1' and with many repetitions of '1' can start matching anywhere after the start of the preceeding [1-9]+ |
 | regexplib/uri.js:38:20:38:28 | [a-z0-9]+ | Strings starting with 'a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [a-z]+ |
 | regexplib/uri.js:38:35:38:40 | [a-z]+ | Strings starting with 'a.' and with many repetitions of 'aa' can start matching anywhere after the start of the preceeding [a-z0-9]+ |
 | regexplib/uri.js:38:52:38:60 | [a-z0-9]+ | Strings starting with 'a.a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [a-z]+ |
 | regexplib/uri.js:39:7:39:9 | .*? | Strings starting with '<a' and with many repetitions of ' ' can start matching anywhere after the start of the preceeding \\s* |
 | regexplib/uri.js:39:43:39:45 | .*? | Strings with many repetitions of '>a' can start matching anywhere after the start of the preceeding .*? |
-| regexplib/uri.js:41:16:41:31 | [a-zA-Z0-9\\-\\.]+ | Strings starting with '0' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [a-zA-Z0-9]+ |
 | regexplib/uri.js:47:31:47:36 | [\\w-]+ | Strings with many repetitions of '-' can start matching anywhere after the start of the preceeding [\\w-\\s]* |
 | regexplib/uri.js:51:51:51:53 | \\S+ | Strings with many repetitions of '!@' can start matching anywhere after the start of the preceeding \\S+ |
-| regexplib/uri.js:54:40:54:42 | \\d* | Strings starting with '$1' and with many repetitions of '1' can start matching anywhere after the start of the preceeding [1-9]+ |
 | regexplib/uri.js:55:20:55:28 | [a-z0-9]+ | Strings starting with 'a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [a-z]+ |
 | regexplib/uri.js:55:35:55:40 | [a-z]+ | Strings starting with 'a.' and with many repetitions of 'aa' can start matching anywhere after the start of the preceeding [a-z0-9]+ |
 | regexplib/uri.js:55:52:55:60 | [a-z0-9]+ | Strings starting with 'a.a' and with many repetitions of '0' can start matching anywhere after the start of the preceeding [a-z]+ |
 | regexplib/uri.js:58:2:58:45 | ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+ | Strings with many repetitions of 'wwwa' can start matching anywhere after the start of the preceeding ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+(([a-zA-Z0-9\\.-]+\\.[a-zA-Z]{2,4})\|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(\\/[a-zA-Z0-9%:/-_\\?\\.'~]*)? |
 | regexplib/uri.js:58:48:58:62 | [a-zA-Z0-9\\.-]+ | Strings starting with 'wwwa' and with many repetitions of 'www--' can start matching anywhere after the start of the preceeding ((http\\:\\/\\/\|https\\:\\/\\/\|ftp\\:\\/\\/)\|(www.))+ |
 | regexplib/uri.js:64:31:64:36 | [\\w-]+ | Strings with many repetitions of '-' can start matching anywhere after the start of the preceeding [\\w-\\s]* |
-| regexplib/uri.js:70:16:70:31 | [a-zA-Z0-9\\-\\.]+ | Strings starting with '0' and with many repetitions of '00' can start matching anywhere after the start of the preceeding [a-zA-Z0-9]+ |
 | regexplib/uri.js:71:75:71:89 | [^\\/\\\\:*?"<>\|]+ | Strings starting with 'A:\\\\!.' and with many repetitions of '!.' can start matching anywhere after the start of the preceeding [^\\/\\\\:*?"<>\|]+ |
 | tst.js:14:15:14:16 | .* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (.*,)+ |
 | tst.js:23:21:23:28 | [\\s\\S]*? | Strings starting with '(*' and with many repetitions of '(*a' can start matching anywhere after the start of the preceeding [\\s\\S]*? |
@@ -396,7 +340,6 @@
 | tst.js:52:67:52:76 | (\\[.*?\\])* | Strings starting with '$.$' and with many repetitions of '[]' can start matching anywhere after the start of the preceeding .*? |
 | tst.js:52:70:52:72 | .*? | Strings starting with '$.$[' and with many repetitions of '[]' can start matching anywhere after the start of the preceeding .*? |
 | tst.js:58:15:58:20 | [a-z]+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding ([a-z]+)+ |
-| tst.js:60:43:60:54 | [a-zA-Z0-9]+ | Strings starting with '0' and with many repetitions of '0' can start matching anywhere after the start of the preceeding (([\\\\-.]\|[_]+)?([a-zA-Z0-9]+))* |
 | tst.js:61:16:61:23 | ([a-z])+ | Strings with many repetitions of 'aa' can start matching anywhere after the start of the preceeding (([a-z])+.)+ |
 | tst.js:66:16:66:31 | [\\w#:.~>+()\\s-]+ | Strings with many repetitions of '\\t' can start matching anywhere after the start of the preceeding .*? |
 | tst.js:66:38:66:40 | .*? | Strings starting with '[' and with many repetitions of '[' can start matching anywhere after the start of the preceeding [\\w#:.~>+()\\s-]+ |
@@ -412,11 +355,11 @@
 | tst.js:104:16:104:24 | (a\|[^a])* | Strings with many repetitions of '`' can start matching anywhere after the start of the preceeding ((a\|[^a])*)" |
 | tst.js:107:15:107:23 | (b\|[^a])* | Strings with many repetitions of '`' can start matching anywhere after the start of the preceeding ((b\|[^a])*)" |
 | tst.js:110:15:110:23 | (G\|[^a])* | Strings with many repetitions of 'G' can start matching anywhere after the start of the preceeding ((G\|[^a])*)" |
-| tst.js:113:15:113:27 | ([0-9]\|[^a])* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding (([0-9]\|[^a])*)" |
+| tst.js:113:15:113:27 | ([0-9]\|[^a])* | Strings with many repetitions of '`' can start matching anywhere after the start of the preceeding (([0-9]\|[^a])*)" |
 | tst.js:122:16:122:62 | (?:\\\\[\\x00-\\x7f]\|[^\\x00-\\x08\\x0a-\\x1f\\x7f"\\\\])* | Strings starting with '"' and with many repetitions of '\\\\"!' can start matching anywhere after the start of the preceeding "((?:\\\\[\\x00-\\x7f]\|[^\\x00-\\x08\\x0a-\\x1f\\x7f"\\\\])*)" |
 | tst.js:125:15:125:28 | ([a-z]\|[d-h])* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (([a-z]\|[d-h])*)" |
 | tst.js:128:15:128:30 | ([^a-z]\|[^0-9])* | Strings with many repetitions of '/' can start matching anywhere after the start of the preceeding (([^a-z]\|[^0-9])*)" |
-| tst.js:131:15:131:25 | (\\d\|[0-9])* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding ((\\d\|[0-9])*)" |
+| tst.js:131:15:131:25 | (\\d\|[0-9])* | Strings with many repetitions of '9' can start matching anywhere after the start of the preceeding ((\\d\|[0-9])*)" |
 | tst.js:134:15:134:22 | (\\s\|\\s)* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding ((\\s\|\\s)*)" |
 | tst.js:137:15:137:21 | (\\w\|G)* | Strings with many repetitions of 'G' can start matching anywhere after the start of the preceeding ((\\w\|G)*)" |
 | tst.js:140:16:140:23 | (\\s\|\\d)* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding ((\\s\|\\d)*)" |
@@ -425,7 +368,7 @@
 | tst.js:149:15:149:24 | (\\s\|[\\f])* | Strings with many repetitions of '\u000c' can start matching anywhere after the start of the preceeding ((\\s\|[\\f])*)" |
 | tst.js:152:15:152:28 | (\\s\|[\\v]\|\\\\v)* | Strings with many repetitions of '\u000b' can start matching anywhere after the start of the preceeding ((\\s\|[\\v]\|\\\\v)*)" |
 | tst.js:155:15:155:24 | (\\f\|[\\f])* | Strings with many repetitions of '\u000c' can start matching anywhere after the start of the preceeding ((\\f\|[\\f])*)" |
-| tst.js:158:15:158:22 | (\\W\|\\D)* | Strings with many repetitions of ' ' can start matching anywhere after the start of the preceeding ((\\W\|\\D)*)" |
+| tst.js:158:15:158:22 | (\\W\|\\D)* | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ((\\W\|\\D)*)" |
 | tst.js:161:15:161:22 | (\\S\|\\w)* | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ((\\S\|\\w)*)" |
 | tst.js:164:15:164:24 | (\\S\|[\\w])* | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ((\\S\|[\\w])*)" |
 | tst.js:167:15:167:27 | (1s\|[\\da-z])* | Strings with many repetitions of '0' can start matching anywhere after the start of the preceeding ((1s\|[\\da-z])*)" |
@@ -493,3 +436,17 @@
 | tst.js:351:15:351:16 | a+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (a+)* |
 | tst.js:352:15:352:16 | a* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (a*)+b |
 | tst.js:353:15:353:16 | a+ | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding (a+)+ |
+| tst.js:369:17:369:22 | [^"]*? | Strings starting with '"' and with many repetitions of '""' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+(?=\\s*\|\\s*$) |
+| tst.js:369:25:369:31 | [^"\\s]+ | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+ |
+| tst.js:372:16:372:21 | [^"]*? | Strings starting with '"' and with many repetitions of '""' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+(?=\\s*\|\\s*$)X |
+| tst.js:372:24:372:30 | [^"\\s]+ | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+ |
+| tst.js:373:16:373:21 | [^"]*? | Strings starting with '"' and with many repetitions of '""' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+(?=X) |
+| tst.js:373:24:373:30 | [^"\\s]+ | Strings with many repetitions of '!' can start matching anywhere after the start of the preceeding ("[^"]*?"\|[^"\\s]+)+ |
+| tst.js:374:15:374:16 | x* | Strings with many repetitions of 'x' can start matching anywhere after the start of the preceeding (x*)+(?=$) |
+| tst.js:375:15:375:16 | x* | Strings with many repetitions of 'x' can start matching anywhere after the start of the preceeding (x*)+(?=$\|y) |
+| tst.js:378:16:378:22 | [\\s\\S]* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding ([\\s\\S]*)+(?=$) |
+| tst.js:379:16:379:22 | [\\s\\S]* | Strings with many repetitions of 'a' can start matching anywhere after the start of the preceeding ([\\s\\S]*)+(?=$\|y) |
+| tst.js:381:15:381:24 | (foo\|FOO)* | Strings with many repetitions of 'FOO' can start matching anywhere after the start of the preceeding (foo\|FOO)*bar |
+| tst.js:382:14:382:23 | (foo\|FOO)* | Strings with many repetitions of 'foo' can start matching anywhere after the start of the preceeding (foo\|FOO)*bar |
+| tst.js:384:15:384:26 | ([AB]\|[ab])* | Strings with many repetitions of 'A' can start matching anywhere after the start of the preceeding ([AB]\|[ab])*C |
+| tst.js:385:14:385:25 | ([DE]\|[de])* | Strings with many repetitions of 'd' can start matching anywhere after the start of the preceeding ([DE]\|[de])*F |
