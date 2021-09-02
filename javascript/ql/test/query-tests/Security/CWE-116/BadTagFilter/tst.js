@@ -18,3 +18,6 @@ var filters = [
 ]
 
 doFilters(filters)
+
+var strip = '<script([^>]*)>([\\S\\s]*?)<\/script([^>]*)>';  // OK - it's used with the ignorecase flag
+new RegExp(strip, 'gi');
