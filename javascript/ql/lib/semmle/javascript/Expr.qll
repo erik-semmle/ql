@@ -16,6 +16,8 @@ private import semmle.javascript.internal.CachedStages
  * ```
  */
 class ExprOrType extends @expr_or_type, Documentable {
+  ExprOrType() { none() }
+
   /** Gets the statement in which this expression or type appears. */
   Stmt getEnclosingStmt() { enclosing_stmt(this, result) }
 

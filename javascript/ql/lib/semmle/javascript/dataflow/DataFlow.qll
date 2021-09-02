@@ -31,6 +31,8 @@ module DataFlow {
    * A node in the data flow graph.
    */
   class Node extends TNode {
+    Node() { none() }
+
     /**
      * Gets a data flow node from which data may flow to this node in one local step.
      */

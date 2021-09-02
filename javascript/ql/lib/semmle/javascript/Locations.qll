@@ -9,6 +9,8 @@ import javascript
  * For more information about locations see [Locations](https://help.semmle.com/QL/learn-ql/ql/locations.html).
  */
 class Location extends @location {
+  Location() { none() }
+
   /** Gets the file for this location. */
   File getFile() { locations_default(this, result, _, _, _, _) }
 
