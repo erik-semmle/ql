@@ -8,7 +8,7 @@
  */
 
 import javascript
-import ClassifyFiles
+import filters.ClassifyFiles
 
 from File f, string category
 where classify(f, category)
