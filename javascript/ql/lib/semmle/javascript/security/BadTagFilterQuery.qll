@@ -45,6 +45,14 @@ private module RegexpMatching {
           isStartState(result)
         )
       )
+      or
+      // we can skip past word boundaries if the next char is a non-word char.
+      exists(State separator |
+        separator.getRepr() instanceof RegExpWordBoundary and
+        separator = getAState(i, str, ignorePrefix) and
+        after(separator.getRepr()) = result and
+        str.charAt(i + 1).regexpMatch("\\W") // \W matches any non-word char.
+      )
     }
 
     /**

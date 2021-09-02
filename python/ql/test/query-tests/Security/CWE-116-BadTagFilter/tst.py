@@ -15,7 +15,8 @@ filters = [
     re.compile(r"""<script.*?>.*?<\/script[^>]*>""", re.re.DOTALL), # NOT OK - does not match uppercase SCRIPT tags
     re.compile(r"""<(script|SCRIPT).*?>.*?<\/(script|SCRIPT)[^>]*>""", re.DOTALL), # NOT OK - does not match mixed case script tags
     re.compile(r"""<script[^>]*?>[\s\S]*?<\/script.*>""", re.IGNORECASE), # NOT OK - doesn't match newlines in the end tag
-    re.compile(r"""<script[^>]*?>[\s\S]*?<\/script[^>]*?>""", re.IGNORECASE) # OK
+    re.compile(r"""<script[^>]*?>[\s\S]*?<\/script[^>]*?>""", re.IGNORECASE), # OK
+    re.compile(r"""<script\b[^>]*>([\s\S]*?)<\/script>""", re.IGNORECASE | re.DOTALL), # NOT OK - too strict matching on the end tag
 ]
 
 doFilters(filters)

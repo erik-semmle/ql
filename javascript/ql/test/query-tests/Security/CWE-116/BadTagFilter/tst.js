@@ -14,6 +14,7 @@ var filters = [
     /<(script|SCRIPT).*?>.*?<\/(script|SCRIPT)[^>]*>/s, // NOT OK - does not match mixed case script tags
     /<script[^>]*?>[\s\S]*?<\/script.*>/i, // NOT OK - doesn't match newlines in the end tag
     /<script[^>]*?>[\s\S]*?<\/script[^>]*?>/i, // OK
+    /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // NOT OK - too strict matching on the end tag
 ]
 
 doFilters(filters)

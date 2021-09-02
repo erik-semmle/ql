@@ -45,6 +45,14 @@ private module RegexpMatching {
           isStartState(result)
         )
       )
+      or
+      // we can skip past word boundaries if the next char is a non-word char.
+      exists(State separator |
+        separator.getRepr() instanceof RegExpWordBoundary and
+        separator = getAState(i, str, ignorePrefix) and
+        after(separator.getRepr()) = result and
+        str.charAt(i + 1).regexpMatch("\\W") // \W matches any non-word char.
+      )
     }
 
     /**
@@ -89,7 +97,8 @@ class HTMLMatchingRegExp extends RegexpMatching::MatchedRegExp {
         "<foo src=\"foo\"></foo>", "<script>", "<script src=\"foo\"></script>",
         "<script src='foo'></script>", "<SCRIPT>foo</SCRIPT>", "<script\tsrc=\"foo\"/>",
         "<script\tsrc='foo'></script>", "<sCrIpT>foo</ScRiPt>", "<script src=\"foo\">foo</script >",
-        "<script src=\"foo\">foo</script foo=\"bar\">", "<script src=\"foo\">foo</script\t\n bar>"
+        "<script src=\"foo\">foo</script foo=\"bar\">", "<script src=\"foo\">foo</script\t\n bar>",
+        "<script src=\"foo\">foo</script bar>"
       ]
   }
 }
@@ -142,6 +151,7 @@ predicate isBadRegexpFilter(HTMLMatchingRegExp regexp, string msg) {
   msg = "This regular expression does not match script tags tabs are used between attributes."
   or
   regexp.matches("<script>foo</script>") and
+  not RegExpFlags::isIgnoreCase(regexp) and
   not regexp.matches("<foo>") and
   not regexp.matches("<foo ></foo>") and
   (
@@ -157,10 +167,16 @@ predicate isBadRegexpFilter(HTMLMatchingRegExp regexp, string msg) {
   not regexp.matches("<foo>") and
   not regexp.matches("<foo ></foo>") and
   (
-    not regexp.matches("<script src=\"foo\">foo</script >") or
-    not regexp.matches("<script src=\"foo\">foo</script foo=\"bar\">") or
-    not regexp.matches("<script src=\"foo\">foo</script\t\n bar>")
-  ) and
-  msg =
-    "This regular expression does not match script end tags containing spaces, tabs or newlines."
+    not regexp.matches("<script src=\"foo\">foo</script >") and
+    msg = "This regular expression does not match script end tags like </script >."
+    or
+    not regexp.matches("<script src=\"foo\">foo</script foo=\"bar\">") and
+    msg = "This regular expression does not match script end tags like </script foo=\"bar\">."
+    or
+    not regexp.matches("<script src=\"foo\">foo</script bar>") and
+    msg = "This regular expression does not match script end tags like </script bar>."
+    or
+    not regexp.matches("<script src=\"foo\">foo</script\t\n bar>") and
+    msg = "This regular expression does not match script end tags like </script\\t\\n bar>."
+  )
 }
