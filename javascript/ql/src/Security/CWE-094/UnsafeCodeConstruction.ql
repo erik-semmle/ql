@@ -14,9 +14,8 @@
 
 import javascript
 import DataFlow::PathGraph
-import semmle.javascript.security.dataflow.UnsafeCodeConstruction::UnsafeCodeConstruction
 
-from Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink
-where cfg.hasFlowPath(source, sink)
+from DataFlow::PathNode source, DataFlow::PathNode sink
+where none()
 select sink.getNode(), source, sink, "$@ flows to here and is later $@.", source.getNode(),
-  "Library input", sink.getNode().(Sink).getCodeSink(), "interpreted as code"
+  "Library input", sink.getNode(), "interpreted as code"
