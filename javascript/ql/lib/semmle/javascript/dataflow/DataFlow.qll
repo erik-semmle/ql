@@ -982,6 +982,32 @@ module DataFlow {
   }
 
   /**
+   * A data flow node representing the arguments object given to a function.
+   */
+  class ReflectiveParametersNode extends DataFlow::Node, TReflectiveParametersNode {
+    Function function;
+
+    ReflectiveParametersNode() { this = TReflectiveParametersNode(function) }
+
+    override string toString() { result = "reflective parameters of " + function.describe() }
+
+    override predicate hasLocationInfo(
+      string filepath, int startline, int startcolumn, int endline, int endcolumn
+    ) {
+      function.getLocation().hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+    }
+
+    override BasicBlock getBasicBlock() { result = function.getEntry().getBasicBlock() }
+
+    /**
+     * Gets the function corresponding to this reflektive parameters node.
+     */
+    Function getFunction() { result = function }
+
+    override File getFile() { result = function.getFile() }
+  }
+
+  /**
    * A data flow node representing the exceptions thrown by the callee of an invocation.
    */
   class ExceptionalInvocationReturnNode extends DataFlow::Node, TExceptionalInvocationReturnNode {
@@ -1583,6 +1609,12 @@ module DataFlow {
     // from returned expr to the FunctionReturnNode.
     exists(Function f | not f.isAsyncOrGenerator() |
       DataFlow::functionReturnNode(succ, f) and pred = valueNode(f.getAReturnedExpr())
+    )
+    or
+    // from a reflective params node to a reference to the arguments object.
+    exists(DataFlow::ReflectiveParametersNode params, Function f | f = params.getFunction() |
+      succ = f.getArgumentsVariable().getAnAccess().flow() and
+      pred = params
     )
   }
 

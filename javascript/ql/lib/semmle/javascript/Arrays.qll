@@ -247,14 +247,27 @@ private module ArrayDataFlow {
   /**
    * A step for creating an array and storing the elements in the array.
    */
-  private class ArrayCreationStep extends DataFlow::SharedFlowStep {
+  private class ArrayCreationStep extends PreCallGraphStep {
     override predicate storeStep(DataFlow::Node element, DataFlow::SourceNode obj, string prop) {
       exists(DataFlow::ArrayCreationNode array, int i |
         element = array.getElement(i) and
         obj = array and
-        if array = any(PromiseAllCreation c).getArrayNode()
-        then prop = arrayElement(i)
-        else prop = arrayElement()
+        prop = arrayElement(i)
+      )
+    }
+  }
+
+  /**
+   * A step from a reflective params node to each parameter.
+   * // TODO: Move elsewhere.
+   */
+  private class ReflectiveParamsStep extends PreCallGraphStep {
+    override predicate loadStep(DataFlow::Node obj, DataFlow::Node element, string prop) {
+      exists(DataFlow::ReflectiveParametersNode params, DataFlow::FunctionNode f, int i |
+        f.getFunction() = params.getFunction() and
+        obj = params and
+        prop = i + "" and
+        element = f.getParameter(i)
       )
     }
   }
