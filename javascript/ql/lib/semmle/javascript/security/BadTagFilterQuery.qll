@@ -121,15 +121,11 @@ private module RegexpMatching {
    * Gets the next set of groups from adding `group` to the previous set of groups `prevGroup`.
    * The result (and `prevGroups`) is a sorted set of integers seperated by `|`.
    */
-  // TODO: Try performance noinline vs inline (and delete binding)
-  pragma[noinline]
+  // TODO: THis is with inline and bindingset.
+  bindingset[prevGroups, group]
   private string computeNextGroups(string prevGroups, int group, boolean includeGrouping) {
     includeGrouping = false and result = prevGroups and result = "" and group = group(_)
     or
-    // satisfying binding, computing more results than neccesarry
-    group = group(_) and
-    exists(getAState(_, _, _, _, _, prevGroups)) and
-    // acutually computing
     includeGrouping = true and
     (
       not group = -1 and
