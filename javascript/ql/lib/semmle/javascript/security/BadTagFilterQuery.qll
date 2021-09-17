@@ -23,43 +23,38 @@ private module RegexpMatching {
      * E.g. a regular expression `/foo$/` will match any string that ends with "foo",
      * but if `ignorePrefix` is true, it will only match "foo".
      */
-    abstract predicate toTest(string str, boolean ignorePrefix);
+    predicate test(string str, boolean ignorePrefix) {
+      none() // maybe overriden in subclasses
+    }
 
     /**
-     * Gets a state a regular expression is in after matching the `i`th char in `str`.
-     * The regular expression is modelled as a non-determistic finite automaton,
-     * the regular expression can therefore be in multiple states after matching a character.
+     * Same as `test(..)`, but where the `fillsCaptureGroup` afterwards tells which capture groups were filled by the regular expression.
      */
-    private State getAState(int i, string str, boolean ignorePrefix) {
-      i = -1 and
-      this.toTest(str, ignorePrefix) and
-      result.getRepr().getRootTerm() = this and
-      isStartState(result)
-      or
-      exists(State prev |
-        prev = getAState(i - 1, str, ignorePrefix) and
-        deltaClosed(prev, getAnInputSymbolMatching(str.charAt(i)), result) and
-        not (
-          ignorePrefix = true and
-          isStartState(prev) and
-          isStartState(result)
-        )
-      )
-      or
-      // we can skip past word boundaries if the next char is a non-word char.
-      exists(State separator |
-        separator.getRepr() instanceof RegExpWordBoundary and
-        separator = getAState(i, str, ignorePrefix) and
-        after(separator.getRepr()) = result and
-        str.charAt(i + 1).regexpMatch("\\W") // \W matches any non-word char.
-      )
+    predicate testWithGroups(string str, boolean ignorePrefix) {
+      none() // maybe overriden in subclasses
     }
 
     /**
      * Holds if `regexp` matches `str`.
      */
-    predicate matches(string str) {
-      exists(State state | state = getAState(str.length() - 1, str, _) |
+    predicate matches(string str) { matches(str, _) }
+
+    /**
+     * Holds if matching `str` may fill capture group number `g`.
+     * Only holds if `str` is in the `testWithGroups` predicate.
+     */
+    predicate fillsCaptureGroup(string str, int g) {
+      exists(string groups |
+        matches(str, groups) and
+        g = groups.regexpFind("(?<!\\d)(\\d+)(?!\\d)", _, _).toInt()
+      )
+    }
+
+    /**
+     * Holds if `regexp` matches `str` while possibly matching the capture groups represented by `groups`.
+     */
+    private predicate matches(string str, string groups) {
+      exists(State state | state = getAState(this, str.length() - 1, str, _, _, groups) |
         epsilonSucc*(state) = Accept(_)
       )
     }
@@ -73,6 +68,105 @@ private module RegexpMatching {
     not exists(RegExpCaret car | car.getRootTerm() = state.getRepr().getRootTerm())
     or
     exists(RegExpCaret car | state = after(car))
+  }
+
+  /**
+   * Gets a state the regular expression `reg` is in after matching the `i`th char in `str`.
+   * The regular expression is modelled as a non-determistic finite automaton,
+   * the regular expression can therefore be in multiple states after matching a character.
+   *
+   * `groups` is a string representation of which capture groups are non empty while matching `str`.
+   * `groups` is a sorted set of integers seperated by "|".
+   */
+  private State getAState(
+    MatchedRegExp reg, int i, string str, boolean ignorePrefix, boolean includeGrouping,
+    string groups
+  ) {
+    // start state, the -1 position before any chars have been matched
+    i = -1 and
+    (
+      reg.test(str, ignorePrefix) and includeGrouping = false
+      or
+      reg.testWithGroups(str, ignorePrefix) and includeGrouping = true
+    ) and
+    result.getRepr().getRootTerm() = reg and
+    isStartState(result) and
+    groups = ""
+    or
+    // recursive case
+    exists(string prevGroups |
+      groups = computeNextGroups(prevGroups, group(result.getRepr()), includeGrouping)
+    |
+      exists(State prev |
+        prev = getAState(reg, i - 1, str, ignorePrefix, includeGrouping, prevGroups) and
+        deltaClosed(prev, getAnInputSymbolMatching(str.charAt(i)), result) and
+        not (
+          ignorePrefix = true and
+          isStartState(prev) and
+          isStartState(result)
+        )
+      )
+      or
+      // we can skip past word boundaries if the next char is a non-word char.
+      exists(State separator |
+        separator.getRepr() instanceof RegExpWordBoundary and
+        separator = getAState(reg, i, str, ignorePrefix, includeGrouping, prevGroups) and
+        after(separator.getRepr()) = result and
+        str.charAt(i + 1).regexpMatch("\\W") // \W matches any non-word char.
+      )
+    )
+  }
+
+  /**
+   * Gets the next set of groups from adding `group` to the previous set of groups `prevGroup`.
+   * The result (and `prevGroups`) is a sorted set of integers seperated by `|`.
+   */
+  // TODO: Try performance noinline vs inline (and delete binding)
+  pragma[noinline]
+  private string computeNextGroups(string prevGroups, int group, boolean includeGrouping) {
+    includeGrouping = false and result = prevGroups and result = "" and group = group(_)
+    or
+    // satisfying binding, computing more results than neccesarry
+    group = group(_) and
+    exists(getAState(_, _, _, _, _, prevGroups)) and
+    // acutually computing
+    includeGrouping = true and
+    (
+      not group = -1 and
+      (
+        not prevGroups = "" and
+        result = sorted(prevGroups + "|" + group.toString())
+        or
+        prevGroups = "" and
+        result = group.toString()
+      )
+      or
+      group = -1 and result = prevGroups
+    )
+  }
+
+  /**
+   * Gets a sorted version of `str`, where the integers seperated by "|" appear in sorted order.
+   */
+  bindingset[str]
+  string sorted(string str) {
+    result =
+      strictconcat(int i |
+        i = str.regexpFind("(?<!\\d)(\\d+)(?!\\d)", _, _).toInt() and not i = -1
+      |
+        i.toString(), "|" order by i
+      )
+  }
+
+  /**
+   * Gets the capture group number that `term` belongs to,
+   * or -1 if `term` does not belong to a capture group.
+   */
+  int group(RegExpTerm term) {
+    exists(RegExpGroup grp | grp.getNumber() = result | term.getParent*() = grp)
+    or
+    not exists(RegExpGroup grp | exists(grp.getNumber()) | term.getParent+() = grp) and
+    result = -1
   }
 }
 
@@ -88,7 +182,12 @@ class HTMLMatchingRegExp extends RegexpMatching::MatchedRegExp {
     )
   }
 
-  override predicate toTest(string str, boolean ignorePrefix) {
+  override predicate testWithGroups(string str, boolean ignorePrefix) {
+    ignorePrefix = true and
+    str = ["<!-- foo -->", "<!-- foo --!>"]
+  }
+
+  override predicate test(string str, boolean ignorePrefix) {
     ignorePrefix = true and
     str =
       [
@@ -110,11 +209,25 @@ class HTMLMatchingRegExp extends RegexpMatching::MatchedRegExp {
  */
 predicate isBadRegexpFilter(HTMLMatchingRegExp regexp, string msg) {
   regexp.matches("<!-- foo -->") and
+  regexp.matches("<!-- foo --!>") and
+  exists(int a, int b | not a = b |
+    regexp.fillsCaptureGroup("<!-- foo -->", a) and
+    // the <!-- foo --> can be ambigously parsed (matching both capture groups, and that is OK).
+    regexp.fillsCaptureGroup("<!-- foo --!>", b) and
+    not regexp.fillsCaptureGroup("<!-- foo --!>", a) and
+    msg =
+      "Comments ending with --> are matched with capture group " + a +
+        " and capture groups ending with --!> are only matched with capture group " +
+        strictconcat(int i | regexp.fillsCaptureGroup("<!-- foo --!>", i) | i.toString(), ", ") +
+        "."
+  )
+  or
+  regexp.matches("<!-- foo -->") and
   not regexp.matches("<!-- foo --!>") and
   not regexp.matches("<!- foo ->") and
   not regexp.matches("<foo>") and
   not regexp.matches("<script>") and
-  msg = "This regular expression only matches -->  and not --!> as a HTML comment end tag."
+  msg = "This regular expression only matches --> and not --!> as a HTML comment end tag."
   or
   regexp.matches("<!-- foo -->") and
   not regexp.matches("<!-- foo\n -->") and

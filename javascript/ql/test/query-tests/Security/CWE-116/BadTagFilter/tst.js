@@ -15,6 +15,8 @@ var filters = [
     /<script[^>]*?>[\s\S]*?<\/script.*>/i, // NOT OK - doesn't match newlines in the end tag
     /<script[^>]*?>[\s\S]*?<\/script[^>]*?>/i, // OK
     /<script\b[^>]*>([\s\S]*?)<\/script>/gi, // NOT OK - too strict matching on the end tag
+    /<(?:!--([\S|\s]*?)-->)|([^\/\s>]+)[\S\s]*?>/, // NOT OK - doesn't match comments with the right capture groups
+    /<(?:(?:\/([^>]+)>)|(?:!--([\S|\s]*?)-->)|(?:([^\/\s>]+)((?:\s+[\w\-:.]+(?:\s*=\s*?(?:(?:"[^"]*")|(?:'[^']*')|[^\s"'\/>]+))?)*)[\S\s]*?(\/?)>))/, // NOT OK - capture groups
 ]
 
 doFilters(filters)
