@@ -105,9 +105,7 @@ module API {
      * For example, modules have an `exports` member representing their exports, and objects have
      * their properties as members.
      */
-    bindingset[m]
-    bindingset[result]
-    Node getMember(string m) { result = getASuccessor(Label::member(m)) }
+    Node getMember(string m) { Impl::memberEdge(this, m, result) }
 
     /**
      * Gets a node representing a member of this API component where the name of the member is
@@ -119,10 +117,7 @@ module API {
      * Gets a node representing a member of this API component where the name of the member may
      * or may not be known statically.
      */
-    Node getAMember() {
-      result = getASuccessor(Label::member(_)) or
-      result = getUnknownMember()
-    }
+    Node getAMember() { Impl::anyMemberEdge(this, result) }
 
     /**
      * Gets a node representing an instance of this API component, that is, an object whose
@@ -811,6 +806,16 @@ module API {
     private DataFlow::Node awaited(DataFlow::InvokeNode call) {
       result = awaited(call, DataFlow::TypeTracker::end())
     }
+
+    /** Holds if there is a member `m` edge from `pred` to `succ` in the API-graph. */
+    cached
+    predicate memberEdge(TApiNode pred, string member, TApiNode succ) {
+      edge(pred, Label::member(member), succ)
+    }
+
+    /** Holds if there is any member edge from `pred` to `succ` in the API-graph. */
+    cached
+    predicate anyMemberEdge(TApiNode pred, TApiNode succ) { memberEdge(pred, _, succ) }
 
     /**
      * Holds if there is an edge from `pred` to `succ` in the API graph that is labeled with `lbl`.
