@@ -192,7 +192,7 @@ module Flask {
 
     FlaskViewClass() {
       this.getABase() = Views::View::subclassRef().getAUse().asExpr() and
-      api_node.getAnImmediateUse().asExpr() = this.getParent()
+      api_node.getAnImmediateUse().asExpr().(ClassExpr) = this.getParent()
     }
 
     /** Gets a function that could handle incoming requests, if any. */
@@ -217,7 +217,7 @@ module Flask {
   class FlaskMethodViewClass extends FlaskViewClass {
     FlaskMethodViewClass() {
       this.getABase() = Views::MethodView::subclassRef().getAUse().asExpr() and
-      api_node.getAnImmediateUse().asExpr() = this.getParent()
+      api_node.getAnImmediateUse().asExpr().(ClassExpr) = this.getParent()
     }
 
     override Function getARequestHandler() {
@@ -298,7 +298,7 @@ module Flask {
     override Function getARequestHandler() {
       exists(DataFlow::LocalSourceNode func_src |
         func_src.flowsTo(this.getViewArg()) and
-        func_src.asExpr() = result.getDefinition()
+        func_src.asExpr().(CallableExpr) = result.getDefinition()
       )
       or
       exists(FlaskViewClass vc |
