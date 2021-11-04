@@ -325,6 +325,19 @@ class TypeBackTracker extends TTypeBackTracker {
     pred = succ.getAPredecessor() and
     this = result
   }
+
+  /**
+   * Gets a forwards summary that is compatible with this backwards summary.
+   * That is, if this summary describes the steps needed to back-track a value
+   * from `sink` to `mid`, and the result is a valid summary of the steps needed
+   * to track a value from `source` to `mid`, then the value from `source` may
+   * also flow to `sink`.
+   */
+  TypeTracker getACompatibleTypeTracker() {
+    exists(boolean hasCall | result = MkTypeTracker(hasCall, prop) |
+      hasCall = false or this.hasReturn() = false
+    )
+  }
 }
 
 module TypeBackTracker {

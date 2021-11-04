@@ -680,15 +680,7 @@ module API {
       )
     }
 
-    /**
-     * Gets a data-flow node to which `nd`, which is a use of an API-graph node, flows.
-     *
-     * The flow from `nd` to that node may be inter-procedural. If `promisified` is `true`, the
-     * flow goes through a promisification, and `boundArgs` indicates how many arguments have been
-     * bound throughout the flow. (To ensure termination, we somewhat arbitrarily constrain the
-     * number of bound arguments to be at most ten.)
-     */
-    private DataFlow::SourceNode trackUseNode(
+    private DataFlow::SourceNode trackUseNodeBase(
       DataFlow::SourceNode nd, boolean promisified, int boundArgs, DataFlow::TypeTracker t
     ) {
       t.start() and
@@ -697,6 +689,7 @@ module API {
       promisified = false and
       boundArgs = 0
       or
+      // these are not quite bases-cases, but we treat them as such
       exists(Promisify::PromisifyCall promisify |
         trackUseNode(nd, false, boundArgs, t.continue()).flowsTo(promisify.getArgument(0)) and
         promisified = true and
@@ -708,8 +701,78 @@ module API {
         result = pin.getBoundFunction(pred, boundArgs - predBoundArgs) and
         boundArgs in [0 .. 10]
       )
+    }
+
+    private DataFlow::SourceNode useStepCandidateFwd(DataFlow::TypeTracker t) {
+      result = trackUseNodeBase(_, _, _, t)
       or
-      t = useStep(nd, promisified, boundArgs, result)
+      exists(DataFlow::TypeTracker t2 | result = useStepCandidateFwd(t2).track(t2, t))
+      or
+      useStepCandidateStep(useStepCandidateFwd(t.continue()), result)
+    }
+
+    pragma[noinline]
+    private predicate useStepCandidateStep(DataFlow::SourceNode pred, DataFlow::SourceNode succ) {
+      exists(Promisify::PromisifyCall promisify |
+        succ = promisify and
+        pred.flowsTo(promisify.getArgument(0))
+      )
+      or
+      exists(DataFlow::PartialInvokeNode partial, DataFlow::Node mid |
+        succ = partial.getBoundFunction(mid, _) and
+        pred.flowsTo(mid)
+      )
+    }
+
+    private DataFlow::SourceNode useStepCandidateRev(DataFlow::TypeBackTracker tb) {
+      tb.start() and
+      exists(DataFlow::TypeTracker t2 |
+        t2 = DataFlow::TypeTracker::end() and
+        result = useStepCandidateFwd(t2)
+      )
+      or
+      result = useStepCandidateRevStep(tb) and
+      useStepCandidateFwd(result, tb)
+      or
+      exists(DataFlow::SourceNode prev, DataFlow::TypeBackTracker tb2 |
+        useStepCandidateStep(result, prev) and
+        prev = useStepCandidateRev(tb2) and
+        tb2 = tb.continue()
+      )
+    }
+
+    pragma[noopt]
+    private DataFlow::SourceNode useStepCandidateRevStep(DataFlow::TypeBackTracker tb) {
+      exists(DataFlow::TypeBackTracker tb2, DataFlow::SourceNode mid, StepSummary summary |
+        mid = useStepCandidateRev(tb2) and
+        StepSummary::step(result, mid, summary) and
+        tb = tb2.prepend(summary)
+      )
+    }
+
+    pragma[noinline]
+    private predicate useStepCandidateFwd(DataFlow::Node res, DataFlow::TypeBackTracker tb) {
+      exists(DataFlow::TypeTracker t |
+        pragma[only_bind_out](t) = pragma[only_bind_out](tb).getACompatibleTypeTracker() and
+        pragma[only_bind_out](res) = useStepCandidateFwd(t)
+      )
+    }
+
+    /**
+     * Gets a data-flow node to which `nd`, which is a use of an API-graph node, flows.
+     *
+     * The flow from `nd` to that node may be inter-procedural. If `promisified` is `true`, the
+     * flow goes through a promisification, and `boundArgs` indicates how many arguments have been
+     * bound throughout the flow. (To ensure termination, we somewhat arbitrarily constrain the
+     * number of bound arguments to be at most ten.)
+     */
+    private DataFlow::SourceNode trackUseNode(
+      DataFlow::SourceNode nd, boolean promisified, int boundArgs, DataFlow::TypeTracker t
+    ) {
+      result = trackUseNodeBase(nd, promisified, boundArgs, t)
+      or
+      t = useStep(nd, promisified, boundArgs, result) and
+      useStepCandidate(result, t)
     }
 
     private import semmle.javascript.dataflow.internal.StepSummary
@@ -732,10 +795,28 @@ module API {
       )
     }
 
+    pragma[noinline]
+    private predicate useStepCandidate(DataFlow::Node res, DataFlow::TypeTracker t) {
+      exists(DataFlow::TypeBackTracker tb |
+        pragma[only_bind_out](t) = pragma[only_bind_out](tb).getACompatibleTypeTracker() and
+        pragma[only_bind_out](res) = useStepCandidateRev(tb)
+      )
+    }
+
     private DataFlow::SourceNode trackUseNode(
       DataFlow::SourceNode nd, boolean promisified, int boundArgs
     ) {
       result = trackUseNode(nd, promisified, boundArgs, DataFlow::TypeTracker::end())
+    }
+
+    // vscode:
+    // main: 15.972.682
+    // try1: 4.080.465
+    // try2: 4.080.465
+    private int countTrackUseNode() {
+      result =
+        count(DataFlow::SourceNode res, DataFlow::SourceNode nd, boolean promisified, int boundArgs,
+          DataFlow::TypeTracker t | res = trackUseNode(nd, promisified, boundArgs, t))
     }
 
     /**
