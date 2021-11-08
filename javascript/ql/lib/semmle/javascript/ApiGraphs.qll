@@ -711,13 +711,10 @@ module API {
 
     private DataFlow::SourceNode useStepCandidateRev(DataFlow::TypeBackTracker tb) {
       tb.start() and
-      exists(DataFlow::TypeTracker t2 |
-        t2 = DataFlow::TypeTracker::end() and
-        result = useStepCandidateFwd(t2)
-      )
+      result = useStepCandidateFwd(DataFlow::TypeTracker::end())
       or
       result = useStepCandidateRevStep(tb) and
-      useStepCandidateFwd(result, tb)
+      result = useStepCandidateFwd(tb.getACompatibleTypeTracker())
     }
 
     pragma[noopt]
@@ -730,10 +727,10 @@ module API {
     }
 
     pragma[noinline]
-    private predicate useStepCandidateFwd(DataFlow::Node res, DataFlow::TypeBackTracker tb) {
-      exists(DataFlow::TypeTracker t |
+    private predicate useStepCandidate(DataFlow::Node res, DataFlow::TypeTracker t) {
+      exists(DataFlow::TypeBackTracker tb |
         pragma[only_bind_out](t) = pragma[only_bind_out](tb).getACompatibleTypeTracker() and
-        pragma[only_bind_out](res) = useStepCandidateFwd(t)
+        pragma[only_bind_out](res) = useStepCandidateRev(tb)
       )
     }
 
@@ -771,14 +768,6 @@ module API {
         prev = trackUseNode(nd, promisified, boundArgs, t) and
         StepSummary::step(prev, res, summary) and
         result = t.append(summary)
-      )
-    }
-
-    pragma[noinline]
-    private predicate useStepCandidate(DataFlow::Node res, DataFlow::TypeTracker t) {
-      exists(DataFlow::TypeBackTracker tb |
-        pragma[only_bind_out](t) = pragma[only_bind_out](tb).getACompatibleTypeTracker() and
-        pragma[only_bind_out](res) = useStepCandidateRev(tb)
       )
     }
 
