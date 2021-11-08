@@ -707,21 +707,6 @@ module API {
       result = trackUseNodeBase(_, _, _, t)
       or
       exists(DataFlow::TypeTracker t2 | result = useStepCandidateFwd(t2).track(t2, t))
-      or
-      useStepCandidateStep(useStepCandidateFwd(t.continue()), result)
-    }
-
-    pragma[noinline]
-    private predicate useStepCandidateStep(DataFlow::SourceNode pred, DataFlow::SourceNode succ) {
-      exists(Promisify::PromisifyCall promisify |
-        succ = promisify and
-        pred.flowsTo(promisify.getArgument(0))
-      )
-      or
-      exists(DataFlow::PartialInvokeNode partial, DataFlow::Node mid |
-        succ = partial.getBoundFunction(mid, _) and
-        pred.flowsTo(mid)
-      )
     }
 
     private DataFlow::SourceNode useStepCandidateRev(DataFlow::TypeBackTracker tb) {
@@ -733,12 +718,6 @@ module API {
       or
       result = useStepCandidateRevStep(tb) and
       useStepCandidateFwd(result, tb)
-      or
-      exists(DataFlow::SourceNode prev, DataFlow::TypeBackTracker tb2 |
-        useStepCandidateStep(result, prev) and
-        prev = useStepCandidateRev(tb2) and
-        tb2 = tb.continue()
-      )
     }
 
     pragma[noopt]
@@ -813,11 +792,14 @@ module API {
     // main: 15.972.682
     // try1: 4.080.465
     // try2: 4.080.465
-    private int countTrackUseNode() {
-      result =
-        count(DataFlow::SourceNode res, DataFlow::SourceNode nd, boolean promisified, int boundArgs,
-          DataFlow::TypeTracker t | res = trackUseNode(nd, promisified, boundArgs, t))
-    }
+    // try3: 4.080.465
+    /*
+     * private int countTrackUseNode() {
+     *      result =
+     *        count(DataFlow::SourceNode res, DataFlow::SourceNode nd, boolean promisified, int boundArgs,
+     *          DataFlow::TypeTracker t | res = trackUseNode(nd, promisified, boundArgs, t))
+     *    }
+     */
 
     /**
      * Gets a node that is inter-procedurally reachable from `nd`, which is a use of some node.
