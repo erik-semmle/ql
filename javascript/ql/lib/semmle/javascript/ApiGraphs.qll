@@ -11,6 +11,7 @@
 
 import javascript
 private import semmle.javascript.dataflow.internal.FlowSteps as FlowSteps
+private import internal.CachedStages
 
 /**
  * Provides classes and predicates for working with APIs defined or used in a database.
@@ -33,6 +34,7 @@ module API {
      * As another example, in the assignment `exports.plusOne = (x) => x+1` the two references to
      * `x` are uses of the first parameter of `plusOne`.
      */
+    pragma[inline]
     DataFlow::Node getAUse() {
       exists(DataFlow::SourceNode src | Impl::use(this, src) |
         Impl::trackUseNode(src).flowsTo(result)
@@ -105,22 +107,32 @@ module API {
      * For example, modules have an `exports` member representing their exports, and objects have
      * their properties as members.
      */
-    bindingset[m]
-    bindingset[result]
-    Node getMember(string m) { result = getASuccessor(Label::member(m)) }
+    cached
+    Node getMember(string m) {
+      m = Impl::getAPossibleMemberName() and
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::member(m))
+    }
 
     /**
      * Gets a node representing a member of this API component where the name of the member is
      * not known statically.
      */
-    Node getUnknownMember() { result = getASuccessor(Label::unknownMember()) }
+    cached
+    Node getUnknownMember() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::unknownMember())
+    }
 
     /**
      * Gets a node representing a member of this API component where the name of the member may
      * or may not be known statically.
      */
+    cached
     Node getAMember() {
-      result = getASuccessor(Label::member(_)) or
+      Stages::APIStage::ref() and
+      result = getMember(_)
+      or
       result = getUnknownMember()
     }
 
@@ -135,7 +147,11 @@ module API {
      * This predicate may have multiple results when there are multiple constructor calls invoking this API component.
      * Consider using `getAnInstantiation()` if there is a need to distinguish between individual constructor calls.
      */
-    Node getInstance() { result = getASuccessor(Label::instance()) }
+    cached
+    Node getInstance() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::instance())
+    }
 
     /**
      * Gets a node representing the `i`th parameter of the function represented by this node.
@@ -143,16 +159,17 @@ module API {
      * This predicate may have multiple results when there are multiple invocations of this API component.
      * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
      */
-    bindingset[i]
-    Node getParameter(int i) { result = getASuccessor(Label::parameter(i)) }
+    cached
+    Node getParameter(int i) {
+      i = Impl::getAPossibleParameterIndex() and
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::parameter(i))
+    }
 
     /**
      * Gets the number of parameters of the function represented by this node.
      */
-    int getNumParameter() {
-      result =
-        max(string s | exists(getASuccessor(Label::parameterByStringIndex(s))) | s.toInt()) + 1
-    }
+    int getNumParameter() { result = max(int s | exists(getParameter(s))) + 1 }
 
     /**
      * Gets a node representing the last parameter of the function represented by this node.
@@ -165,7 +182,11 @@ module API {
     /**
      * Gets a node representing the receiver of the function represented by this node.
      */
-    Node getReceiver() { result = getASuccessor(Label::receiver()) }
+    cached
+    Node getReceiver() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::receiver())
+    }
 
     /**
      * Gets a node representing a parameter or the receiver of the function represented by this
@@ -175,8 +196,11 @@ module API {
      * there are multiple invocations of this API component.
      * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
      */
+    cached
     Node getAParameter() {
-      result = getASuccessor(Label::parameterByStringIndex(_)) or
+      Stages::APIStage::ref() and
+      result = getParameter(_)
+      or
       result = getReceiver()
     }
 
@@ -186,18 +210,30 @@ module API {
      * This predicate may have multiple results when there are multiple invocations of this API component.
      * Consider using `getACall()` if there is a need to distingiush between individual calls.
      */
-    Node getReturn() { result = getASuccessor(Label::return()) }
+    cached
+    Node getReturn() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::return())
+    }
 
     /**
      * Gets a node representing the promised value wrapped in the `Promise` object represented by
      * this node.
      */
-    Node getPromised() { result = getASuccessor(Label::promised()) }
+    cached
+    Node getPromised() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::promised())
+    }
 
     /**
      * Gets a node representing the error wrapped in the `Promise` object represented by this node.
      */
-    Node getPromisedError() { result = getASuccessor(Label::promisedError()) }
+    cached
+    Node getPromisedError() {
+      Stages::APIStage::ref() and
+      result = getASuccessor(Label::promisedError())
+    }
 
     /**
      * Gets a string representation of the lexicographically least among all shortest access paths
@@ -842,6 +878,29 @@ module API {
     cached
     DataFlow::SourceNode trackDefNode(DataFlow::Node nd) {
       result = trackDefNode(nd, DataFlow::TypeBackTracker::end())
+    }
+
+    /** Gets all the possible property names for member edges in the API graph. */
+    cached
+    string getAPossibleMemberName() {
+      exports(_, result, _) or
+      exists(any(DataFlow::ClassNode c).getInstanceMethod(result)) or
+      result = "exports" or
+      result = any(CanonicalName c).getName() or
+      result = any(DataFlow::PropRef p).getPropertyName() or
+      exists(Impl::MkTypeUse(_, result)) or
+      exists(any(Module m).getAnExportedValue(result))
+    }
+
+    /** Gets all the possible indexes for parameter edges in the API graph. */
+    cached
+    int getAPossibleParameterIndex() {
+      result =
+        [-1 .. max(int args |
+            args = any(InvokeExpr invk).getNumArgument() or
+            args = any(Function f).getNumParameter()
+          )] or
+      result = [0 .. 10]
     }
 
     private DataFlow::SourceNode awaited(DataFlow::InvokeNode call, DataFlow::TypeTracker t) {
