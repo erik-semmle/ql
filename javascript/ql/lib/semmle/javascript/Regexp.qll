@@ -958,7 +958,6 @@ private predicate isUsedAsNonMatchObject(DataFlow::MethodCallNode call) {
  */
 cached
 predicate isInterpretedAsRegExp(DataFlow::Node source) {
-  Stages::Taint::ref() and
   source.analyze().getAType() = TTString() and
   (
     // The first argument to an invocation of `RegExp` (with or without `new`).

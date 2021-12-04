@@ -53,31 +53,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      exists(any(ASTNode a).getTopLevel())
-      or
-      exists(any(ASTNode a).getParent())
-      or
-      exists(any(StmtContainer c).getEnclosingContainer())
-      or
-      exists(any(Documentable d).getDocumentation())
-      or
-      exists(any(NodeInStmtContainer n).getContainer())
-      or
-      exists(any(Expr e).getStringValue())
-      or
-      any(ASTNode node).isAmbient()
-      or
-      exists(any(Identifier e).getName())
-      or
-      exists(any(ExprOrType e).getUnderlyingValue())
-      or
-      exists(ConstantExpr e)
-      or
-      exists(SyntacticConstants::NullConstant n)
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -97,13 +73,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      any(ReachableBasicBlock bb).dominates(_)
-      or
-      exists(any(BasicBlock bb).getNode(_))
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -123,29 +93,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      exists(AmdModule a)
-      or
-      DataFlow::localFlowStep(_, _)
-      or
-      exists(any(DataFlow::SourceNode s).getAPropertyReference("foo"))
-      or
-      exists(any(Expr e).getExceptionTarget())
-      or
-      exists(DataFlow::ssaDefinitionNode(_))
-      or
-      any(DataFlow::Node node).hasLocationInfo(_, _, _, _, _)
-      or
-      exists(any(DataFlow::Node node).toString())
-      or
-      exists(any(AccessPath a).getAnInstanceIn(_))
-      or
-      exists(any(DataFlow::PropRef ref).getBase())
-      or
-      exists(any(DataFlow::ClassNode cls))
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -168,15 +116,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backrefs() {
-      1 = 1
-      or
-      exists(any(Import i).getImportedModule())
-      or
-      exists(DataFlow::moduleImport(_))
-      or
-      exists(any(ReExportDeclaration d).getReExportedModule())
-    }
+    predicate backrefs() { 1 = 1 }
   }
 
   /**
@@ -196,23 +136,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      PreCallGraphStep::loadStep(_, _, _)
-      or
-      basicLoadStep(_, _, _)
-      or
-      exists(any(DataFlow::TypeTracker t).append(_))
-      or
-      exists(any(DataFlow::TypeBackTracker t).prepend(_))
-      or
-      DataFlow::functionForwardingStep(_, _)
-      or
-      any(DataFlow::Node node).hasUnderlyingType(_)
-      or
-      any(DataFlow::Node node).hasUnderlyingType(_, _)
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -232,13 +156,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      AccessPath::DominatingPaths::hasDominatingWrite(_)
-      or
-      DataFlow::SharedFlowStep::step(_, _)
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -258,24 +176,7 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      exists(
-        API::moduleImport("foo")
-            .getMember("bar")
-            .getUnknownMember()
-            .getAMember()
-            .getAParameter()
-            .getPromised()
-            .getReturn()
-            .getParameter(2)
-            .getUnknownMember()
-            .getInstance()
-            .getReceiver()
-            .getPromisedError()
-      )
-    }
+    predicate backref() { 1 = 1 }
   }
 
   /**
@@ -297,30 +198,6 @@ module Stages {
      * Contains references to each predicate that use the above `ref` predicate.
      */
     cached
-    predicate backref() {
-      1 = 1
-      or
-      TaintTracking::heapStep(_, _)
-      or
-      exists(RemoteFlowSource r)
-      or
-      exists(Exports::getALibraryInputParameter())
-      or
-      any(RegExpTerm t).isUsedAsRegExp()
-      or
-      any(TaintTracking::AdditionalSanitizerGuardNode e).appliesTo(_)
-    }
-
-    cached
-    class DummySanitizer extends TaintTracking::AdditionalSanitizerGuardNode {
-      cached
-      DummySanitizer() { none() }
-
-      cached
-      override predicate appliesTo(TaintTracking::Configuration cfg) { none() }
-
-      cached
-      override predicate sanitizes(boolean outcome, Expr e) { none() }
-    }
+    predicate backref() { 1 = 1 }
   }
 }

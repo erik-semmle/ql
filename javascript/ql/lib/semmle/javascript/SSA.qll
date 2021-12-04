@@ -355,7 +355,6 @@ private module Internal {
    */
   cached
   SsaDefinition getDefReachingEndOf(ReachableBasicBlock bb, SsaSourceVariable v) {
-    Stages::DataFlowStage::ref() and
     exists(int lastRef | lastRef = max(int i | ssaRef(bb, i, v, _)) |
       result = getLocalDefinition(bb, lastRef, v)
       or

@@ -91,7 +91,6 @@ class AccessPath extends TAccessPath {
    */
   cached
   Expr getAnInstanceIn(BasicBlock bb) {
-    Stages::DataFlowStage::ref() and
     exists(SsaVariable var |
       this = MkSsaRoot(var) and
       result = getARefinementOf*(var).getAUseIn(bb)

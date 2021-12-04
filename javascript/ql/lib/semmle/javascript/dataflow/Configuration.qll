@@ -670,14 +670,6 @@ class SharedFlowStep extends Unit {
  */
 cached
 module SharedFlowStep {
-  cached
-  private module Internal {
-    // Forces this to be part of the `FlowSteps` stage.
-    // We use a public predicate in a private module to avoid warnings about this being unused.
-    cached
-    predicate forceStage() { Stages::FlowSteps::ref() }
-  }
-
   /**
    * Holds if `pred` &rarr; `succ` should be considered a data flow edge.
    */

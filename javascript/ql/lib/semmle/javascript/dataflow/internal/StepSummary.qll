@@ -8,9 +8,6 @@ private module Cached {
   cached
   module Public {
     cached
-    predicate forceStage() { Stages::TypeTracking::ref() }
-
-    cached
     class PropertyName extends string {
       cached
       PropertyName() {

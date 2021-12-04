@@ -18,13 +18,6 @@ private module Cached {
     )
   }
 
-  cached
-  private module Stage {
-    // Forces the module to be computed as part of the type-tracking stage.
-    cached
-    predicate forceStage() { Stages::TypeTracking::ref() }
-  }
-
   /**
    * Holds if the function in `succ` forwards all its arguments to a call to `pred` and returns
    * its result. This can thus be seen as a step `pred -> succ` used for tracking function values

@@ -108,20 +108,14 @@ module API {
      * their properties as members.
      */
     cached
-    Node getMember(string m) {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::member(m))
-    }
+    Node getMember(string m) { result = this.getASuccessor(Label::member(m)) }
 
     /**
      * Gets a node representing a member of this API component where the name of the member is
      * not known statically.
      */
     cached
-    Node getUnknownMember() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::unknownMember())
-    }
+    Node getUnknownMember() { result = this.getASuccessor(Label::unknownMember()) }
 
     /**
      * Gets a node representing a member of this API component where the name of the member may
@@ -129,7 +123,6 @@ module API {
      */
     cached
     Node getAMember() {
-      Stages::APIStage::ref() and
       result = this.getMember(_)
       or
       result = this.getUnknownMember()
@@ -147,10 +140,7 @@ module API {
      * Consider using `getAnInstantiation()` if there is a need to distinguish between individual constructor calls.
      */
     cached
-    Node getInstance() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::instance())
-    }
+    Node getInstance() { result = this.getASuccessor(Label::instance()) }
 
     /**
      * Gets a node representing the `i`th parameter of the function represented by this node.
@@ -159,10 +149,7 @@ module API {
      * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
      */
     cached
-    Node getParameter(int i) {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::parameter(i))
-    }
+    Node getParameter(int i) { result = this.getASuccessor(Label::parameter(i)) }
 
     /**
      * Gets the number of parameters of the function represented by this node.
@@ -181,10 +168,7 @@ module API {
      * Gets a node representing the receiver of the function represented by this node.
      */
     cached
-    Node getReceiver() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::receiver())
-    }
+    Node getReceiver() { result = this.getASuccessor(Label::receiver()) }
 
     /**
      * Gets a node representing a parameter or the receiver of the function represented by this
@@ -196,7 +180,6 @@ module API {
      */
     cached
     Node getAParameter() {
-      Stages::APIStage::ref() and
       result = this.getParameter(_)
       or
       result = this.getReceiver()
@@ -209,29 +192,20 @@ module API {
      * Consider using `getACall()` if there is a need to distingiush between individual calls.
      */
     cached
-    Node getReturn() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::return())
-    }
+    Node getReturn() { result = this.getASuccessor(Label::return()) }
 
     /**
      * Gets a node representing the promised value wrapped in the `Promise` object represented by
      * this node.
      */
     cached
-    Node getPromised() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::promised())
-    }
+    Node getPromised() { result = this.getASuccessor(Label::promised()) }
 
     /**
      * Gets a node representing the error wrapped in the `Promise` object represented by this node.
      */
     cached
-    Node getPromisedError() {
-      Stages::APIStage::ref() and
-      result = this.getASuccessor(Label::promisedError())
-    }
+    Node getPromisedError() { result = this.getASuccessor(Label::promisedError()) }
 
     /**
      * Gets a string representation of the lexicographically least among all shortest access paths
@@ -870,7 +844,6 @@ module API {
      */
     cached
     predicate edge(TApiNode pred, Label::ApiLabel lbl, TApiNode succ) {
-      Stages::APIStage::ref() and
       exists(string m |
         pred = MkRoot() and
         lbl = Label::moduleLabel(m)

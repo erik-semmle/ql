@@ -741,7 +741,7 @@ module ModuleImportNode {
  * This predicate can be extended by subclassing `ModuleImportNode::Range`.
  */
 cached
-ModuleImportNode moduleImport(string path) { Stages::Imports::ref() and result.getPath() = path }
+ModuleImportNode moduleImport(string path) { result.getPath() = path }
 
 /**
  * Gets a (default) import of the given dependency `dep`, such as

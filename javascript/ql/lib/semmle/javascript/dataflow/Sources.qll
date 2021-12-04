@@ -230,7 +230,6 @@ private module Cached {
    */
   cached
   predicate namedPropRef(DataFlow::SourceNode base, string prop, DataFlow::PropRef ref) {
-    Stages::DataFlowStage::ref() and
     hasLocalSource(ref.getBase(), base) and
     ref.getPropertyName() = prop
   }

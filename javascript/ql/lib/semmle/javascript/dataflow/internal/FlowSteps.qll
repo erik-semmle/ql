@@ -409,7 +409,6 @@ private module CachedSteps {
    */
   cached
   predicate basicLoadStep(DataFlow::Node pred, DataFlow::PropRead succ, string prop) {
-    Stages::TypeTracking::ref() and
     succ.accesses(pred, prop)
   }
 
@@ -435,7 +434,6 @@ private module CachedSteps {
    */
   cached
   predicate exploratoryCallbackStep(DataFlow::Node arg, DataFlow::SourceNode cb) {
-    Stages::TypeTracking::ref() and
     exists(DataFlow::InvokeNode invk, DataFlow::ParameterNode cbParm, DataFlow::Node cbArg |
       arg = invk.getAnArgument() and
       cbParm.flowsTo(invk.getCalleeNode()) and
@@ -453,7 +451,6 @@ private module CachedSteps {
   /** Gets a function that flows to `parameter` via one or more parameter-passing steps. */
   cached
   DataFlow::FunctionNode getACallbackSource(DataFlow::ParameterNode parameter) {
-    Stages::TypeTracking::ref() and
     callStep(result.getALocalUse(), parameter)
     or
     exists(DataFlow::ParameterNode mid |

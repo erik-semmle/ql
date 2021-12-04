@@ -12,7 +12,6 @@ private import semmle.javascript.internal.CachedStages
  */
 cached
 DataFlow::SourceNode getALibraryInputParameter() {
-  Stages::Taint::ref() and
   exists(int bound, DataFlow::FunctionNode func |
     func = getAValueExportedByPackage().getABoundFunctionValue(bound)
   |
