@@ -1,0 +1,9 @@
+{
+    "name": "insecure-dep-downloader",
+    "dependencies": {
+        "foo": "*",
+        "good1": "https://example.org/foo",
+        "bad1": "http://example.org/foo",
+        "bad2": "ftp://example.org/foo"
+    }
+}
