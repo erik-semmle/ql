@@ -16,8 +16,6 @@
 
 import javascript
 
-from PackageJSON pack, JSONString val
-where
-  pack.getDependencies().getPropValue(_) = val and
-  val.getValue().regexpMatch("(http|ftp)://.*")
+from JSONString val
+where none()
 select val, "Dependency downloaded using unencrypted communication channel."
