@@ -3,18 +3,13 @@
   "qhelp.dtd">
 <qhelp>
 <overview>
-<p>Using an insecure protocol like HTTP or FTP to download your dependencies leaves your Maven build vulnerable to a
+<p>Using an insecure protocol like HTTP or FTP to download your dependencies leaves your npm build vulnerable to a
 <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">Man in the Middle (MITM)</a>.
 This can allow attackers to inject malicious code into the artifacts that you are resolving and infect build artifacts
 that are being produced. This can be used by attackers to perform a
 <a href="https://en.wikipedia.org/wiki/Supply_chain_attack">Supply chain attack</a>
 against your project's users.
 </p>
-
-<p>This vulnerability has a
-<a href="https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H&amp;version=3.1">
-    CVSS v3.1 base score of 8.1/10
-</a>.</p>
 
 </overview>
 <recommendation>
@@ -23,17 +18,6 @@ against your project's users.
 
 </recommendation>
 
-<example>
-
-<p>These examples show examples of locations in Maven POM files where artifact repository upload/download is configured.
-The first shows the use of HTTP, the second shows the use of HTTPS.
-</p>
-
-<sample src="insecure-pom.xml" />
-
-<sample src="secure-pom.xml" />
-
-</example>
 <references>
 <li>
   Research:
@@ -47,27 +31,5 @@ The first shows the use of HTTP, the second shows the use of HTTPS.
     How to take over the computer of any Java (or Closure or Scala) Developer.
   </a>
 </li>
-<li>
-  Proof of Concept:
-  <a href="https://github.com/mveytsman/dilettante">
-    mveytsman/dilettante
-  </a>
-</li>
-<li>
-  Additional Gradle &amp; Maven plugin:
-  <a href="https://spring.io/blog/2019/06/10/announcing-nohttp">
-    Announcing nohttp
-  </a>
-</li>
-<li>
-  Java Ecosystem Announcement:
-  <a href="https://gist.github.com/JLLeitschuh/789e49e3d34092a005031a0a1880af99">
-    HTTP Decommission Artifact Server Announcements
-  </a>
-</li>
-
-<!--  LocalWords:  CWE maven dependencies artifact
- -->
-
 </references>
 </qhelp>
