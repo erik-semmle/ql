@@ -13,9 +13,8 @@
 
 import javascript
 import DataFlow::PathGraph
-import semmle.javascript.security.dataflow.InsecureTemporaryFileQuery
 
-from Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink
-where cfg.hasFlowPath(source, sink)
+from DataFlow::PathNode source, DataFlow::PathNode sink
+where none()
 select sink.getNode(), source, sink, "Insecure creation of file in $@.", source.getNode(),
   "the os temp dir"
