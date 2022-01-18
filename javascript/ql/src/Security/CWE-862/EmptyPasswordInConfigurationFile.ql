@@ -14,14 +14,6 @@
 import javascript
 import semmle.javascript.security.PasswordInConfigurationFileQuery
 
-from string key, string val, Locatable valElement
-where
-  config(key, val, valElement) and
-  (
-    val = "" and key.toLowerCase() = "password"
-    or
-    key.toLowerCase() != "readme" and
-    // look for `password=;`, `password=`, `password=  `, `password==`.
-    val.regexpMatch("(?is).*password\\s*(==?|:)\\s*(\\\"\\\"|''|``|;|:)?\\s*($|;|&|]|\\n).*")
-  )
+from Locatable valElement
+where none()
 select valElement.(FirstLineOf), "Empty password in configuration file."
