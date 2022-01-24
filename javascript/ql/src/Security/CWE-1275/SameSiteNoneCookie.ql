@@ -13,9 +13,6 @@
 
 import javascript
 
-from CookieWrites::CookieWrite cookie
-where
-  cookie.isSensitive() and
-  cookie.isSecure() and // `js/clear-text-cookie` will report it if the cookie is not secure.
-  cookie.getSameSite().toLowerCase() = "none"
-select cookie, "Sensitive cookie with SameSite set to 'None'"
+from Expr e
+where none()
+select e, "Sensitive cookie with SameSite set to 'None'"
