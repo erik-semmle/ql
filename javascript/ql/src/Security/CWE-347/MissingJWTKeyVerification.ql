@@ -14,6 +14,7 @@ import semmle.javascript.RestrictedLocations
 
 from DataFlow::CallNode call
 where
+  none() and
   call = DataFlow::moduleMember("jsonwebtoken", "verify").getACall() and
   unique(boolean b | b = call.getArgument(1).analyze().getABooleanValue()) = false
 select call.asExpr().(FirstLineOf),
