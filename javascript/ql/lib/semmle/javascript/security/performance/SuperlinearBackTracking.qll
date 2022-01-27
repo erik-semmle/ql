@@ -43,15 +43,6 @@ import ReDoSUtil
  */
 
 /**
- * An instantiaion of `ReDoSConfiguration` for superlinear ReDoS.
- */
-class SuperLinearReDoSConfiguration extends ReDoSConfiguration {
-  SuperLinearReDoSConfiguration() { this = "SuperLinearReDoSConfiguration" }
-
-  override predicate isReDoSCandidate(State state, string pump) { isPumpable(_, state, pump) }
-}
-
-/**
  * Gets any root (start) state of a regular expression.
  */
 private State getRootState() { result = mkMatch(any(RegExpRoot r)) }
@@ -351,6 +342,14 @@ predicate isPumpable(State pivot, State succ, string pump) {
     pump = concretise(t)
   )
 }
+
+/**
+ * Holds if states starting in `state` can have polynomial backtracking with the string `pump`.
+ */
+predicate isReDoSCandidate(State state, string pump) { isPumpable(_, state, pump) }
+
+/** Holds if `state` has polynomial ReDoS */
+predicate hasReDoSResult = ReDoSPruning<isReDoSCandidate/2>::hasReDoSResult/4;
 
 /**
  * Holds if repetitions of `pump` at `t` will cause polynomial backtracking.
