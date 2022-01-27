@@ -101,6 +101,7 @@ predicate useAfterCheck(FileCheck check, FileUse use) {
 
 from FileCheck check, FileUse use
 where
+  none() and
   checkAndUseOnSame(check, use) and
   useAfterCheck(check, use) and
   not getAFileHandle(DataFlow::TypeTracker::end()).flowsTo(use.getPathArgument())
