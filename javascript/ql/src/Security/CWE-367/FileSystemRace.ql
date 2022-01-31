@@ -77,6 +77,18 @@ predicate checkAndUseOnSame(FileCheck check, FileUse use) {
   AccessPath::getAnAliasedSourceNode(check.getPathArgument()).flowsTo(use.getPathArgument())
 }
 
+module IsCFGAfterImpl {
+  class Pred extends ControlFlowNode {
+    Pred() { this = any(FileCheck c).asExpr() }
+  }
+
+  class Succ extends ControlFlowNode {
+    Succ() { this = any(FileUse u).asExpr() }
+  }
+}
+
+predicate isAfter = IsCFGAfter<IsCFGAfterImpl>::isAfter/2;
+
 /**
  * Holds if `check` happens before `use`.
  */
@@ -84,17 +96,7 @@ pragma[inline]
 predicate useAfterCheck(FileCheck check, FileUse use) {
   check.getCallback(_).getFunction() = use.getContainer()
   or
-  exists(BasicBlock bb |
-    check.getBasicBlock() = bb and
-    use.getBasicBlock() = bb and
-    exists(int i, int j |
-      bb.getNode(i) = check.asExpr() and
-      bb.getNode(j) = use.asExpr() and
-      i < j
-    )
-  )
-  or
-  check.getBasicBlock().getASuccessor+() = use.getBasicBlock()
+  isAfter(check.asExpr(), use.asExpr())
 }
 
 from FileCheck check, FileUse use
