@@ -417,3 +417,57 @@ class ConditionGuardNode extends GuardControlFlowNode, @condition_guard {
 class ConcreteControlFlowNode extends ControlFlowNode {
   ConcreteControlFlowNode() { not this instanceof SyntheticControlFlowNode }
 }
+
+signature module IsCFGAfterSig {
+  class Pred extends ControlFlowNode;
+
+  class Succ extends ControlFlowNode;
+}
+
+// TODO: Move this entire thing into a new .qll file somewhere.
+module IsCFGAfter<IsCFGAfterSig ISCFGAfter> {
+  // TODO: If I do this as class Pred=ISCFGAfter::Pred, then dispatch to super-methods doesn't work.
+  private class Pred extends ControlFlowNode, ISCFGAfter::Pred {
+    Pred() { this instanceof ISCFGAfter::Pred }
+  }
+
+  private class Succ extends ControlFlowNode, ISCFGAfter::Succ {
+    Succ() { this instanceof ISCFGAfter::Succ }
+  }
+
+  private class RelevantBasicBlock extends BasicBlock {
+    RelevantBasicBlock() {
+      any(Pred p).getBasicBlock() = this and
+      any(Succ s).getBasicBlock() = this
+    }
+  }
+
+  private int rankNode(RelevantBasicBlock block, ControlFlowNode node) {
+    node =
+      rank[result](ControlFlowNode n |
+        n.getBasicBlock() = block and
+        (
+          n instanceof Pred
+          or
+          n instanceof Succ
+        )
+      |
+        n order by any(int i | block.getNode(i) = n)
+      )
+  }
+
+  predicate isAfter(Pred pred, Succ succ) {
+    exists(RelevantBasicBlock bb |
+      pred.getBasicBlock() = bb and
+      succ.getBasicBlock() = bb and
+      exists(int i, int j |
+        rankNode(bb, pred) = i and
+        rankNode(bb, succ) = j and
+        i < j
+      )
+    )
+    or
+    // TODO: Might want to parameterize the BB successor method.
+    pred.getBasicBlock().getASuccessor+() = succ.getBasicBlock()
+  }
+}
