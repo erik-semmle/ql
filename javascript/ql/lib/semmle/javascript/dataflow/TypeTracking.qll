@@ -177,6 +177,19 @@ module TypeTracker {
    * Gets a valid end point of type tracking.
    */
   TypeTracker end() { result.end() }
+
+  signature DataFlow::SourceNode getSourceSig();
+
+  module MakeRef<getSourceSig/0 getSource> {
+    private DataFlow::SourceNode ref(DataFlow::TypeTracker t) {
+      t.start() and
+      result = getSource()
+      or
+      exists(DataFlow::TypeTracker t2 | result = ref(t2).track(t2, t))
+    }
+
+    DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
+  }
 }
 
 private newtype TTypeBackTracker = MkTypeBackTracker(Boolean hasReturn, OptionalPropertyName prop)

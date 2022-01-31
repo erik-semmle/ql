@@ -6,27 +6,19 @@ import javascript
 private import semmle.javascript.security.dataflow.Xss as Xss
 
 module Cheerio {
-  /**
-   * A reference to the `cheerio` function, possibly with a loaded DOM.
-   */
-  private DataFlow::SourceNode cheerioRef(DataFlow::TypeTracker t) {
-    t.start() and
-    (
-      result = DataFlow::moduleImport("cheerio")
-      or
-      exists(string name | result = cheerioRef().getAMemberCall(name) |
-        name = "load" or
-        name = "parseHTML"
-      )
-    )
+  private DataFlow::SourceNode cheerioSource(DataFlow::TypeTracker t) {
+    result = DataFlow::moduleImport("cheerio")
     or
-    exists(DataFlow::TypeTracker t2 | result = cheerioRef(t2).track(t2, t))
+    exists(string name | result = cheerioRef().getAMemberCall(name) |
+      name = "load" or
+      name = "parseHTML"
+    )
   }
 
-  /**
-   * A reference to the `cheerio` function, possibly with a loaded DOM.
-   */
-  DataFlow::SourceNode cheerioRef() { result = cheerioRef(DataFlow::TypeTracker::end()) }
+  /** A reference to the `cheerio` function, possibly with a loaded DOM. */
+  DataFlow::SourceNode cheerioRef() {
+    result = DataFlow::TypeTracker::MakeRef<cheerioSource/0>::ref()
+  }
 
   /**
    * A creation of `cheerio` object, a collection of virtual DOM elements
