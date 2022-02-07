@@ -872,8 +872,11 @@ module ReDoSPruning<isCandidateSig/2 isCandidate> {
     private predicate lastStartState(State state) {
       exists(RegExpRoot root |
         state =
-          max(StateInPumpableRegexp s, Location l |
-            isStartState(s) and getRoot(s.getRepr()) = root and l = s.getRepr().getLocation()
+          max(State s, Location l |
+            s = stateInPumpableRegexp() and
+            isStartState(s) and
+            getRoot(s.getRepr()) = root and
+            l = s.getRepr().getLocation()
           |
             s
             order by
@@ -945,11 +948,9 @@ module ReDoSPruning<isCandidateSig/2 isCandidate> {
     /**
      * A state within a regular expression that has a pumpable state.
      */
-    class StateInPumpableRegexp extends State {
-      pragma[noinline]
-      StateInPumpableRegexp() {
-        exists(State s | isReDoSCandidate(s, _) | getRoot(s.getRepr()) = getRoot(this.getRepr()))
-      }
+    pragma[noinline]
+    State stateInPumpableRegexp() {
+      exists(State s | isReDoSCandidate(s, _) | getRoot(s.getRepr()) = getRoot(result.getRepr()))
     }
   }
 
@@ -987,26 +988,32 @@ module ReDoSPruning<isCandidateSig/2 isCandidate> {
      * This predicate might find impossible suffixes when searching for suffixes of length > 1, which can cause FPs.
      */
     pragma[noinline]
-    private predicate isLikelyRejectable(StateInPumpableRegexp s) {
-      // exists a reject edge with some char.
-      hasRejectEdge(s)
-      or
-      hasEdgeToLikelyRejectable(s)
-      or
-      // stopping here is rejection
-      isRejectState(s)
+    private predicate isLikelyRejectable(State s) {
+      s = stateInPumpableRegexp() and
+      (
+        // exists a reject edge with some char.
+        hasRejectEdge(s)
+        or
+        hasEdgeToLikelyRejectable(s)
+        or
+        // stopping here is rejection
+        isRejectState(s)
+      )
     }
 
     /**
      * Holds if `s` is not an accept state, and there is no epsilon transition to an accept state.
      */
-    predicate isRejectState(StateInPumpableRegexp s) { not epsilonSucc*(s) = Accept(_) }
+    predicate isRejectState(State s) {
+      not epsilonSucc*(s) = Accept(_) and s = stateInPumpableRegexp()
+    }
 
     /**
      * Holds if there is likely a non-empty suffix leading to rejection starting in `s`.
      */
     pragma[noopt]
-    predicate hasEdgeToLikelyRejectable(StateInPumpableRegexp s) {
+    predicate hasEdgeToLikelyRejectable(State s) {
+      s = stateInPumpableRegexp() and
       // all edges (at least one) with some char leads to another state that is rejectable.
       // the `next` states might not share a common suffix, which can cause FPs.
       exists(string char | char = hasEdgeToLikelyRejectableHelper(s) |
@@ -1021,7 +1028,8 @@ module ReDoSPruning<isCandidateSig/2 isCandidate> {
      * and `s` has not been found to be rejectable by `hasRejectEdge` or `isRejectState`.
      */
     pragma[noinline]
-    private string hasEdgeToLikelyRejectableHelper(StateInPumpableRegexp s) {
+    private string hasEdgeToLikelyRejectableHelper(State s) {
+      s = stateInPumpableRegexp() and
       not hasRejectEdge(s) and
       not isRejectState(s) and
       deltaClosedChar(s, result, _)
@@ -1032,7 +1040,9 @@ module ReDoSPruning<isCandidateSig/2 isCandidate> {
      * along epsilon edges, such that there is a transition from
      * `prev` to `next` that the character symbol `char`.
      */
-    predicate deltaClosedChar(StateInPumpableRegexp prev, string char, StateInPumpableRegexp next) {
+    predicate deltaClosedChar(State prev, string char, State next) {
+      prev = stateInPumpableRegexp() and
+      next = stateInPumpableRegexp() and
       deltaClosed(prev, getAnInputSymbolMatchingRelevant(char), next)
     }
 

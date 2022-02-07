@@ -419,45 +419,38 @@ class ConcreteControlFlowNode extends ControlFlowNode {
 }
 
 signature module IsCFGAfterSig {
-  class Pred extends ControlFlowNode;
+  ControlFlowNode pred();
 
-  class Succ extends ControlFlowNode;
+  ControlFlowNode succ();
 }
 
-// TODO: Move this entire thing into a new .qll file somewhere.
+// TODO: Move this entire thing into a new .qll file somewhere?
 module IsCFGAfter<IsCFGAfterSig ISCFGAfter> {
-  // TODO: If I do this as class Pred=ISCFGAfter::Pred, then dispatch to super-methods doesn't work.
-  private class Pred extends ControlFlowNode, ISCFGAfter::Pred {
-    Pred() { this instanceof ISCFGAfter::Pred }
+  private BasicBlock relevantBasicBlock() {
+    ISCFGAfter::pred().getBasicBlock() = result and
+    ISCFGAfter::succ().getBasicBlock() = result
   }
 
-  private class Succ extends ControlFlowNode, ISCFGAfter::Succ {
-    Succ() { this instanceof ISCFGAfter::Succ }
-  }
-
-  private class RelevantBasicBlock extends BasicBlock {
-    RelevantBasicBlock() {
-      any(Pred p).getBasicBlock() = this and
-      any(Succ s).getBasicBlock() = this
-    }
-  }
-
-  private int rankNode(RelevantBasicBlock block, ControlFlowNode node) {
+  private int rankNode(BasicBlock block, ControlFlowNode node) {
+    block = relevantBasicBlock() and
     node =
       rank[result](ControlFlowNode n |
         n.getBasicBlock() = block and
         (
-          n instanceof Pred
+          n = ISCFGAfter::pred()
           or
-          n instanceof Succ
+          n = ISCFGAfter::succ()
         )
       |
         n order by any(int i | block.getNode(i) = n)
       )
   }
 
-  predicate isAfter(Pred pred, Succ succ) {
-    exists(RelevantBasicBlock bb |
+  predicate isAfter(ControlFlowNode pred, ControlFlowNode succ) {
+    pred = ISCFGAfter::pred() and
+    succ = ISCFGAfter::succ() and
+    exists(BasicBlock bb |
+      bb = relevantBasicBlock() and
       pred.getBasicBlock() = bb and
       succ.getBasicBlock() = bb and
       exists(int i, int j |

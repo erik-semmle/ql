@@ -78,16 +78,12 @@ predicate checkAndUseOnSame(FileCheck check, FileUse use) {
 }
 
 module IsCFGAfterImpl {
-  class Pred extends ControlFlowNode {
-    Pred() { this = any(FileCheck c).asExpr() }
-  }
+  ControlFlowNode pred() { result = any(FileCheck c).asExpr() }
 
-  class Succ extends ControlFlowNode {
-    Succ() { this = any(FileUse u).asExpr() }
-  }
+  ControlFlowNode succ() { result = any(FileUse u).asExpr() }
 }
 
-predicate isAfter = IsCFGAfter<IsCFGAfterImpl>::isAfter/2;
+module IsAfter = IsCFGAfter<IsCFGAfterImpl>;
 
 /**
  * Holds if `check` happens before `use`.
@@ -96,7 +92,7 @@ pragma[inline]
 predicate useAfterCheck(FileCheck check, FileUse use) {
   check.getCallback(_).getFunction() = use.getContainer()
   or
-  isAfter(check.asExpr(), use.asExpr())
+  IsAfter::isAfter(check.asExpr(), use.asExpr())
 }
 
 from FileCheck check, FileUse use
