@@ -238,7 +238,7 @@ CharClass getCanonicalCharClass(RegExpTerm term) {
 /**
  * Holds if `a` and `b` are input symbols from the same regexp.
  */
-private predicate sharesRoot(TInputSymbol a, TInputSymbol b) {
+private predicate sharesRoot(InputSymbol a, InputSymbol b) {
   exists(RegExpRoot root |
     belongsTo(a, root) and
     belongsTo(b, root)
@@ -248,7 +248,7 @@ private predicate sharesRoot(TInputSymbol a, TInputSymbol b) {
 /**
  * Holds if the `a` is an input symbol from a regexp that has root `root`.
  */
-private predicate belongsTo(TInputSymbol a, RegExpRoot root) {
+private predicate belongsTo(InputSymbol a, RegExpRoot root) {
   exists(State s | getRoot(s.getRepr()) = root |
     delta(s, a, _)
     or
@@ -417,6 +417,13 @@ private module CharacterClasses {
     )
   }
 
+  bindingset[char, cc]
+  private string caseNormalize(string char, RegExpTerm cc) {
+    if RegExpFlags::isIgnoreCase(cc.getRootTerm())
+    then result = char.toLowerCase()
+    else result = char
+  }
+
   /**
    * An implementation of `CharacterClass` for positive (non inverted) character classes.
    */
@@ -425,7 +432,7 @@ private module CharacterClasses {
 
     PositiveCharacterClass() { this = getCanonicalCharClass(cc) and not cc.isInverted() }
 
-    override string getARelevantChar() { result = getAMentionedChar(cc) }
+    override string getARelevantChar() { result = caseNormalize(getAMentionedChar(cc), cc) }
 
     override predicate matches(string char) { hasChildThatMatches(cc, char) }
   }
@@ -439,8 +446,8 @@ private module CharacterClasses {
     InvertedCharacterClass() { this = getCanonicalCharClass(cc) and cc.isInverted() }
 
     override string getARelevantChar() {
-      result = nextChar(getAMentionedChar(cc)) or
-      nextChar(result) = getAMentionedChar(cc)
+      result = nextChar(caseNormalize(getAMentionedChar(cc), cc)) or
+      nextChar(result) = caseNormalize(getAMentionedChar(cc), cc)
     }
 
     bindingset[char]
@@ -483,7 +490,9 @@ private module CharacterClasses {
       result = " "
       or
       charClass = "w" and
-      result = ["a", "Z", "_", "0", "9"]
+      if RegExpFlags::isIgnoreCase(cc.getRootTerm())
+      then result = ["a", "z", "_", "0", "9"]
+      else result = ["a", "Z", "_", "0", "9"]
     }
 
     override predicate matches(string char) { classEscapeMatches(charClass, char) }
@@ -537,6 +546,22 @@ private class EdgeLabel extends TInputSymbol {
     or
     exists(InputSymbol s | this = s and result = s.toString())
   }
+}
+
+private CharacterClass normalize(CharacterClass c) {
+  exists(string normalization |
+    normalization = getMormalizationString(c) and
+    result =
+      min(CharacterClass cc, string raw |
+        getMormalizationString(cc) = normalization and cc = CharClass(raw)
+      |
+        cc order by raw
+      )
+  )
+}
+
+private string getMormalizationString(CharacterClass c) {
+  result = concat(string char | c.matches(char) and char = CharacterClasses::getARelevantChar())
 }
 
 /**
@@ -650,13 +675,13 @@ predicate delta(State q1, EdgeLabel lbl, State q2) {
     cc.isUniversalClass() and q1 = before(cc) and lbl = Any() and q2 = after(cc)
     or
     q1 = before(cc) and
-    lbl = CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm())) and
+    lbl = normalize(CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm()))) and
     q2 = after(cc)
   )
   or
   exists(RegExpTerm cc | isEscapeClass(cc, _) |
     q1 = before(cc) and
-    lbl = CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm())) and
+    lbl = normalize(CharClass(cc.getRawValue() + "|" + getCanonicalizationFlags(cc.getRootTerm()))) and
     q2 = after(cc)
   )
   or
