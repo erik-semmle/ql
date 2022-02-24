@@ -75,6 +75,13 @@ class Configuration extends TaintTracking::Configuration {
       not read.hasDominatingAssignment()
     )
     or
+    exists(EnumeratedPropName propName |
+      pred = propName.getSourceObject() and
+      succ = propName and
+      inlbl.isTaint() and
+      outlbl.isTaint()
+    )
+    or
     // Same as above, but for property projection.
     exists(PropertyProjection proj |
       proj.isSingletonProjection() and

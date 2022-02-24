@@ -94,3 +94,10 @@ module.exports.fixedProp = function (obj, path, value) {
   var i = 0;
   maybeProto[i + 2] = value; // OK - number properties are OK.
 }
+
+module.exports.iteration = function (obj, other, value) {
+  for (var i in other) {
+    var value = obj[i];
+    value[other[2]] = value; // NOT OK
+  }
+}
