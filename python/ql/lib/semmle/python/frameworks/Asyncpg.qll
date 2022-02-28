@@ -76,7 +76,7 @@ private module Asyncpg {
     class PreparedStatementConstruction extends SqlConstruction::Range, API::CallNode {
       PreparedStatementConstruction() { this = connection().getMember("prepare").getACall() }
 
-      override DataFlow::Node getSql() { result = this.getParameter(0, "query").getARhs() }
+      override DataFlow::Node getSql() { result = this.getArgument(0, "query").getARhs() }
     }
 
     class PreparedStatementExecution extends SqlExecution::Range, API::CallNode {
@@ -108,7 +108,7 @@ private module Asyncpg {
     class CursorConstruction extends SqlConstruction::Range, API::CallNode {
       CursorConstruction() { this = connection().getMember("cursor").getACall() }
 
-      override DataFlow::Node getSql() { result = this.getParameter(0, "query").getARhs() }
+      override DataFlow::Node getSql() { result = this.getArgument(0, "query").getARhs() }
     }
 
     /** The creation of a `Cursor` executes the associated query. */

@@ -2507,7 +2507,7 @@ private module StdlibPrivate {
   /** Gets a call to `hashlib.new` with `algorithmName` as the first argument. */
   private API::CallNode hashlibNewCall(string algorithmName) {
     algorithmName =
-      result.getParameter(0, "name").getAValueReachingRhs().asExpr().(StrConst).getText() and
+      result.getArgument(0, "name").getAValueReachingRhs().asExpr().(StrConst).getText() and
     result = API::moduleImport("hashlib").getMember("new").getACall()
   }
 
@@ -2519,12 +2519,12 @@ private module StdlibPrivate {
 
     HashlibNewCall() {
       this = hashlibNewCall(hashName) and
-      exists(this.getParameter(1, "data"))
+      exists(this.getArgument(1, "data"))
     }
 
     override Cryptography::CryptographicAlgorithm getAlgorithm() { result.matchesName(hashName) }
 
-    override DataFlow::Node getAnInput() { result = this.getParameter(1, "data").getARhs() }
+    override DataFlow::Node getAnInput() { result = this.getArgument(1, "data").getARhs() }
   }
 
   /**

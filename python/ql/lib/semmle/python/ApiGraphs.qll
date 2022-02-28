@@ -92,7 +92,7 @@ module API {
      */
     bindingset[m]
     bindingset[result]
-    Node getMember(string m) { result = this.getASuccessor(Label::member(m)) }
+    Node getMember(string m) { none() }
 
     /**
      * Gets a node representing a member of this API component where the name of the member is
@@ -117,37 +117,7 @@ module API {
      */
     Node getReturn() { result = this.getASuccessor(Label::return()) }
 
-    /**
-     * Gets a node representing the `i`th parameter of the function represented by this node.
-     *
-     * This predicate may have multiple results when there are multiple invocations of this API component.
-     * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
-     */
-    Node getParameter(int i) { result = this.getASuccessor(Label::parameter(i)) }
-
-    /**
-     * Gets the node representing the keyword parameter `name` of the function represented by this node.
-     *
-     * This predicate may have multiple results when there are multiple invocations of this API component.
-     * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
-     */
-    Node getKeywordParameter(string name) {
-      result = this.getASuccessor(Label::keywordParameter(name))
-    }
-
-    /**
-     * Gets the number of parameters of the function represented by this node.
-     */
-    int getNumParameter() { result = max(int s | exists(this.getParameter(s))) + 1 }
-
-    /**
-     * Gets a node representing the last parameter of the function represented by this node.
-     *
-     * This predicate may have multiple results when there are multiple invocations of this API component.
-     * Consider using `getACall()` if there is a need to distingiush between individual calls.
-     */
-    Node getLastParameter() { result = this.getParameter(this.getNumParameter() - 1) }
-
+    //Node getParameter(int i) { result = this.getASuccessor(Label::parameter(i)) }
     /**
      * Gets a node representing a subclass of the class represented by this node.
      */
@@ -234,7 +204,7 @@ module API {
         Impl::edge(pred, lbl, this) and
         predpath = pred.getAPath(length - 1) and
         exists(string dot | if length = 1 then dot = "" else dot = "." |
-          result = predpath + dot + lbl and
+          result = predpath + dot + lbl.getLabelRelativeToNode(pred) and
           // avoid producing strings longer than 1MB
           result.length() < 1000 * 1000
         )
@@ -249,6 +219,8 @@ module API {
   /** The root node of an API graph. */
   class Root extends Node, Impl::MkRoot {
     override string toString() { result = "root" }
+
+    override Node getMember(string name) { none() }
   }
 
   /** A node corresponding to the use of an API component. */
@@ -264,6 +236,22 @@ module API {
         not exists(this.getPath()) and result = type + "with no path"
       )
     }
+
+    Def getArgument(int i) { result = this.getASuccessor(Label::parameter(i)) }
+
+    /**
+     * Gets the node representing the keyword argument `name` of the call represented by this node.
+     *
+     * This predicate may have multiple results when there are multiple invocations of this API component.
+     * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
+     */
+    Def getKeywordArgument(string name) {
+      result = this.getASuccessor(Label::keywordParameter(name))
+    }
+
+    bindingset[m]
+    bindingset[result]
+    override Use getMember(string m) { result = this.getASuccessor(Label::member(m)) }
   }
 
   /** A node corresponding to the rhs of an API component. */
@@ -275,6 +263,35 @@ module API {
         not exists(this.getPath()) and result = type + "with no path"
       )
     }
+
+    Use getParameter(int i) { result = this.getASuccessor(Label::parameter(i)) }
+
+    /**
+     * Gets the node representing the keyword parameter `name` of the function represented by this node.
+     *
+     * This predicate may have multiple results when there are multiple invocations of this API component.
+     * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
+     */
+    Use getKeywordParameter(string name) {
+      result = this.getASuccessor(Label::keywordParameter(name))
+    }
+
+    bindingset[m]
+    bindingset[result]
+    override Def getMember(string m) { result = this.getASuccessor(Label::member(m)) }
+
+    /**
+     * Gets the number of parameters of the function represented by this node.
+     */
+    int getNumParameter() { result = max(int s | exists(this.getParameter(s))) + 1 }
+
+    /**
+     * Gets a node representing the last parameter of the function represented by this node.
+     *
+     * This predicate may have multiple results when there are multiple invocations of this API component.
+     * Consider using `getACall()` if there is a need to distingiush between individual calls.
+     */
+    Node getLastParameter() { result = this.getParameter(this.getNumParameter() - 1) }
   }
 
   /** Gets the root node. */
@@ -287,10 +304,10 @@ module API {
    * you should use `.getMember` on the parent module. For example, for nodes corresponding to the module `foo.bar`,
    * use `moduleImport("foo").getMember("bar")`.
    */
-  Node moduleImport(string m) { result = Impl::MkModuleImport(m) }
+  Use moduleImport(string m) { result = Impl::MkModuleImport(m) }
 
   /** Gets a node corresponding to the built-in with the given name, if any. */
-  Node builtin(string n) { result = moduleImport("builtins").getMember(n) }
+  Use builtin(string n) { result = moduleImport("builtins").getMember(n) }
 
   /**
    * An `CallCfgNode` that is connected to the API graph.
@@ -302,45 +319,45 @@ module API {
    * the corresponding predicates from `API::Node`. These are guaranteed to exist and be unique to this call.
    */
   class CallNode extends DataFlow::CallCfgNode {
-    API::Node callee;
+    API::Use callee;
 
     CallNode() { this = callee.getReturn().getAnImmediateUse() }
 
     /** Gets the API node for the `i`th parameter of this invocation. */
     pragma[nomagic]
-    Node getParameter(int i) {
-      result = callee.getParameter(i) and
-      result = this.getAParameterCandidate(i)
+    Def getArgument(int i) {
+      result = callee.getArgument(i) and
+      result = this.getAnArgumentCandidate(i)
     }
 
     /**
      * Gets an API node where a RHS of the node is the `i`th argument to this call.
      */
     pragma[noinline]
-    private Node getAParameterCandidate(int i) { result.getARhs() = this.getArg(i) }
+    private Def getAnArgumentCandidate(int i) { result.getARhs() = this.getArg(i) }
 
     /** Gets the API node for a parameter of this invocation. */
-    Node getAParameter() { result = this.getParameter(_) }
+    Def getAnArgument() { result = this.getArgument(_) }
 
     /** Gets the API node for the last parameter of this invocation. */
-    Node getLastParameter() { result = this.getParameter(max(int i | exists(this.getArg(i)))) }
+    Def getLastArgument() { result = this.getArgument(max(int i | exists(this.getArg(i)))) }
 
     /** Gets the API node for the keyword parameter `name` of this invocation. */
-    Node getKeywordParameter(string name) {
-      result = callee.getKeywordParameter(name) and
-      result = this.getAKeywordParameterCandidate(name)
+    Def getKeywordArgument(string name) {
+      result = callee.getKeywordArgument(name) and
+      result = this.getAKeywordArgumentCandidate(name)
     }
 
     /** Gets the API node for the parameter that has index `i` or has keyword `name`. */
     bindingset[i, name]
-    Node getParameter(int i, string name) {
-      result = this.getParameter(i)
+    Def getArgument(int i, string name) {
+      result = this.getArgument(i)
       or
-      result = this.getKeywordParameter(name)
+      result = this.getKeywordArgument(name)
     }
 
     pragma[noinline]
-    private Node getAKeywordParameterCandidate(string name) {
+    private Node getAKeywordArgumentCandidate(string name) {
       result.getARhs() = this.getArgByName(name)
     }
 
@@ -754,6 +771,9 @@ module API {
     class ApiLabel extends TLabel {
       /** Gets a string representation of this label. */
       string toString() { result = "???" }
+
+      bindingset[n]
+      string getLabelRelativeToNode(API::Node n) { n = n and result = this.toString() }
     }
 
     private import LabelImpl
@@ -830,6 +850,13 @@ module API {
 
         /** Gets the index of the parameter for this label. */
         int getIndex() { result = i }
+
+        bindingset[n]
+        override string getLabelRelativeToNode(API::Node n) {
+          n instanceof API::Def and result = "getParameter(" + i + ")"
+          or
+          n instanceof API::Use and result = "getArgument(" + i + ")"
+        }
       }
 
       /** A label for a keyword parameter `name`. */
@@ -839,6 +866,13 @@ module API {
         LabelKeywordParameter() { this = MkLabelKeywordParameter(name) }
 
         override string toString() { result = "getKeywordParameter(\"" + name + "\")" }
+
+        bindingset[n]
+        override string getLabelRelativeToNode(API::Node n) {
+          n instanceof API::Def and result = "getKeywordParameter(\"" + name + "\")"
+          or
+          n instanceof API::Use and result = "getKeywordArgument(\"" + name + "\")"
+        }
 
         /** Gets the name of the parameter for this label. */
         string getName() { result = name }
@@ -856,6 +890,13 @@ module API {
         LabelSubclass() { this = MkLabelSubclass() }
 
         override string toString() { result = "getASubclass()" }
+
+        bindingset[n]
+        override string getLabelRelativeToNode(API::Node n) {
+          n instanceof API::Def and result = "getASubClassDef()"
+          or
+          n instanceof API::Use and result = "getASubclassUse()"
+        }
       }
 
       /** A label for awaited values. */

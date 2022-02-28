@@ -70,7 +70,7 @@ class Assertion extends Comment {
     result =
       this.lookup(i - 1)
           .getASuccessor(any(API::Label::ApiLabel label |
-              label.toString() = this.getEdgeLabel(i - 1)
+              label.getLabelRelativeToNode(this.lookup(i - 1)) = this.getEdgeLabel(i - 1)
             ))
   }
 
@@ -89,7 +89,11 @@ class Assertion extends Comment {
         suffix =
           "it does have outgoing edges labelled " +
             concat(string lbl |
-              exists(nd.getASuccessor(any(API::Label::ApiLabel label | label.toString() = lbl)))
+              exists(
+                nd.getASuccessor(any(API::Label::ApiLabel label |
+                    label.getLabelRelativeToNode(nd) = lbl
+                  ))
+              )
             |
               lbl, ", "
             ) + "."
