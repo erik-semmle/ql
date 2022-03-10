@@ -2346,17 +2346,10 @@ private module Stage3 {
     )
   }
 
-  predicate revFlow(NodeEx node, FlowState state, Configuration config) {
-    revFlow(node, state, _, _, _, config)
-  }
-
   pragma[nomagic]
   predicate revFlow(NodeEx node, Configuration config) { revFlow(node, _, _, _, _, config) }
 
   // use an alias as a workaround for bad functionality-induced joins
-  pragma[nomagic]
-  predicate revFlowAlias(NodeEx node, Configuration config) { revFlow(node, _, _, _, _, config) }
-
   // use an alias as a workaround for bad functionality-induced joins
   pragma[nomagic]
   predicate revFlowAlias(
@@ -3178,21 +3171,8 @@ private module Stage4 {
     revFlow(node, state, _, _, _, config)
   }
 
-  pragma[nomagic]
-  predicate revFlow(NodeEx node, Configuration config) { revFlow(node, _, _, _, _, config) }
-
   // use an alias as a workaround for bad functionality-induced joins
-  pragma[nomagic]
-  predicate revFlowAlias(NodeEx node, Configuration config) { revFlow(node, _, _, _, _, config) }
-
   // use an alias as a workaround for bad functionality-induced joins
-  pragma[nomagic]
-  predicate revFlowAlias(
-    NodeEx node, FlowState state, boolean toReturn, ApOption returnAp, Ap ap, Configuration config
-  ) {
-    revFlow(node, state, toReturn, returnAp, ap, config)
-  }
-
   private predicate fwdConsCand(TypedContent tc, Ap ap, Configuration config) {
     storeStepFwd(_, ap, tc, _, _, config)
   }
@@ -3224,17 +3204,6 @@ private module Stage4 {
         or
         p.allowParameterReturnInSelf()
       )
-    )
-  }
-
-  pragma[nomagic]
-  predicate callMayFlowThroughRev(DataFlowCall call, Configuration config) {
-    exists(
-      Ap returnAp0, ArgNodeEx arg, FlowState state, boolean toReturn, ApOption returnAp, Ap ap
-    |
-      revFlow(arg, state, toReturn, returnAp, ap, config) and
-      revFlowInToReturn(call, arg, state, returnAp0, ap, config) and
-      revFlowIsReturned(call, toReturn, returnAp, returnAp0, config)
     )
   }
 

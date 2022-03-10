@@ -23,12 +23,6 @@ private predicate ejbPolyCalls(Callable origin, Callable target) {
   not origin instanceof ForbiddenCallable
 }
 
-private predicate ejbPolyCallsPlus(Callable origin, Callable target) {
-  exists(EJB ejb | origin = ejb.getACallable() | ejbPolyCalls(origin, target))
-  or
-  exists(Callable mid | ejbPolyCallsPlus(origin, mid) and ejbPolyCalls(mid, target))
-}
-
 /**
  * Holds if there exists a call chain from an EJB-`Callable` `origin` to a `ForbiddenCallable` `target`
  * that does not contain any intermediate EJB-`Callable` or `ForbiddenCallable`,
