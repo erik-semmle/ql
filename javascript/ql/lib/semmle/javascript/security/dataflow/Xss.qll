@@ -347,7 +347,7 @@ module DomBasedXss {
   /**
    * A write to the `template` option of a Vue instance, viewed as an XSS sink.
    */
-  class VueTemplateSink extends Sink {
+  class VueTemplateSink extends DomBasedXss::Sink {
     VueTemplateSink() {
       // Note: don't use Vue::Component#getTemplate as it includes an unwanted getALocalSource() step
       this = any(Vue::Component c).getOption("template")
@@ -358,7 +358,7 @@ module DomBasedXss {
    * The tag name argument to the `createElement` parameter of the
    * `render` method of a Vue instance, viewed as an XSS sink.
    */
-  class VueCreateElementSink extends Sink {
+  class VueCreateElementSink extends DomBasedXss::Sink {
     VueCreateElementSink() {
       exists(Vue::Component c, DataFlow::FunctionNode f |
         f.flowsTo(c.getRender()) and
@@ -370,12 +370,12 @@ module DomBasedXss {
   /**
    * A Vue `v-html` attribute, viewed as an XSS sink.
    */
-  class VHtmlSink extends Vue::VHtmlAttribute, Sink { }
+  class VHtmlSink extends Vue::VHtmlAttribute, DomBasedXss::Sink { }
 
   /**
    * A raw interpolation tag in a template file, viewed as an XSS sink.
    */
-  class TemplateSink extends Sink {
+  class TemplateSink extends DomBasedXss::Sink {
     TemplateSink() {
       exists(Templating::TemplatePlaceholderTag tag |
         tag.isRawInterpolation() and
@@ -388,7 +388,7 @@ module DomBasedXss {
    * A value being piped into the `safe` pipe in a template file,
    * disabling subsequent HTML escaping.
    */
-  class SafePipe extends Sink {
+  class SafePipe extends DomBasedXss::Sink {
     SafePipe() { this = Templating::getAPipeCall("safe").getArgument(0) }
   }
 
