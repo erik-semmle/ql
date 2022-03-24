@@ -21,7 +21,7 @@ module ClientSideUrlRedirect {
    */
   abstract class Sink extends DataFlow::Node {
     /** Holds if the sink can execute JavaScript code in the current context. */
-    predicate isXssSink() {
+    predicate isXSSSink() {
       none() // overwritten in subclasses
     }
   }
@@ -128,7 +128,7 @@ module ClientSideUrlRedirect {
       xss = false
     }
 
-    override predicate isXssSink() { xss = true }
+    override predicate isXSSSink() { xss = true }
   }
 
   /**
@@ -184,7 +184,7 @@ module ClientSideUrlRedirect {
       any(DomMethodCallExpr call).interpretsArgumentsAsURL(this.asExpr())
     }
 
-    override predicate isXssSink() { any() }
+    override predicate isXSSSink() { any() }
   }
 
   /**
@@ -199,7 +199,7 @@ module ClientSideUrlRedirect {
       )
     }
 
-    override predicate isXssSink() { any() }
+    override predicate isXSSSink() { any() }
   }
 
   /**
@@ -217,7 +217,7 @@ module ClientSideUrlRedirect {
       )
     }
 
-    override predicate isXssSink() { any() }
+    override predicate isXSSSink() { any() }
   }
 
   /**
