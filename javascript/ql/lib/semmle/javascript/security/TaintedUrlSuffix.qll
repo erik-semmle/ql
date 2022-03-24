@@ -26,11 +26,13 @@ module TaintedUrlSuffix {
    */
   FlowLabel label() { result instanceof TaintedUrlSuffixLabel }
 
-  /** Gets a remote flow source that is a tainted URL query or fragment part from `window.location`. */
+  /**
+   * Gets a remote flow source that is a tainted URL query or fragment part.
+   */
   ClientSideRemoteFlowSource source() {
-    result = DOM::locationRef().getAPropertyRead(["search", "hash"])
+    result.getKind().isFragment()
     or
-    result = DOM::locationSource()
+    result.getKind().isQuery()
     or
     result.getKind().isUrl()
   }
