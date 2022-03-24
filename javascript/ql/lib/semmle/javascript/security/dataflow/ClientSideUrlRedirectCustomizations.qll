@@ -168,20 +168,15 @@ module ClientSideUrlRedirect {
   }
 
   /**
-   * A write to a `href` or similar attribute viewed as a `ScriptUrlSink`.
+   * A script or iframe `src` attribute, viewed as a `ScriptUrlSink`.
    */
-  class AttributeUrlSink extends ScriptUrlSink {
-    AttributeUrlSink() {
-      // e.g. `$("<a>", {href: sink}).appendTo("body")`
+  class SrcAttributeUrlSink extends ScriptUrlSink, DataFlow::ValueNode {
+    SrcAttributeUrlSink() {
       exists(DOM::AttributeDefinition attr |
-        not attr instanceof JSXAttribute and // handled more precisely in `ReactAttributeWriteUrlSink`.
-        attr.getName() = DOM::getAPropertyNameInterpretedAsJavaScriptUrl()
-      |
+        attr.getElement().getName() = ["script", "iframe"] and
+        attr.getName() = "src" and
         this = attr.getValueNode()
       )
-      or
-      // e.g. node.setAttribute("href", sink)
-      any(DomMethodCallExpr call).interpretsArgumentsAsURL(this.asExpr())
     }
 
     override predicate isXSSSink() { any() }
