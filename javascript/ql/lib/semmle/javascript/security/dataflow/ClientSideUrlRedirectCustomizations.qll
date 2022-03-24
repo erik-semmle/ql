@@ -8,6 +8,8 @@ import javascript
 import semmle.javascript.security.dataflow.RemoteFlowSources
 
 module ClientSideUrlRedirect {
+  private import Xss::DomBasedXss as DomBasedXss
+
   /**
    * A data flow source for unvalidated URL redirect vulnerabilities.
    */
