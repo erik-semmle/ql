@@ -404,22 +404,24 @@ module Express {
      *
      * `kind` is one of: "error", "request", "response", "next", or "parameter".
      */
-    abstract Parameter getRouteHandlerParameter(string kind);
+    abstract Parameter getRouteHandlerParameter(string kind); // TODO: DataFlow::ParameterNode
 
     /**
      * Gets the parameter of the route handler that contains the request object.
      */
-    Parameter getRequestParameter() { result = this.getRouteHandlerParameter("request") }
+    Parameter getRequestParameter() { result = this.getRouteHandlerParameter("request") } // TODO: DataFlow::ParameterNode
 
     /**
      * Gets the parameter of the route handler that contains the response object.
      */
-    Parameter getResponseParameter() { result = this.getRouteHandlerParameter("response") }
+    Parameter getResponseParameter() { result = this.getRouteHandlerParameter("response") } // TODO: DataFlow::ParameterNode
 
     /**
      * Gets a request body access of this handler.
      */
-    Expr getARequestBodyAccess() { result.(PropAccess).accesses(this.getARequestExpr(), "body") }
+    Expr getARequestBodyAccess() {
+      result.(PropAccess).accesses(this.getARequestNode().asExpr(), "body")
+    } // TODO: DataFlow::Node
   }
 
   /**
@@ -443,7 +445,8 @@ module Express {
    * Holds if `call` is a chainable method call on the response object of `handler`.
    */
   private predicate isChainableResponseMethodCall(RouteHandler handler, MethodCallExpr call) {
-    exists(string name | call.calls(handler.getAResponseExpr(), name) |
+    // TODO: DataFlow::MethodCallNode
+    exists(string name | call.calls(handler.getAResponseNode().asExpr(), name) |
       name =
         [
           "append", "attachment", "location", "send", "sendStatus", "set", "status", "type", "vary",
@@ -511,16 +514,32 @@ module Express {
   }
 
   /**
+   * DEPRECATED: Use `ResponseNode` instead.
    * An Express response expression.
    */
-  class ResponseExpr extends NodeJSLib::ResponseExpr {
+  deprecated class ResponseExpr extends NodeJSLib::ResponseExpr {
+    ResponseExpr() { this.flow() instanceof ResponseNode }
+  }
+
+  /**
+   * An Express response expression.
+   */
+  class ResponseNode extends NodeJSLib::ResponseNode {
     override ResponseSource src;
+  }
+
+  /**
+   * DEPRECATED: Use `RequestNode` instead.
+   * An Express request expression.
+   */
+  deprecated class RequestExpr extends NodeJSLib::RequestExpr {
+    RequestExpr() { this.flow() instanceof RequestNode }
   }
 
   /**
    * An Express request expression.
    */
-  class RequestExpr extends NodeJSLib::RequestExpr {
+  class RequestNode extends NodeJSLib::RequestNode {
     override RequestSource src;
   }
 
@@ -674,12 +693,12 @@ module Express {
   /**
    * Holds if `e` is an HTTP request object.
    */
-  predicate isRequest(Expr e) { any(RouteHandler rh).getARequestExpr() = e } // TODO: DataFlow::Node
+  predicate isRequest(Expr e) { any(RouteHandler rh).getARequestNode().asExpr() = e } // TODO: DataFlow::Node
 
   /**
    * Holds if `e` is an HTTP response object.
    */
-  predicate isResponse(Expr e) { any(RouteHandler rh).getAResponseExpr() = e } // TODO: DataFlow::Node
+  predicate isResponse(Expr e) { any(RouteHandler rh).getAResponseNode().asExpr() = e } // TODO: DataFlow::Node
 
   /**
    * An access to the HTTP request body.
@@ -691,9 +710,7 @@ module Express {
   abstract private class HeaderDefinition extends HTTP::Servers::StandardHeaderDefinition {
     HeaderDefinition() { isResponse(this.getReceiver().asExpr()) }
 
-    override RouteHandler getRouteHandler() {
-      this.getReceiver().asExpr() = result.getAResponseExpr()
-    }
+    override RouteHandler getRouteHandler() { this.getReceiver() = result.getAResponseNode() }
   }
 
   /**
@@ -871,9 +888,7 @@ module Express {
      *
      * Example: `router2` for `router1.use(router2)` or `router1.use("/route2", router2)`
      */
-    RouterDefinition getASubRouter() {
-      result.ref().flowsTo(this.getARouteSetup().getAnArgument())
-    }
+    RouterDefinition getASubRouter() { result.ref().flowsTo(this.getARouteSetup().getAnArgument()) }
 
     /**
      * Gets a route handler registered on this router.
@@ -943,7 +958,7 @@ module Express {
     DataFlow::MethodCallNode {
     ResponseSendFileAsFileSystemAccess() {
       exists(string name | name = "sendFile" or name = "sendfile" |
-        this.calls(any(ResponseExpr res).flow(), name)
+        this.calls(any(ResponseNode res), name)
       )
     }
 
