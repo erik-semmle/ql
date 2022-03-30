@@ -203,10 +203,10 @@ module NextJS {
       )
     }
 
-    override Parameter getRouteHandlerParameter(string kind) {
-      kind = "request" and result = getFunction().getParameter(0)
+    override DataFlow::ParameterNode getRouteHandlerParameter(string kind) {
+      kind = "request" and result = getParameter(0)
       or
-      kind = "response" and result = getFunction().getParameter(1)
+      kind = "response" and result = getParameter(1)
     }
   }
 
