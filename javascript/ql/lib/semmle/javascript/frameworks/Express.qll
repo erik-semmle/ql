@@ -79,7 +79,7 @@ module Express {
   private class RouterRange extends Routing::Router::Range {
     RouterDefinition def;
 
-    RouterRange() { this = def.flow() }
+    RouterRange() { this = def }
 
     override DataFlow::SourceNode getAReference() { result = def.ref() }
   }
@@ -873,20 +873,19 @@ module Express {
      * Gets a route handler of the application, regardless of nesting.
      */
     override HTTP::RouteHandler getARouteHandler() {
-      result = this.asExpr().(RouterDefinition).getASubRouter*().getARouteHandler()
+      result = this.(RouterDefinition).getASubRouter*().getARouteHandler()
     }
   }
 
   /**
    * An Express router.
    */
-  class RouterDefinition extends InvokeExpr {
-    // TODO: DataFlow::Node
-    RouterDefinition() { this = routerCreation().asExpr() }
+  class RouterDefinition extends DataFlow::InvokeNode {
+    RouterDefinition() { this = routerCreation() }
 
     private DataFlow::SourceNode ref(DataFlow::TypeTracker t) {
       t.start() and
-      result = DataFlow::exprNode(this)
+      result = this
       or
       exists(string name | result = this.ref(t.continue()).getAMethodCall(name) |
         name = "route" or
@@ -901,9 +900,9 @@ module Express {
 
     /**
      * DEPRECATED: Use `ref().flowsToExpr()` instead.
-     * Holds if `sink` may refer to this router.
+     * This predicate is now from `DataFlow::SourceNode`.
      */
-    deprecated predicate flowsTo(Expr sink) { this.ref().flowsToExpr(sink) }
+    deprecated override predicate flowsTo(DataFlow::Node n) { super.flowsTo(n) }
 
     /**
      * Gets a `RouteSetup` that was used for setting up a route on this router.
