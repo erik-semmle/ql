@@ -189,7 +189,7 @@ module FlowFromSource {
 
     /** The sinks are the endpoints we're extracting. */
     override predicate isSink(DataFlow::Node sink, DataFlow::FlowLabel lbl) {
-      sink = getAnEndpoint(q)
+      sink = getAnEndpoint(q) and exists(lbl)
     }
   }
 }
