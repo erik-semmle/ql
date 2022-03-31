@@ -8,7 +8,7 @@ import semmle.javascript.Promises
 /** Provices classes for modelling NoSQL query sinks. */
 module NoSql {
   /** An expression that is interpreted as a NoSQL query. */
-  abstract class Query extends Expr {
+  abstract class Query extends DataFlow::Node {
     /** Gets an expression that is interpreted as a code operator in this query. */
     DataFlow::Node getACodeOperator() { none() }
   }
@@ -85,7 +85,7 @@ private module MongoDB {
   class Query extends NoSql::Query {
     QueryCall qc;
 
-    Query() { this = qc.getAQueryArgument().asExpr() }
+    Query() { this = qc.getAQueryArgument() }
 
     override DataFlow::Node getACodeOperator() { result = qc.getACodeOperator() }
   }
@@ -519,7 +519,7 @@ private module Mongoose {
   class MongoDBQueryPart extends NoSql::Query {
     MongooseFunction f;
 
-    MongoDBQueryPart() { this = f.getQueryArgument().getARhs().asExpr() }
+    MongoDBQueryPart() { this = f.getQueryArgument().getARhs() }
 
     override DataFlow::Node getACodeOperator() {
       result = getADollarWhereProperty(f.getQueryArgument())
@@ -626,7 +626,7 @@ private module Minimongo {
   class Query extends NoSql::Query {
     QueryCall qc;
 
-    Query() { this = qc.getAQueryArgument().asExpr() }
+    Query() { this = qc.getAQueryArgument() }
 
     override DataFlow::Node getACodeOperator() { result = qc.getACodeOperator() }
   }
@@ -686,7 +686,7 @@ private module MarsDB {
   class Query extends NoSql::Query {
     QueryCall qc;
 
-    Query() { this = qc.getAQueryArgument().asExpr() }
+    Query() { this = qc.getAQueryArgument() }
 
     override DataFlow::Node getACodeOperator() { result = qc.getACodeOperator() }
   }
@@ -771,7 +771,7 @@ private module Redis {
     RedisKeyArgument() {
       exists(string method, int argIndex |
         QuerySignatures::argumentIsAmbiguousKey(method, argIndex) and
-        this = redis().getMember(method).getParameter(argIndex).getARhs().asExpr()
+        this = redis().getMember(method).getParameter(argIndex).getARhs()
       )
     }
   }
