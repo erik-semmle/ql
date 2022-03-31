@@ -44,7 +44,7 @@ module BrokenCryptoAlgorithm {
     WeakCryptographicOperationSink() {
       exists(CryptographicOperation application |
         application.getAlgorithm().isWeak() and
-        this.asExpr() = application.getInput()
+        this = application.getInput()
       )
     }
   }
