@@ -497,13 +497,11 @@ private module Mongoose {
   /**
    * An expression passed to `mongoose.createConnection` to supply credentials.
    */
-  class Credentials extends CredentialsExpr {
+  class Credentials extends CredentialsNode {
     string kind;
 
     Credentials() {
-      exists(string prop |
-        this = createConnection().getParameter(3).getMember(prop).getARhs().asExpr()
-      |
+      exists(string prop | this = createConnection().getParameter(3).getMember(prop).getARhs() |
         prop = "user" and kind = "user name"
         or
         prop = "pass" and kind = "password"
