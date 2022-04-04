@@ -15,13 +15,13 @@ import javascript
 
 from
   Express::RouteSetup setup, Express::RouteHandler handler, Express::RequestInputAccess input,
-  SensitiveExpr sensitive
+  SensitiveNode sensitive
 where
   setup.getRequestMethod() = "GET" and
   handler = setup.getARouteHandler() and
   input.getRouteHandler() = handler and
   input.getKind() = "parameter" and
-  input.(DataFlow::SourceNode).flowsToExpr(sensitive) and
+  input.(DataFlow::SourceNode).flowsTo(sensitive) and
   not sensitive.getClassification() = SensitiveDataClassification::id()
 select input, "$@ for GET requests uses query parameter as sensitive data.", handler,
   "Route handler"
