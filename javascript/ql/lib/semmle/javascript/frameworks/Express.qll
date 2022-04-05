@@ -51,7 +51,7 @@ module Express {
   }
 
   /**
-   * DEPRECATED: Use `isRouter()` instead.
+   * DEPRECATED: Use `RouterDefinition.ref()` or `RouteSetup` instead.
    * An expression that refers to a route.
    */
   deprecated class RouteExpr extends MethodCallExpr {
