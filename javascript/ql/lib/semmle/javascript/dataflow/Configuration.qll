@@ -883,32 +883,35 @@ private class FlowStepThroughImport extends SharedFlowStep {
  *
  * Summary steps through function calls are not taken into account.
  */
-pragma[inline]
+pragma[noinline]
 private predicate basicFlowStepNoBarrier(
   DataFlow::Node pred, DataFlow::Node succ, PathSummary summary, DataFlow::Configuration cfg
 ) {
-  // Local flow
-  exists(FlowLabel predlbl, FlowLabel succlbl |
-    localFlowStep(pred, succ, cfg, predlbl, succlbl) and
-    not cfg.isBarrierEdge(pred, succ) and
-    summary = MkPathSummary(false, false, predlbl, succlbl)
+  isRelevantForward(pred, cfg) and
+  (
+    // Local flow
+    exists(FlowLabel predlbl, FlowLabel succlbl |
+      localFlowStep(pred, succ, cfg, predlbl, succlbl) and
+      not cfg.isBarrierEdge(pred, succ) and
+      summary = MkPathSummary(false, false, predlbl, succlbl)
+    )
+    or
+    // Flow through properties of objects
+    propertyFlowStep(pred, succ) and
+    summary = PathSummary::level()
+    or
+    // Flow through global variables
+    globalFlowStep(pred, succ) and
+    summary = PathSummary::level()
+    or
+    // Flow into function
+    callStep(pred, succ) and
+    summary = PathSummary::call()
+    or
+    // Flow out of function
+    returnStep(pred, succ) and
+    summary = PathSummary::return()
   )
-  or
-  // Flow through properties of objects
-  propertyFlowStep(pred, succ) and
-  summary = PathSummary::level()
-  or
-  // Flow through global variables
-  globalFlowStep(pred, succ) and
-  summary = PathSummary::level()
-  or
-  // Flow into function
-  callStep(pred, succ) and
-  summary = PathSummary::call()
-  or
-  // Flow out of function
-  returnStep(pred, succ) and
-  summary = PathSummary::return()
 }
 
 /**
