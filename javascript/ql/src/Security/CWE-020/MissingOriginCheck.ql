@@ -13,61 +13,6 @@
 
 import javascript
 
-/** A function that handles "message" events. */
-class PostMessageHandler extends DataFlow::FunctionNode {
-  override PostMessageEventHandler astNode;
-
-  /** Gets the parameter that contains the event. */
-  DataFlow::ParameterNode getEventParameter() {
-    result = DataFlow::parameterNode(astNode.getEventParameter())
-  }
-}
-
-/** Gets a reference to the event from a postmessage `handler` */
-DataFlow::SourceNode event(DataFlow::TypeTracker t, PostMessageHandler handler) {
-  t.start() and
-  result = handler.getEventParameter()
-  or
-  exists(DataFlow::TypeTracker t2 | result = event(t2, handler).track(t2, t))
-}
-
-/** Gets a reference to the .origin from a postmessage event. */
-DataFlow::SourceNode origin(DataFlow::TypeTracker t, PostMessageHandler handler) {
-  t.start() and
-  result = event(DataFlow::TypeTracker::end(), handler).getAPropertyRead("origin")
-  or
-  result =
-    origin(t.continue(), handler)
-        .getAMethodCall([
-            "toString", "toLowerCase", "toUpperCase", "toLocaleLowerCase", "toLocaleUpperCase"
-          ])
-  or
-  exists(DataFlow::TypeTracker t2 | result = origin(t2, handler).track(t2, t))
-}
-
-/** Gets a reference to the .source from a postmessage event. */
-DataFlow::SourceNode source(DataFlow::TypeTracker t, PostMessageHandler handler) {
-  t.start() and
-  result = event(DataFlow::TypeTracker::end(), handler).getAPropertyRead("source")
-  or
-  exists(DataFlow::TypeTracker t2 | result = source(t2, handler).track(t2, t))
-}
-
-/** Gets a reference to the origin or the source of a postmessage event. */
-DataFlow::SourceNode sourceOrOrigin(PostMessageHandler handler) {
-  result = source(DataFlow::TypeTracker::end(), handler) or
-  result = origin(DataFlow::TypeTracker::end(), handler)
-}
-
-/** Holds if there exists a check of the .origin or .source of the postmessage `handler`. */
-predicate hasOriginCheck(PostMessageHandler handler) {
-  // event.origin === "constant"
-  exists(EqualityTest test | sourceOrOrigin(handler).flowsToExpr(test.getAnOperand()))
-  or
-  // set.includes(event.source)
-  exists(InclusionTest test | sourceOrOrigin(handler).flowsTo(test.getContainedNode()))
-}
-
-from PostMessageHandler handler
-where not hasOriginCheck(handler)
-select handler.getEventParameter(), "Postmessage handler has no origin check."
+from DataFlow::Node handler
+where none()
+select handler, "foo"
