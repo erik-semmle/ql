@@ -3,8 +3,8 @@
  * @description Using user-controlled GitHub Actions contexts like `run:` or `script:` may allow a malicious
  *              user to inject code into the GitHub action.
  * @kind problem
- * @problem.severity error
- * @precision high
+ * @problem.severity warning
+ * @precision medium
  * @id js/actions/injection
  * @tags actions
  *       security
