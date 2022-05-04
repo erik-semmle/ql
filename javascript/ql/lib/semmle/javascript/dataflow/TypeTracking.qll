@@ -183,6 +183,49 @@ module TypeTracker {
    * Gets a valid end point of type tracking.
    */
   TypeTracker end() { result.end() }
+
+  signature DataFlow::SourceNode startTrackingSig();
+
+  module MkTypeTracker<startTrackingSig/0 start> {
+    private DataFlow::SourceNode track(DataFlow::TypeTracker t) {
+      t.start() and
+      result = start()
+      or
+      result = trackRec(t)
+      // exists(DataFlow::TypeTracker t2 | result = track(t2).track(t2, t))
+    }
+
+    pragma[noopt]
+    private DataFlow::SourceNode trackRec(DataFlow::TypeTracker t) {
+      exists(DataFlow::TypeTracker t2, StepSummary summary, DataFlow::SourceNode prev |
+        prev = track(t2) and
+        StepSummary::step(prev, result, summary) and
+        t = t2.append(summary)
+      )
+    }
+
+    DataFlow::SourceNode ref() { result = track(end()) }
+
+    private DataFlow::SourceNode track(DataFlow::TypeTracker t, DataFlow::SourceNode start) {
+      t.start() and
+      result = start() and
+      start = result
+      or
+      result = trackRec(t, start)
+      // exists(DataFlow::TypeTracker t2 | result = track(t2).track(t2, t))
+    }
+
+    pragma[noopt]
+    private DataFlow::SourceNode trackRec(DataFlow::TypeTracker t, DataFlow::SourceNode start) {
+      exists(DataFlow::TypeTracker t2, StepSummary summary, DataFlow::SourceNode prev |
+        prev = track(t2, start) and
+        StepSummary::step(prev, result, summary) and
+        t = t2.append(summary)
+      )
+    }
+
+    DataFlow::SourceNode ref(DataFlow::SourceNode start) { result = track(end(), start) }
+  }
 }
 
 private newtype TTypeBackTracker = MkTypeBackTracker(Boolean hasReturn, OptionalPropertyName prop)

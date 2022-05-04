@@ -13,19 +13,11 @@ import semmle.javascript.security.dataflow.StoredXssQuery
 import DataFlow::PathGraph
 
 /**
- * Gets an instance of `mysql.createConnection()`, tracked globally.
+ * Gets a call to `mysql.createConnection()`.
  */
-DataFlow::SourceNode mysqlConnection(DataFlow::TypeTracker t) {
-  t.start() and
+DataFlow::SourceNode mysqlConnection() {
   result = DataFlow::moduleImport("mysql").getAMemberCall("createConnection")
-  or
-  exists(DataFlow::TypeTracker t2 | result = mysqlConnection(t2).track(t2, t))
 }
-
-/**
- * Gets an instance of `mysql.createConnection()`, tracked globally.
- */
-DataFlow::SourceNode mysqlConnection() { result = mysqlConnection(DataFlow::TypeTracker::end()) }
 
 /**
  * The data returned from a MySQL query.
@@ -42,7 +34,13 @@ DataFlow::SourceNode mysqlConnection() { result = mysqlConnection(DataFlow::Type
  * ```
  */
 class MysqlSource extends Source {
-  MysqlSource() { this = mysqlConnection().getAMethodCall("query").getCallback(1).getParameter(1) }
+  MysqlSource() {
+    this =
+      DataFlow::TypeTracker::MkTypeTracker<mysqlConnection/0>::ref()
+          .getAMethodCall("query")
+          .getCallback(1)
+          .getParameter(1)
+  }
 }
 
 from Configuration cfg, DataFlow::PathNode source, DataFlow::PathNode sink

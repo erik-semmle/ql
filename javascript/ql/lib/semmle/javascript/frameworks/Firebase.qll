@@ -6,31 +6,24 @@ import javascript
 
 module Firebase {
   /** Gets a reference to the Firebase API object. */
-  private DataFlow::SourceNode firebase(DataFlow::TypeTracker t) {
-    t.start() and
-    (
-      result = DataFlow::moduleImport("firebase/app")
-      or
-      result = DataFlow::moduleImport("firebase-admin")
-      or
-      result = DataFlow::globalVarRef("firebase")
-    )
+  private DataFlow::SourceNode firebaseStart() {
+    result = DataFlow::moduleImport("firebase/app")
     or
-    exists(DataFlow::TypeTracker t2 | result = firebase(t2).track(t2, t))
+    result = DataFlow::moduleImport("firebase-admin")
+    or
+    result = DataFlow::globalVarRef("firebase")
   }
 
   /** Gets a reference to the `firebase/app` or `firebase-admin` API object. */
-  DataFlow::SourceNode firebase() { result = firebase(DataFlow::TypeTracker::end()) }
+  DataFlow::SourceNode firebase() {
+    result = DataFlow::TypeTracker::MkTypeTracker<firebaseStart/0>::ref()
+  }
 
   /** Gets a reference to a Firebase app created with `initializeApp`. */
-  private DataFlow::SourceNode initApp(DataFlow::TypeTracker t) {
-    t.start() and
+  private DataFlow::SourceNode initAppStart() {
     result = firebase().getAMethodCall("initializeApp")
     or
-    t.start() and
     result.hasUnderlyingType("firebase", "app.App")
-    or
-    exists(DataFlow::TypeTracker t2 | result = initApp(t2).track(t2, t))
   }
 
   /**
@@ -38,75 +31,66 @@ module Firebase {
    * app created explicitly with `initializeApp()`.
    */
   DataFlow::SourceNode app() {
-    result = firebase(DataFlow::TypeTracker::end()) or
-    result = initApp(DataFlow::TypeTracker::end())
+    result = firebase() or
+    result = DataFlow::TypeTracker::MkTypeTracker<initAppStart/0>::ref()
   }
 
   module Database {
     /** Gets a reference to a Firebase database object, such as `firebase.database()`. */
-    private DataFlow::SourceNode database(DataFlow::TypeTracker t) {
-      result = app().getAMethodCall("database") and t.start()
+    private DataFlow::SourceNode databaseStart() {
+      result = app().getAMethodCall("database")
       or
-      t.start() and
       result.hasUnderlyingType("firebase", "database.Database")
-      or
-      exists(DataFlow::TypeTracker t2 | result = database(t2).track(t2, t))
     }
 
     /** Gets a reference to a Firebase database object, such as `firebase.database()`. */
-    DataFlow::SourceNode database() { result = database(DataFlow::TypeTracker::end()) }
-
-    /** Gets a node that refers to a `Reference` object, such as `firebase.database().ref()`. */
-    private DataFlow::SourceNode ref(DataFlow::TypeTracker t) {
-      t.start() and
-      (
-        exists(string name | result = database().getAMethodCall(name) |
-          name = "ref" or
-          name = "refFromURL"
-        )
-        or
-        exists(string name | result = ref().getAMethodCall(name) |
-          name = "push" or
-          name = "child"
-        )
-        or
-        exists(string name | result = ref().getAPropertyRead(name) |
-          name = "parent" or
-          name = "root"
-        )
-        or
-        result = snapshot().getAPropertyRead("ref")
-        or
-        result.hasUnderlyingType("firebase", "database.Reference")
-      )
-      or
-      exists(DataFlow::TypeTracker t2 | result = ref(t2).track(t2, t))
+    DataFlow::SourceNode database() {
+      result = DataFlow::TypeTracker::MkTypeTracker<databaseStart/0>::ref()
     }
 
     /** Gets a node that refers to a `Reference` object, such as `firebase.database().ref()`. */
-    DataFlow::SourceNode ref() { result = ref(DataFlow::TypeTracker::end()) }
-
-    /** Gets a node that refers to a `Query` or `Reference` object. */
-    private DataFlow::SourceNode query(DataFlow::TypeTracker t) {
-      t.start() and
-      (
-        result = ref(t) // a Reference can be used as a Query
-        or
-        exists(string name | result = query().getAMethodCall(name) |
-          name = "endAt" or
-          name = "limitTo" + any(string s) or
-          name = "orderBy" + any(string s) or
-          name = "startAt"
-        )
-        or
-        result.hasUnderlyingType("firebase", "database.Query")
+    private DataFlow::SourceNode refStart() {
+      exists(string name | result = database().getAMethodCall(name) |
+        name = "ref" or
+        name = "refFromURL"
       )
       or
-      exists(DataFlow::TypeTracker t2 | result = query(t2).track(t2, t))
+      exists(string name | result = ref().getAMethodCall(name) |
+        name = "push" or
+        name = "child"
+      )
+      or
+      exists(string name | result = ref().getAPropertyRead(name) |
+        name = "parent" or
+        name = "root"
+      )
+      or
+      result = snapshot().getAPropertyRead("ref")
+      or
+      result.hasUnderlyingType("firebase", "database.Reference")
+    }
+
+    /** Gets a node that refers to a `Reference` object, such as `firebase.database().ref()`. */
+    DataFlow::SourceNode ref() { result = DataFlow::TypeTracker::MkTypeTracker<refStart/0>::ref() }
+
+    /** Gets a node that refers to a `Query` or `Reference` object. */
+    private DataFlow::SourceNode queryStart() {
+      result = refStart() // a Reference can be used as a Query
+      or
+      exists(string name | result = query().getAMethodCall(name) |
+        name = "endAt" or
+        name = "limitTo" + any(string s) or
+        name = "orderBy" + any(string s) or
+        name = "startAt"
+      )
+      or
+      result.hasUnderlyingType("firebase", "database.Query")
     }
 
     /** Gets a node that refers to a `Query` or `Reference` object. */
-    DataFlow::SourceNode query() { result = query(DataFlow::TypeTracker::end()) }
+    DataFlow::SourceNode query() {
+      result = DataFlow::TypeTracker::MkTypeTracker<queryStart/0>::ref()
+    }
 
     /**
      * A call of form `query.on(...)` or `query.once(...)`.
@@ -147,37 +131,32 @@ module Firebase {
    */
   module CloudFunctions {
     /** Gets a reference to the Cloud Functions namespace. */
-    private DataFlow::SourceNode namespace(DataFlow::TypeTracker t) {
-      t.start() and
+    private DataFlow::SourceNode namespaceStart() {
       result = DataFlow::moduleImport("firebase-functions")
-      or
-      exists(DataFlow::TypeTracker t2 | result = namespace(t2).track(t2, t))
     }
 
     /** Gets a reference to the Cloud Functions namespace. */
-    DataFlow::SourceNode namespace() { result = namespace(DataFlow::TypeTracker::end()) }
+    DataFlow::SourceNode namespace() {
+      result = DataFlow::TypeTracker::MkTypeTracker<namespaceStart/0>::ref()
+    }
 
     /** Gets a reference to a Cloud Functions database object. */
-    private DataFlow::SourceNode database(DataFlow::TypeTracker t) {
-      t.start() and
+    private DataFlow::SourceNode databaseStart() {
       result = namespace().getAPropertyRead("database")
-      or
-      exists(DataFlow::TypeTracker t2 | result = database(t2).track(t2, t))
     }
 
     /** Gets a reference to a Cloud Functions database object. */
-    DataFlow::SourceNode database() { result = database(DataFlow::TypeTracker::end()) }
-
-    /** Gets a data flow node holding a `RefBuilder` object. */
-    private DataFlow::SourceNode refBuilder(DataFlow::TypeTracker t) {
-      t.start() and
-      result = database().getAMethodCall("ref")
-      or
-      exists(DataFlow::TypeTracker t2 | result = refBuilder(t2).track(t2, t))
+    DataFlow::SourceNode database() {
+      result = DataFlow::TypeTracker::MkTypeTracker<databaseStart/0>::ref()
     }
 
     /** Gets a data flow node holding a `RefBuilder` object. */
-    DataFlow::SourceNode ref() { result = refBuilder(DataFlow::TypeTracker::end()) }
+    private DataFlow::SourceNode refBuilderStart() { result = database().getAMethodCall("ref") }
+
+    /** Gets a data flow node holding a `RefBuilder` object. */
+    DataFlow::SourceNode ref() {
+      result = DataFlow::TypeTracker::MkTypeTracker<refBuilderStart/0>::ref()
+    }
 
     /** A call that registers a listener on a `RefBuilder`, such as `ref.onCreate(...)`. */
     class RefBuilderListenCall extends DataFlow::MethodCallNode {

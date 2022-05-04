@@ -438,7 +438,9 @@ module JQuery {
    *
    * This predicate can be extended by subclassing `JQuery::DollarSource::Range`.
    */
-  DataFlow::SourceNode dollar() { result = dollar(DataFlow::TypeTracker::end()) }
+  DataFlow::SourceNode dollar() {
+    result = DataFlow::TypeTracker::MkTypeTracker<dollarSource/0>::ref()
+  }
 
   /** Gets an invocation of the jQuery `$` function. */
   DataFlow::CallNode dollarCall() { result = dollar().getACall() }

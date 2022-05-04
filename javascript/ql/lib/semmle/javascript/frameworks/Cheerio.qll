@@ -42,12 +42,10 @@ module Cheerio {
    * Gets a reference to a `cheerio` object, a collection of virtual DOM elements
    * with an interface similar to jQuery objects.
    */
-  private DataFlow::SourceNode cheerioObjectRef(DataFlow::TypeTracker t) {
-    t.start() and
+  private DataFlow::SourceNode cheerioObject() {
     result instanceof CheerioObjectCreation
     or
     // Chainable calls.
-    t.start() and
     exists(DataFlow::MethodCallNode call, string name |
       call = cheerioObjectRef().getAMethodCall(name) and
       result = call
@@ -63,8 +61,6 @@ module Cheerio {
           name != "hasClass"
         )
     )
-    or
-    exists(DataFlow::TypeTracker t2 | result = cheerioObjectRef(t2).track(t2, t))
   }
 
   /**
@@ -72,7 +68,7 @@ module Cheerio {
    * with an interface similar to jQuery objects.
    */
   DataFlow::SourceNode cheerioObjectRef() {
-    result = cheerioObjectRef(DataFlow::TypeTracker::end())
+    result = DataFlow::TypeTracker::MkTypeTracker<cheerioObject/0>::ref()
   }
 
   /**

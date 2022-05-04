@@ -482,16 +482,8 @@ module TaintTracking {
   }
 
   /** Gets a data flow node referring to the client side URL. */
-  private DataFlow::SourceNode clientSideUrlRef(DataFlow::TypeTracker t) {
-    t.start() and
+  private DataFlow::SourceNode clientSideUrlRefStart() {
     result.(ClientSideRemoteFlowSource).getKind().isUrl()
-    or
-    exists(DataFlow::TypeTracker t2 | result = clientSideUrlRef(t2).track(t2, t))
-  }
-
-  /** Gets a data flow node referring to the client side URL. */
-  private DataFlow::SourceNode clientSideUrlRef() {
-    result = clientSideUrlRef(DataFlow::TypeTracker::end())
   }
 
   /**
@@ -500,7 +492,7 @@ module TaintTracking {
    */
   private predicate isSafeClientSideUrlProperty(DataFlow::PropRead read) {
     // Block all properties of client-side URLs, as .hash and .search are considered sources of their own
-    read = clientSideUrlRef().getAPropertyRead()
+    read = DataFlow::TypeTracker::MkTypeTracker<clientSideUrlRefStart/0>::ref().getAPropertyRead()
     or
     exists(StringSplitCall c |
       c.getBaseString().getALocalSource() =

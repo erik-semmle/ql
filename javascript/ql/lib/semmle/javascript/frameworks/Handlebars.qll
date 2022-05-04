@@ -30,21 +30,15 @@ module Handlebars {
 
 /** Provides logic for taint steps for the handlebars library. */
 private module HandlebarsTaintSteps {
+  private DataFlow::SourceNode compiledTemplateStart() {
+    result = any(Handlebars::Handlebars hb).getAMethodCall(["compile", "template"])
+  }
+
   /**
    * Gets a reference to a compiled Handlebars template.
    */
   private DataFlow::SourceNode compiledTemplate(DataFlow::CallNode compileCall) {
-    result = compiledTemplate(DataFlow::TypeTracker::end(), compileCall)
-  }
-
-  private DataFlow::SourceNode compiledTemplate(
-    DataFlow::TypeTracker t, DataFlow::CallNode compileCall
-  ) {
-    t.start() and
-    result = any(Handlebars::Handlebars hb).getAMethodCall(["compile", "template"]) and
-    result = compileCall
-    or
-    exists(DataFlow::TypeTracker t2 | result = compiledTemplate(t2, compileCall).track(t2, t))
+    result = DataFlow::TypeTracker::MkTypeTracker<compiledTemplateStart/0>::ref(compileCall)
   }
 
   /**
