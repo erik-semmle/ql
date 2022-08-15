@@ -131,16 +131,13 @@ module CodeInjection {
   }
 
   /**
-   * Gets a reference to a `<script />` tag created using `document.createElement`.
+   * Gets a `<script />` tag created using `document.createElement`.
    */
-  private DataFlow::SourceNode scriptTag(DataFlow::TypeTracker t) {
-    t.start() and
+  private DataFlow::SourceNode createdScriptTag() {
     exists(DataFlow::CallNode call | call = result |
       call = DOM::documentRef().getAMethodCall("createElement") and
       call.getArgument(0).mayHaveStringValue("script")
     )
-    or
-    exists(DataFlow::TypeTracker t2 | result = scriptTag(t2).track(t2, t))
   }
 
   /**
@@ -148,7 +145,7 @@ module CodeInjection {
    * or an element of type `HTMLScriptElement`.
    */
   private DataFlow::SourceNode scriptTag() {
-    result = scriptTag(DataFlow::TypeTracker::end())
+    result = DataFlow::TypeTracker::MkTypeTracker<createdScriptTag/0>::ref()
     or
     result.hasUnderlyingType("HTMLScriptElement")
   }

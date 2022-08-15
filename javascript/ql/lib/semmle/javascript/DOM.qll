@@ -511,20 +511,10 @@ module DOM {
   DataFlow::SourceNode documentSource() { result instanceof DocumentSource::Range }
 
   /**
-   * Gets a reference to the `document` object.
-   */
-  private DataFlow::SourceNode documentRef(DataFlow::TypeTracker t) {
-    t.start() and
-    result instanceof DocumentSource::Range
-    or
-    exists(DataFlow::TypeTracker t2 | result = documentRef(t2).track(t2, t))
-  }
-
-  /**
    * Gets a reference to the 'document' object.
    */
   DataFlow::SourceNode documentRef() {
-    result = documentRef(DataFlow::TypeTracker::end())
+    result = DataFlow::TypeTracker::MkTypeTracker<documentSource/0>::ref()
     or
     result.hasUnderlyingType("Document")
   }

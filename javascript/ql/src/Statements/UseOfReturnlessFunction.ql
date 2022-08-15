@@ -118,13 +118,8 @@ predicate hasNonVoidCallbackMethod(string name) {
     ]
 }
 
-DataFlow::SourceNode array(DataFlow::TypeTracker t) {
-  t.start() and result instanceof DataFlow::ArrayCreationNode
-  or
-  exists(DataFlow::TypeTracker t2 | result = array(t2).track(t2, t))
-}
-
-DataFlow::SourceNode array() { result = array(DataFlow::TypeTracker::end()) }
+/** Gets a node that creates a new array. */
+DataFlow::SourceNode arraySource() { result instanceof DataFlow::ArrayCreationNode }
 
 /**
  * Holds if `call` is an Array or Lodash method accepting a callback `func`,
@@ -141,7 +136,8 @@ predicate voidArrayCallback(DataFlow::CallNode call, Function func) {
   not isStub(func) and
   not alwaysThrows(func) and
   (
-    call.getReceiver().getALocalSource() = array()
+    call.getReceiver().getALocalSource() =
+      DataFlow::TypeTracker::MkTypeTracker<arraySource/0>::ref()
     or
     call.getCalleeNode().getALocalSource() instanceof LodashUnderscore::Member
   )

@@ -425,14 +425,6 @@ module JQuery {
    */
   DataFlow::SourceNode dollarSource() { result instanceof DollarSource::Range }
 
-  /** Gets a data flow node referring to the jQuery `$` function. */
-  private DataFlow::SourceNode dollar(DataFlow::TypeTracker t) {
-    t.start() and
-    result = dollarSource()
-    or
-    exists(DataFlow::TypeTracker t2 | result = dollar(t2).track(t2, t))
-  }
-
   /**
    * Gets a data flow node referring to the jQuery `$` function.
    *
@@ -482,19 +474,10 @@ module JQuery {
   }
 
   /** Gets a source of jQuery objects. */
-  private DataFlow::SourceNode objectSource(DataFlow::TypeTracker t) {
-    t.start() and
+  private DataFlow::SourceNode objectSource() {
     result instanceof ObjectSource::Range
     or
-    t.start() and
     result = legacyObjectSource()
-  }
-
-  /** Gets a data flow node referring to a jQuery object. */
-  private DataFlow::SourceNode objectRef(DataFlow::TypeTracker t) {
-    result = objectSource(t)
-    or
-    exists(DataFlow::TypeTracker t2 | result = objectRef(t2).track(t2, t))
   }
 
   /**
@@ -502,7 +485,9 @@ module JQuery {
    *
    * This predicate can be extended by subclassing `JQuery::ObjectSource::Range`.
    */
-  DataFlow::SourceNode objectRef() { result = objectRef(DataFlow::TypeTracker::end()) }
+  DataFlow::SourceNode objectRef() {
+    result = DataFlow::TypeTracker::MkTypeTracker<objectSource/0>::ref()
+  }
 
   /** A data flow node that refers to a jQuery object. */
   class Object extends DataFlow::SourceNode {

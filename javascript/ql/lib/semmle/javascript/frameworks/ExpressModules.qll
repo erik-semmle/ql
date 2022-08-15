@@ -232,11 +232,8 @@ module ExpressLibraries {
  */
 module FileUpload {
   /** Gets a data flow node referring to `req.files`. */
-  private DataFlow::SourceNode filesRef(Express::RequestSource req, DataFlow::TypeTracker t) {
-    t.start() and
-    result = req.ref().getAPropertyRead("files")
-    or
-    exists(DataFlow::TypeTracker t2 | result = filesRef(req, t2).track(t2, t))
+  private DataFlow::SourceNode filesRef() {
+    exists(Express::RequestSource req | result = req.ref().getAPropertyRead("files"))
   }
 
   /**
@@ -245,7 +242,10 @@ module FileUpload {
   class Move extends FileSystemWriteAccess, DataFlow::MethodCallNode {
     Move() {
       exists(DataFlow::moduleImport("express-fileupload")) and
-      this = filesRef(_, DataFlow::TypeTracker::end()).getAPropertyRead().getAMethodCall("mv")
+      this =
+        DataFlow::TypeTracker::MkTypeTracker<filesRef/0>::ref()
+            .getAPropertyRead()
+            .getAMethodCall("mv")
     }
 
     override DataFlow::Node getAPathArgument() { result = getArgument(0) }

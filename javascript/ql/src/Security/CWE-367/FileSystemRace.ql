@@ -47,22 +47,17 @@ class FileUse extends DataFlow::CallNode {
 }
 
 /**
- * Gets a reference to a file-handle from a call to `open` or `openSync`.
+ * Gets a call to `open` or `openSync`.
  */
-DataFlow::SourceNode getAFileHandle(DataFlow::TypeTracker t) {
-  t.start() and
-  (
-    result = NodeJSLib::FS::moduleMember("openSync").getACall()
-    or
-    result =
-      NodeJSLib::FS::moduleMember("open")
-          .getACall()
-          .getLastArgument()
-          .getAFunctionValue()
-          .getParameter(1)
-  )
+DataFlow::SourceNode getAFileHandle() {
+  result = NodeJSLib::FS::moduleMember("openSync").getACall()
   or
-  exists(DataFlow::TypeTracker t2 | result = getAFileHandle(t2).track(t2, t))
+  result =
+    NodeJSLib::FS::moduleMember("open")
+        .getACall()
+        .getLastArgument()
+        .getAFunctionValue()
+        .getParameter(1)
 }
 
 /**
@@ -101,5 +96,5 @@ from FileCheck check, FileUse use
 where
   checkAndUseOnSame(check, use) and
   useAfterCheck(check, use) and
-  not getAFileHandle(DataFlow::TypeTracker::end()).flowsTo(use.getPathArgument())
+  not DataFlow::TypeTracker::MkTypeTracker<getAFileHandle/0>::ref().flowsTo(use.getPathArgument())
 select use, "The file may have changed since it $@.", check, "was checked"

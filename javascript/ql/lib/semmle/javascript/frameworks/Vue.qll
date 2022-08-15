@@ -684,50 +684,42 @@ module Vue {
     result = routeConfig().getMember("children").getAMember()
   }
 
-  /** Gets a data flow node that refers to a `Route` object from `vue-router`. */
-  private DataFlow::SourceNode routeObject(DataFlow::TypeTracker t) {
-    t.start() and
-    (
-      exists(API::Node router | router = API::moduleImport("vue-router") |
-        result = router.getInstance().getMember("currentRoute").asSource()
-        or
-        result =
-          router
-              .getInstance()
-              .getMember(["beforeEach", "beforeResolve", "afterEach"])
-              .getParameter(0)
-              .getParameter([0, 1])
-              .asSource()
-        or
-        result = router.getParameter(0).getMember("scrollBehavior").getParameter([0, 1]).asSource()
-      )
+  /** Gets a `Route` object from `vue-router`. */
+  private DataFlow::SourceNode routeObject() {
+    exists(API::Node router | router = API::moduleImport("vue-router") |
+      result = router.getInstance().getMember("currentRoute").asSource()
       or
-      result = routeConfig().getMember("beforeEnter").getParameter([0, 1]).asSource()
+      result =
+        router
+            .getInstance()
+            .getMember(["beforeEach", "beforeResolve", "afterEach"])
+            .getParameter(0)
+            .getParameter([0, 1])
+            .asSource()
       or
-      exists(Component c |
-        result = c.getABoundFunction().getAFunctionValue().getReceiver().getAPropertyRead("$route")
-        or
-        result =
-          c.getALifecycleHook(["beforeRouteEnter", "beforeRouteUpdate", "beforeRouteLeave"])
-              .getAFunctionValue()
-              .getParameter([0, 1])
-        or
-        result = c.getWatchHandler("$route").getParameter([0, 1])
-      )
+      result = router.getParameter(0).getMember("scrollBehavior").getParameter([0, 1]).asSource()
     )
     or
-    exists(DataFlow::TypeTracker t2 | result = routeObject(t2).track(t2, t))
+    result = routeConfig().getMember("beforeEnter").getParameter([0, 1]).asSource()
+    or
+    exists(Component c |
+      result = c.getABoundFunction().getAFunctionValue().getReceiver().getAPropertyRead("$route")
+      or
+      result =
+        c.getALifecycleHook(["beforeRouteEnter", "beforeRouteUpdate", "beforeRouteLeave"])
+            .getAFunctionValue()
+            .getParameter([0, 1])
+      or
+      result = c.getWatchHandler("$route").getParameter([0, 1])
+    )
   }
-
-  /** Gets a data flow node that refers to a `Route` object from `vue-router`. */
-  DataFlow::SourceNode routeObject() { result = routeObject(DataFlow::TypeTracker::end()) }
 
   private class VueRouterFlowSource extends ClientSideRemoteFlowSource {
     ClientSideRemoteFlowKind kind;
 
     VueRouterFlowSource() {
       exists(string name |
-        this = routeObject().getAPropertyRead(name)
+        this = DataFlow::TypeTracker::MkTypeTracker<routeObject/0>::ref().getAPropertyRead(name)
         or
         exists(string prop |
           this = any(Component c).getWatchHandler(prop).getParameter([0, 1]) and

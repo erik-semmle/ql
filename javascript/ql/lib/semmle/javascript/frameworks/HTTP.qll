@@ -522,14 +522,10 @@ module HTTP {
    * Provides classes for working with objects that may contain one or more route handlers.
    */
   module RouteHandlerCandidateContainer {
-    private DataFlow::SourceNode ref(DataFlow::TypeTracker t, RouteHandlerCandidateContainer c) {
-      t.start() and result = c
-      or
-      exists(DataFlow::TypeTracker t2 | result = ref(t2, c).track(t2, t))
-    }
+    private DataFlow::SourceNode refStart() { result instanceof RouteHandlerCandidateContainer }
 
     private DataFlow::SourceNode ref(RouteHandlerCandidateContainer c) {
-      result = ref(DataFlow::TypeTracker::end(), c)
+      result = DataFlow::TypeTracker::MkTypeTracker<refStart/0>::ref(c)
     }
 
     /**
