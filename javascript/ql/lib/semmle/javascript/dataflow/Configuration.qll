@@ -1285,35 +1285,36 @@ private predicate reachableFromStoreBase(
       MkPathSummary(false, s2.hasCall(), DataFlow::FlowLabel::data(), DataFlow::FlowLabel::data())
   )
   or
-  exists(PathSummary newSummary, PathSummary oldSummary |
-    reachableFromStoreBaseStep(startProp, endProp, base, nd, cfg, oldSummary, newSummary,
-      onlyRelevantInCall) and
-    summary = oldSummary.appendValuePreserving(newSummary)
-  )
+  reachableFromStoreBaseRec(startProp, endProp, base, nd, cfg, summary, onlyRelevantInCall)
 }
 
 /**
+ * TODO: This doc is bad!
  * Holds if `base` is the base of a write to property `endProp`, and `nd` is reachable
  * from `base` under configuration `cfg` (possibly through callees) along a path whose
  * last step is summarized by `newSummary`, and the previous steps are summarized
  * by `oldSummary`.
  */
-pragma[noinline]
-private predicate reachableFromStoreBaseStep(
+pragma[noopt]
+private predicate reachableFromStoreBaseRec(
   string startProp, string endProp, DataFlow::Node base, DataFlow::Node nd,
-  DataFlow::Configuration cfg, PathSummary oldSummary, PathSummary newSummary,
-  boolean onlyRelevantInCall
+  DataFlow::Configuration cfg, PathSummary summary, boolean onlyRelevantInCall
 ) {
-  exists(DataFlow::Node mid |
+  exists(DataFlow::Node mid, PathSummary oldSummary, PathSummary newSummary |
     reachableFromStoreBase(startProp, endProp, base, mid, cfg, oldSummary, onlyRelevantInCall) and
     flowStep(mid, cfg, nd, newSummary) and
-    onlyRelevantInCall.booleanAnd(newSummary.hasReturn()) = false
+    exists(boolean hasReturn |
+      hasReturn = newSummary.hasReturn() and
+      onlyRelevantInCall.booleanAnd(hasReturn) = false
+    )
     or
     exists(string midProp |
       reachableFromStoreBase(startProp, midProp, base, mid, cfg, oldSummary, onlyRelevantInCall) and
       isAdditionalLoadStoreStep(mid, nd, midProp, endProp, cfg) and
       newSummary = PathSummary::level()
     )
+  |
+    summary = oldSummary.appendValuePreserving(newSummary)
   )
 }
 
