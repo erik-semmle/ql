@@ -32,4 +32,4 @@ newtype TNode =
   TExceptionalInvocationReturnNode(InvokeExpr e) or
   TGlobalAccessPathRoot() or
   TTemplatePlaceholderTag(Templating::TemplatePlaceholderTag tag) or
-  TReflectiveParametersNode(Function f)
+  TReflectiveParametersNode(Function f) { none() }
