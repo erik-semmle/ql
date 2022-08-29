@@ -288,6 +288,8 @@ private File benignUnqueryableFile() {
   result.getAbsolutePath().matches("%/ql/ql/test%")
 }
 
+import NodeName
+
 /**
  * Gets an AstNode that does not affect any query result.
  * Is interresting as an quick-eval target to investigate dead code.
@@ -297,5 +299,20 @@ AstNode unQueryable() {
   not result = queryable() and
   not result = deprecated() and
   not result = benignUnqueryable() and
-  not result.getParent() = any(AstNode node | not node = queryable())
+  not result.getParent() = any(AstNode node | not node = queryable()) and
+  // remove where a queryable feature with the "same" name exists.
+  not exists(AstNode other, string name |
+    name = getName(result, _) and
+    name = oppositeFirstLetter(getName(other, _)) and
+    other.getParent() = result.getParent()
+  )
+}
+
+bindingset[name]
+string oppositeFirstLetter(string name) {
+  exists(string first | first = name.prefix(1) |
+    if first.toUpperCase() = first
+    then result = first.toLowerCase() + name.suffix(1)
+    else result = first.toUpperCase() + name.suffix(1)
+  )
 }
