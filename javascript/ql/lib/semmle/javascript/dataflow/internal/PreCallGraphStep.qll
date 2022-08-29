@@ -5,7 +5,6 @@
 
 private import javascript
 private import semmle.javascript.Unit
-private import semmle.javascript.internal.CachedStages
 
 /**
  * Internal extension point for adding flow edges prior to call graph construction
@@ -50,7 +49,6 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from `pred` to `succ`.
    */
-  cached
   predicate step(DataFlow::Node pred, DataFlow::Node succ) {
     any(PreCallGraphStep s).step(pred, succ)
   }
@@ -58,7 +56,6 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from `pred` into the `prop` property of `succ`.
    */
-  cached
   predicate storeStep(DataFlow::Node pred, DataFlow::SourceNode succ, string prop) {
     any(PreCallGraphStep s).storeStep(pred, succ, prop)
   }
@@ -66,16 +63,13 @@ module PreCallGraphStep {
   /**
    * Holds if there is a step from the `prop` property of `pred` to `succ`.
    */
-  cached
   predicate loadStep(DataFlow::Node pred, DataFlow::Node succ, string prop) {
-    Stages::TypeTracking::ref() and
     any(PreCallGraphStep s).loadStep(pred, succ, prop)
   }
 
   /**
    * Holds if there is a step from the `prop` property of `pred` to the same property in `succ`.
    */
-  cached
   predicate loadStoreStep(DataFlow::Node pred, DataFlow::SourceNode succ, string prop) {
     any(PreCallGraphStep s).loadStoreStep(pred, succ, prop)
   }

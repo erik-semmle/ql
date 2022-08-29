@@ -162,7 +162,6 @@ private predicate jsdocTypeLookup(JSDocNamedTypeExpr ref, AstNode decl, string k
  *  - `"V"` for variable accesses
  *  - `"I"` for imports
  */
-cached
 AstNode definitionOf(Locatable e, string kind) {
   variableDefLookup(e, result, kind)
   or

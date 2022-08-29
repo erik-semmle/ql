@@ -5,7 +5,6 @@
  */
 
 import javascript
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A module, which may either be an ECMAScript 2015-style module,
@@ -38,13 +37,11 @@ abstract class Module extends TopLevel {
    * Symbols defined in another module that are re-exported by
    * this module are only sometimes considered.
    */
-  cached
   abstract DataFlow::Node getAnExportedValue(string name);
 
   /**
    * Gets a value that is exported as the whole exports object of this module.
    */
-  cached
   DataFlow::Node getABulkExportedNode() { none() } // overridden in subclasses
 
   /**
@@ -185,9 +182,7 @@ abstract class Import extends AstNode {
    * behavior of Node.js imports, which prefer core modules such as `fs` over any
    * source module of the same name.
    */
-  cached
   Module getImportedModule() {
-    Stages::Imports::ref() and
     if exists(this.resolveExternsImport())
     then result = this.resolveExternsImport()
     else (

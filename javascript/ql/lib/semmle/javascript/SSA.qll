@@ -76,14 +76,12 @@
 
 import javascript
 private import semmle.javascript.dataflow.Refinements
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A variable that can be SSA converted, that is, a local variable.
  */
 class SsaSourceVariable extends LocalVariable { }
 
-cached
 private module Internal {
   /**
    * A data type representing SSA definitions.
@@ -106,7 +104,6 @@ private module Internal {
    * unreachable code has no SSA definitions associated with it, and neither
    * have dead assignments (that is, assignments whose value is never read).
    */
-  cached
   newtype TSsaDefinition =
     TExplicitDef(ReachableBasicBlock bb, int i, VarDef d, SsaSourceVariable v) {
       bb.defAt(i, v, d) and
@@ -206,7 +203,6 @@ private module Internal {
   /**
    * A classification of variable references into reads and writes.
    */
-  cached
   newtype RefKind =
     Read() or
     Write()
@@ -353,9 +349,7 @@ private module Internal {
   /**
    * Gets an SSA definition of `v` that reaches the end of basic block `bb`.
    */
-  cached
   SsaDefinition getDefReachingEndOf(ReachableBasicBlock bb, SsaSourceVariable v) {
-    Stages::DataFlowStage::ref() and
     exists(int lastRef | lastRef = max(int i | ssaRef(bb, i, v, _)) |
       result = getLocalDefinition(bb, lastRef, v)
       or
@@ -379,7 +373,6 @@ private module Internal {
    * Gets the unique SSA definition of `v` whose value reaches the `i`th node of `bb`,
    * which is a use of `v`.
    */
-  cached
   SsaDefinition getDefinition(ReachableBasicBlock bb, int i, SsaSourceVariable v) {
     result = getLocalDefinition(bb, i, v)
     or
@@ -627,7 +620,6 @@ abstract class SsaPseudoDefinition extends SsaImplicitDefinition {
   /**
    * Gets an input of this pseudo-definition.
    */
-  cached
   abstract SsaVariable getAnInput();
 
   override VarDef getAContributingVarDef() {
@@ -650,7 +642,6 @@ class SsaPhiNode extends SsaPseudoDefinition, TPhi {
   /**
    * Gets the input to this phi node coming from the given predecessor block.
    */
-  cached
   SsaVariable getInputFromBlock(BasicBlock bb) {
     bb = getBasicBlock().getAPredecessor() and
     result = getDefReachingEndOf(bb, getSourceVariable())

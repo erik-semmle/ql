@@ -56,7 +56,6 @@ class AnalyzedNode extends DataFlow::Node {
    * tracking through the properties of object literals and function/class
    * instances is also performed.
    */
-  cached
   AbstractValue getAValue() { result = getALocalValue() }
 
   /**
@@ -70,7 +69,6 @@ class AnalyzedNode extends DataFlow::Node {
    * tracking through the properties of object literals and function/class
    * instances is performed, other than those accounted for by `globalFlowPred`.
    */
-  cached
   AbstractValue getALocalValue() {
     // model flow from other nodes; we do not currently
     // feed back the results from the (value) flow analysis into
@@ -85,7 +83,6 @@ class AnalyzedNode extends DataFlow::Node {
   }
 
   /** Gets a type inferred for this node. */
-  cached
   InferredType getAType() { result = getAValue().getType() }
 
   /**

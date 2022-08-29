@@ -3,7 +3,6 @@
 import javascript
 private import NodeModuleResolutionImpl
 private import semmle.javascript.DynamicPropertyAccess as DynamicPropertyAccess
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A Node.js module.
@@ -114,7 +113,6 @@ class NodeModule extends Module {
   }
 
   override DataFlow::Node getABulkExportedNode() {
-    Stages::Imports::ref() and
     exists(DataFlow::PropWrite write |
       write.getBase().asExpr() = this.getModuleVariable().getAnAccess() and
       write.getPropertyName() = "exports" and
@@ -279,7 +277,6 @@ private predicate isCreateRequire(DataFlow::Node nd) {
 /**
  * Holds if `nd` may refer to `require`, either directly or modulo local data flow.
  */
-cached
 private predicate isRequire(DataFlow::Node nd) {
   nd.asExpr() = any(RequireVariable req).getAnAccess() and
   // `mjs` files explicitly disallow `require`

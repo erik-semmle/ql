@@ -3,7 +3,6 @@
  */
 
 import javascript
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A program element that is either an expression or a type annotation.
@@ -89,8 +88,7 @@ class ExprOrType extends @expr_or_type, Documentable {
    *
    * Also see `getUnderlyingReference` and `stripParens`.
    */
-  cached
-  Expr getUnderlyingValue() { Stages::Ast::ref() and result = this }
+  Expr getUnderlyingValue() { result = this }
 }
 
 /**
@@ -110,8 +108,7 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
   int getIntValue() { none() }
 
   /** Gets the constant string value this expression evaluates to, if any. */
-  cached
-  string getStringValue() { Stages::Ast::ref() and result = getStringValue(this) }
+  string getStringValue() { result = getStringValue(this) }
 
   /** Holds if this expression is impure, that is, its evaluation could have side effects. */
   predicate isImpure() { any() }
@@ -257,9 +254,7 @@ class Expr extends @expr, ExprOrStmt, ExprOrType, AST::ValueNode {
   }
 }
 
-cached
 private DataFlow::Node getCatchParameterFromStmt(Stmt stmt) {
-  Stages::DataFlowStage::ref() and
   result =
     DataFlow::parameterNode(stmt.getEnclosingTryCatchStmt().getACatchClause().getAParameter())
 }
@@ -275,11 +270,7 @@ private DataFlow::Node getCatchParameterFromStmt(Stmt stmt) {
  */
 class Identifier extends @identifier, ExprOrType {
   /** Gets the name of this identifier. */
-  cached
-  string getName() {
-    Stages::Ast::ref() and
-    literals(result, _, this)
-  }
+  string getName() { literals(result, _, this) }
 
   override string getAPrimaryQlClass() { result = "Identifier" }
 }
@@ -813,9 +804,7 @@ class FunctionExpr extends @function_expr, Expr, Function {
   /** Gets the statement in which this function expression appears. */
   override Stmt getEnclosingStmt() { result = Expr.super.getEnclosingStmt() }
 
-  override StmtContainer getEnclosingContainer() {
-    Stages::Ast::ref() and result = Expr.super.getContainer()
-  }
+  override StmtContainer getEnclosingContainer() { result = Expr.super.getContainer() }
 
   override predicate isImpure() { none() }
 

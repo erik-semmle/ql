@@ -2,9 +2,7 @@
 
 private import javascript
 private import FlowSteps as FlowSteps
-private import semmle.javascript.internal.CachedStages
 
-cached
 private module Cached {
   private predicate forwardsParameter(
     DataFlow::FunctionNode function, int i, DataFlow::CallNode call
@@ -16,13 +14,6 @@ private module Cached {
       parameter.isRestParameter() and
       parameter.flowsTo(call.getASpreadArgument())
     )
-  }
-
-  cached
-  private module Stage {
-    // Forces the module to be computed as part of the type-tracking stage.
-    cached
-    predicate forceStage() { Stages::TypeTracking::ref() }
   }
 
   /**
@@ -58,7 +49,6 @@ private module Cached {
    * wrapWithLogging(g); // step: g -> wrapWithLogging(g)
    * ```
    */
-  cached
   predicate functionForwardingStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(DataFlow::FunctionNode function, DataFlow::CallNode call |
       call.flowsTo(function.getReturnNode()) and
@@ -120,7 +110,6 @@ private module Cached {
    * wrapWithLogging(g); // step: g -> wrapWithLogging(g)
    * ```
    */
-  cached
   predicate functionOneWayForwardingStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(DataFlow::FunctionNode function, DataFlow::CallNode call |
       call.getContainer() = function.getFunction() and

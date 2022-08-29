@@ -5,7 +5,6 @@
 
 import javascript
 private import internal.StmtContainers
-private import semmle.javascript.internal.CachedStages
 
 /**
  * Holds if `nd` starts a new basic block.
@@ -36,7 +35,6 @@ private predicate entryBB(BasicBlock bb) { bb.getFirstNode() instanceof ControlF
 /** Holds if `bb` is an exit basic block. */
 private predicate exitBB(BasicBlock bb) { bb.getLastNode() instanceof ControlFlowExitNode }
 
-cached
 private module Internal {
   /**
    * Holds if `succ` is a control flow successor of `nd` within the same basic block.
@@ -52,21 +50,16 @@ private module Internal {
    * In other words, `i` is the shortest distance from a node `bb`
    * that starts a basic block to `nd` along the `intraBBSucc` relation.
    */
-  cached
   predicate bbIndex(BasicBlock bb, ControlFlowNode nd, int i) =
     shortestDistances(startsBB/1, intraBBSucc/2)(bb, nd, i)
 
-  cached
   int bbLength(BasicBlock bb) { result = strictcount(ControlFlowNode nd | bbIndex(bb, nd, _)) }
 
-  cached
   predicate useAt(BasicBlock bb, int i, Variable v, VarUse u) {
-    Stages::BasicBlocks::ref() and
     v = u.getVariable() and
     bbIndex(bb, u, i)
   }
 
-  cached
   predicate defAt(BasicBlock bb, int i, Variable v, VarDef d) {
     exists(VarRef lhs |
       lhs = d.getTarget().(BindingPattern).getABindingVarRef() and
@@ -92,7 +85,6 @@ private module Internal {
     )
   }
 
-  cached
   predicate reachableBB(BasicBlock bb) {
     entryBB(bb)
     or
@@ -103,12 +95,10 @@ private module Internal {
 private import Internal
 
 /** Holds if `dom` is an immediate dominator of `bb`. */
-cached
 private predicate bbIDominates(BasicBlock dom, BasicBlock bb) =
   idominance(entryBB/1, succBB/2)(_, dom, bb)
 
 /** Holds if `dom` is an immediate post-dominator of `bb`. */
-cached
 private predicate bbIPostDominates(BasicBlock dom, BasicBlock bb) =
   idominance(exitBB/1, predBB/2)(_, dom, bb)
 
@@ -119,8 +109,7 @@ private predicate bbIPostDominates(BasicBlock dom, BasicBlock bb) =
  * At the database level, a basic block is represented by its first control flow node.
  */
 class BasicBlock extends @cfg_node, NodeInStmtContainer {
-  cached
-  BasicBlock() { Stages::BasicBlocks::ref() and startsBB(this) }
+  BasicBlock() { startsBB(this) }
 
   /** Gets a basic block succeeding this one. */
   BasicBlock getASuccessor() { succBB(this, result) }

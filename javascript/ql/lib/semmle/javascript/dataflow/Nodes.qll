@@ -7,7 +7,6 @@
 private import javascript
 private import semmle.javascript.dependencies.Dependencies
 private import internal.CallGraphs
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A data flow node corresponding to an expression.
@@ -740,10 +739,9 @@ module ModuleImportNode {
  *
  * This predicate can be extended by subclassing `ModuleImportNode::Range`.
  */
-cached
 ModuleImportNode moduleImport(string path) {
   // NB. internal modules may be imported with a "node:" prefix
-  Stages::Imports::ref() and result.getPath() = ["node:" + path, path]
+  result.getPath() = ["node:" + path, path]
 }
 
 /**
@@ -991,7 +989,6 @@ class ClassNode extends DataFlow::SourceNode instanceof ClassNode::Range {
   /**
    * Gets a dataflow node that refers to this class object.
    */
-  cached
   final DataFlow::SourceNode getAClassReference() {
     result = this.getAClassReference(DataFlow::TypeTracker::end())
   }
@@ -1035,7 +1032,6 @@ class ClassNode extends DataFlow::SourceNode instanceof ClassNode::Range {
   /**
    * Gets a dataflow node that refers to an instance of this class.
    */
-  cached
   final DataFlow::SourceNode getAnInstanceReference() {
     result = this.getAnInstanceReference(DataFlow::TypeTracker::end())
   }
@@ -1100,42 +1096,35 @@ module ClassNode {
    * Subclass this to introduce new kinds of class nodes. If you want to refine
    * the definition of existing class nodes, subclass `DataFlow::ClassNode` instead.
    */
-  cached
   abstract class Range extends DataFlow::SourceNode {
     /**
      * Gets the name of the class, if it has one.
      */
-    cached
     abstract string getName();
 
     /**
      * Gets a description of the class.
      */
-    cached
     abstract string describe();
 
     /**
      * Gets the constructor function of this class.
      */
-    cached
     abstract FunctionNode getConstructor();
 
     /**
      * Gets the instance member with the given name and kind.
      */
-    cached
     abstract FunctionNode getInstanceMember(string name, MemberKind kind);
 
     /**
      * Gets an instance member with the given kind.
      */
-    cached
     abstract FunctionNode getAnInstanceMember(MemberKind kind);
 
     /**
      * Gets the static member of this class with the given name and kind.
      */
-    cached
     abstract FunctionNode getStaticMember(string name, MemberKind kind);
 
     /**
@@ -1143,13 +1132,11 @@ module ClassNode {
      *
      * Gets the static method of this class with the given name.
      */
-    cached
     deprecated FunctionNode getStaticMethod(string name) { none() }
 
     /**
      * Gets a static member of this class of the given kind.
      */
-    cached
     abstract FunctionNode getAStaticMember(MemberKind kind);
 
     /**
@@ -1159,24 +1146,20 @@ module ClassNode {
      *
      * The constructor is not considered a static method.
      */
-    cached
     deprecated FunctionNode getAStaticMethod() { none() }
 
     /**
      * Gets a dataflow node representing a class to be used as the super-class
      * of this node.
      */
-    cached
     abstract DataFlow::Node getASuperClassNode();
 
     /**
      * Gets the type annotation for the field `fieldName`, if any.
      */
-    cached
     TypeAnnotation getFieldTypeAnnotation(string fieldName) { none() }
 
     /** Gets a decorator applied to this class. */
-    cached
     DataFlow::Node getADecorator() { none() }
   }
 
@@ -1684,9 +1667,5 @@ class RegExpCreationNode extends DataFlow::SourceNode {
   }
 
   /** Gets a data flow node referring to this regular expression. */
-  cached
-  DataFlow::SourceNode getAReference() {
-    Stages::FlowSteps::ref() and
-    result = this.getAReference(DataFlow::TypeTracker::end())
-  }
+  DataFlow::SourceNode getAReference() { result = this.getAReference(DataFlow::TypeTracker::end()) }
 }

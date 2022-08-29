@@ -265,7 +265,6 @@ private class MarkerComment extends Comment {
  * Holds if comment `c` in toplevel `tl` matches the marker comment of library
  * `fl` at `version`.
  */
-cached
 private predicate matchMarkerComment(
   MarkerComment c, TopLevel tl, FrameworkLibraryWithMarkerComment fl, string version
 ) {

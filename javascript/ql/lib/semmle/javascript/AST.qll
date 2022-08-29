@@ -4,7 +4,6 @@
 
 import javascript
 private import internal.StmtContainers
-private import semmle.javascript.internal.CachedStages
 
 /**
  * A program element corresponding to JavaScript code, such as an expression
@@ -75,8 +74,7 @@ class AstNode extends @ast_node, NodeInStmtContainer {
   }
 
   /** Gets the toplevel syntactic unit to which this element belongs. */
-  cached
-  TopLevel getTopLevel() { Stages::Ast::ref() and result = this.getParent().getTopLevel() }
+  TopLevel getTopLevel() { result = this.getParent().getTopLevel() }
 
   /**
    * Gets the `i`th child node of this node.
@@ -119,8 +117,7 @@ class AstNode extends @ast_node, NodeInStmtContainer {
   int getNumChildStmt() { result = count(this.getAChildStmt()) }
 
   /** Gets the parent node of this node, if any. */
-  cached
-  AstNode getParent() { Stages::Ast::ref() and this = result.getAChild() }
+  AstNode getParent() { this = result.getAChild() }
 
   /** Gets the first control flow node belonging to this syntactic entity. */
   ControlFlowNode getFirstControlFlowNode() { result = this }
@@ -134,9 +131,7 @@ class AstNode extends @ast_node, NodeInStmtContainer {
    * Since the overwhelming majority of ambient nodes are `TypeExpr` or inside `.d.ts` files,
    * we avoid caching them.
    */
-  cached
   private predicate isAmbientInternal() {
-    Stages::Ast::ref() and
     this.getParent().isAmbientInternal()
     or
     not isAmbientTopLevel(this.getTopLevel()) and
@@ -190,10 +185,7 @@ deprecated class ASTNode = AstNode;
 /**
  * Holds if the given file is a `.d.ts` file.
  */
-cached
-private predicate isAmbientTopLevel(TopLevel tl) {
-  Stages::Ast::ref() and tl.getFile().getBaseName().matches("%.d.ts")
-}
+private predicate isAmbientTopLevel(TopLevel tl) { tl.getFile().getBaseName().matches("%.d.ts") }
 
 /**
  * A toplevel syntactic unit; that is, a stand-alone script, an inline script
@@ -210,9 +202,7 @@ private predicate isAmbientTopLevel(TopLevel tl) {
  */
 class TopLevel extends @toplevel, StmtContainer {
   /** Holds if this toplevel is minified. */
-  cached
   predicate isMinified() {
-    Stages::Ast::ref() and
     // file name contains 'min' (not as part of a longer word)
     this.getFile().getBaseName().regexpMatch(".*[^-._]*[-._]min([-._].*)?\\.\\w+")
     or
@@ -383,7 +373,6 @@ class ExprOrStmt extends @expr_or_stmt, ControlFlowNode, AstNode { }
  */
 class StmtContainer extends @stmt_container, AstNode {
   /** Gets the innermost enclosing container in which this container is nested. */
-  cached
   StmtContainer getEnclosingContainer() { none() }
 
   /**

@@ -5,36 +5,25 @@
 import javascript
 import semmle.javascript.frameworks.HTTP
 import semmle.javascript.security.dataflow.DOM
-private import semmle.javascript.internal.CachedStages
 
-cached
-private module Cached {
-  /** A data flow source of remote user input. */
-  cached
-  abstract class RemoteFlowSource extends DataFlow::Node {
-    /** Gets a human-readable string that describes the type of this remote flow source. */
-    cached
-    abstract string getSourceType();
-
-    /**
-     * Holds if this can be a user-controlled object, such as a JSON object parsed from user-controlled data.
-     */
-    cached
-    predicate isUserControlledObject() { none() }
-  }
+/** A data flow source of remote user input. */
+abstract class RemoteFlowSource extends DataFlow::Node {
+  /** Gets a human-readable string that describes the type of this remote flow source. */
+  abstract string getSourceType();
 
   /**
-   * A source of remote input in a web browser environment.
+   * Holds if this can be a user-controlled object, such as a JSON object parsed from user-controlled data.
    */
-  cached
-  abstract class ClientSideRemoteFlowSource extends RemoteFlowSource {
-    /** Gets a string indicating what part of the browser environment this was derived from. */
-    cached
-    abstract ClientSideRemoteFlowKind getKind();
-  }
+  predicate isUserControlledObject() { none() }
 }
 
-import Cached
+/**
+ * A source of remote input in a web browser environment.
+ */
+abstract class ClientSideRemoteFlowSource extends RemoteFlowSource {
+  /** Gets a string indicating what part of the browser environment this was derived from. */
+  abstract ClientSideRemoteFlowKind getKind();
+}
 
 /**
  * A type of remote flow source that is specific to the browser environment.
@@ -173,7 +162,7 @@ private class ExternalRemoteFlowSourceSpecEntryPoint extends API::EntryPoint {
 private class ExternalRemoteFlowSource extends RemoteFlowSource {
   RemoteFlowSourceAccessPath ap;
 
-  ExternalRemoteFlowSource() { Stages::Taint::ref() and this = ap.resolve().asSource() }
+  ExternalRemoteFlowSource() { this = ap.resolve().asSource() }
 
   override string getSourceType() { result = ap.getSourceType() }
 }

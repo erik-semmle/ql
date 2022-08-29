@@ -24,7 +24,6 @@ private import internal.FlowSteps as FlowSteps
 private import internal.DataFlowNode
 private import internal.AnalyzedParameters
 private import internal.PreCallGraphStep
-private import semmle.javascript.internal.CachedStages
 
 module DataFlow {
   /**
@@ -150,7 +149,6 @@ module DataFlow {
      * For more information, see
      * [Locations](https://codeql.github.com/docs/writing-codeql-queries/providing-locations-in-codeql-queries/).
      */
-    cached
     predicate hasLocationInfo(
       string filepath, int startline, int startcolumn, int endline, int endcolumn
     ) {
@@ -173,7 +171,6 @@ module DataFlow {
     int getEndColumn() { this.hasLocationInfo(_, _, _, _, result) }
 
     /** Gets a textual representation of this element. */
-    cached
     string toString() { none() }
 
     /**
@@ -182,7 +179,6 @@ module DataFlow {
      * A node with an immediate predecessor can usually only have the value that flows
      * into its from its immediate predecessor.
      */
-    cached
     DataFlow::Node getImmediatePredecessor() {
       lvalueFlowStep(result, this) and
       not lvalueDefaultFlowStep(_, this)
@@ -254,9 +250,7 @@ module DataFlow {
      * Holds if this node is annotated with the given named type,
      * or is declared as a subtype thereof, or is a union or intersection containing such a type.
      */
-    cached
     predicate hasUnderlyingType(string globalName) {
-      Stages::TypeTracking::ref() and
       this.getType().hasUnderlyingType(globalName)
       or
       this.getFallbackTypeAnnotation().getAnUnderlyingType().hasQualifiedName(globalName)
@@ -266,9 +260,7 @@ module DataFlow {
      * Holds if this node is annotated with the given named type,
      * or is declared as a subtype thereof, or is a union or intersection containing such a type.
      */
-    cached
     predicate hasUnderlyingType(string moduleName, string typeName) {
-      Stages::TypeTracking::ref() and
       this.getType().hasUnderlyingType(moduleName, typeName)
       or
       this.getFallbackTypeAnnotation().getAnUnderlyingType().hasQualifiedName(moduleName, typeName)
@@ -300,13 +292,12 @@ module DataFlow {
     override predicate hasLocationInfo(
       string filepath, int startline, int startcolumn, int endline, int endcolumn
     ) {
-      Stages::DataFlowStage::ref() and
       astNode.getLocation().hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
     }
 
     override File getFile() { result = astNode.getFile() }
 
-    override string toString() { Stages::DataFlowStage::ref() and result = astNode.toString() }
+    override string toString() { result = astNode.toString() }
   }
 
   /**
@@ -495,7 +486,6 @@ module DataFlow {
      * Gets the data flow node corresponding to the base object
      * whose property is read from or written to.
      */
-    cached
     abstract Node getBase();
 
     /**
@@ -606,10 +596,7 @@ module DataFlow {
 
     PropLValueAsPropWrite() { astNode instanceof LValue }
 
-    override Node getBase() {
-      result = valueNode(astNode.getBase()) and
-      Stages::DataFlowStage::ref()
-    }
+    override Node getBase() { result = valueNode(astNode.getBase()) }
 
     override Expr getPropertyNameExpr() { result = astNode.getPropertyNameExpr() }
 
@@ -1605,9 +1592,7 @@ module DataFlow {
   /**
    * Holds if data can flow from `pred` to `succ` in one local step.
    */
-  cached
   predicate localFlowStep(Node pred, Node succ) {
-    Stages::DataFlowStage::ref() and
     // flow from RHS into LHS
     lvalueFlowStep(pred, succ)
     or

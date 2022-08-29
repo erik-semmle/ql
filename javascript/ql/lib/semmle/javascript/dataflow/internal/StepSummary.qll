@@ -1,18 +1,10 @@
 import javascript
 private import semmle.javascript.dataflow.TypeTracking
-private import semmle.javascript.internal.CachedStages
 private import FlowSteps
 
-cached
 private module Cached {
-  cached
   module Public {
-    cached
-    predicate forceStage() { Stages::TypeTracking::ref() }
-
-    cached
     class PropertyName extends string {
-      cached
       PropertyName() {
         this = any(DataFlow::PropRef pr).getPropertyName()
         or
@@ -35,7 +27,6 @@ private module Cached {
     /**
      * A description of a step on an inter-procedural data flow path.
      */
-    cached
     newtype TStepSummary =
       LevelStep() or
       CallStep() or
@@ -52,7 +43,6 @@ private module Cached {
   /**
    * INTERNAL: Use `SourceNode.track()` or `SourceNode.backtrack()` instead.
    */
-  cached
   predicate step(DataFlow::SourceNode pred, DataFlow::SourceNode succ, StepSummary summary) {
     exists(DataFlow::Node mid | pred.flowsTo(mid) | StepSummary::smallstep(mid, succ, summary))
   }
@@ -72,7 +62,6 @@ private module Cached {
   /**
    * INTERNAL: Use `TypeBackTracker.smallstep()` instead.
    */
-  cached
   predicate smallstep(DataFlow::Node pred, DataFlow::Node succ, StepSummary summary) {
     // Flow through properties of objects
     propertyFlowStep(pred, succ) and

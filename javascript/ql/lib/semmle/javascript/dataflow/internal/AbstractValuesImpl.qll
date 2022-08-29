@@ -10,7 +10,6 @@ private import semmle.javascript.dataflow.InferredTypes
 import semmle.javascript.dataflow.CustomAbstractValueDefinitions
 
 /** An abstract value inferred by the flow analysis. */
-cached
 newtype TAbstractValue =
   /** An abstract representation of `null`. */
   TAbstractNull() or

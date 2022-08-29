@@ -5,7 +5,6 @@
 import javascript
 private import semmle.javascript.dataflow.InferredTypes
 private import semmle.javascript.dataflow.internal.FlowSteps as FlowSteps
-private import semmle.javascript.internal.CachedStages
 
 /**
  * Provides predicates for associating access paths with data flow nodes.
@@ -113,7 +112,6 @@ module AccessPath {
    * }
    * ```
    */
-  cached
   private string fromReference(DataFlow::Node node, Root root) {
     root = node and
     not root.isGlobal() and
@@ -224,7 +222,6 @@ module AccessPath {
    * }
    * ```
    */
-  cached
   private string fromRhs(DataFlow::Node node, Root root) {
     exists(DataFlow::PropWrite write, string baseName |
       node = write.getRhs() and
@@ -530,9 +527,7 @@ module AccessPath {
      *
      * Holds for `read` if there exists a previous write to the same access-path that dominates this read.
      */
-    cached
     predicate hasDominatingWrite(DataFlow::PropRead read) {
-      Stages::TypeTracking::ref() and
       // within the same basic block.
       exists(ReachableBasicBlock bb, Root root, string path, int ranking |
         read.asExpr() = rankedAccessPath(bb, root, path, ranking, AccessPathRead()) and

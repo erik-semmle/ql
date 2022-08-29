@@ -7,7 +7,6 @@
 
 import javascript
 private import semmle.javascript.dataflow.internal.FlowSteps as FlowSteps
-private import internal.CachedStages
 
 /**
  * Provides classes and predicates for working with the API boundary between the current
@@ -224,29 +223,19 @@ module API {
      * For example, modules have an `exports` member representing their exports, and objects have
      * their properties as members.
      */
-    cached
-    Node getMember(string m) {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::member(m))
-    }
+    Node getMember(string m) { result = this.getASuccessor(Label::member(m)) }
 
     /**
      * Gets a node representing a member of this API component where the name of the member is
      * not known statically.
      */
-    cached
-    Node getUnknownMember() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::unknownMember())
-    }
+    Node getUnknownMember() { result = this.getASuccessor(Label::unknownMember()) }
 
     /**
      * Gets a node representing a member of this API component where the name of the member may
      * or may not be known statically.
      */
-    cached
     Node getAMember() {
-      Stages::ApiStage::ref() and
       result = this.getMember(_)
       or
       result = this.getUnknownMember()
@@ -263,11 +252,7 @@ module API {
      * This predicate may have multiple results when there are multiple constructor calls invoking this API component.
      * Consider using `getAnInstantiation()` if there is a need to distinguish between individual constructor calls.
      */
-    cached
-    Node getInstance() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::instance())
-    }
+    Node getInstance() { result = this.getASuccessor(Label::instance()) }
 
     /**
      * Gets a node representing the `i`th parameter of the function represented by this node.
@@ -275,11 +260,7 @@ module API {
      * This predicate may have multiple results when there are multiple invocations of this API component.
      * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
      */
-    cached
-    Node getParameter(int i) {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::parameter(i))
-    }
+    Node getParameter(int i) { result = this.getASuccessor(Label::parameter(i)) }
 
     /**
      * Gets the number of parameters of the function represented by this node.
@@ -297,11 +278,7 @@ module API {
     /**
      * Gets a node representing the receiver of the function represented by this node.
      */
-    cached
-    Node getReceiver() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::receiver())
-    }
+    Node getReceiver() { result = this.getASuccessor(Label::receiver()) }
 
     /**
      * Gets a node representing a parameter of the function represented by this node.
@@ -310,11 +287,7 @@ module API {
      * there are multiple invocations of this API component.
      * Consider using `getAnInvocation()` if there is a need to distingiush between individual calls.
      */
-    cached
-    Node getAParameter() {
-      Stages::ApiStage::ref() and
-      result = this.getParameter(_)
-    }
+    Node getAParameter() { result = this.getParameter(_) }
 
     /**
      * Gets a node representing the result of the function represented by this node.
@@ -322,30 +295,18 @@ module API {
      * This predicate may have multiple results when there are multiple invocations of this API component.
      * Consider using `getACall()` if there is a need to distingiush between individual calls.
      */
-    cached
-    Node getReturn() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::return())
-    }
+    Node getReturn() { result = this.getASuccessor(Label::return()) }
 
     /**
      * Gets a node representing the promised value wrapped in the `Promise` object represented by
      * this node.
      */
-    cached
-    Node getPromised() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::promised())
-    }
+    Node getPromised() { result = this.getASuccessor(Label::promised()) }
 
     /**
      * Gets a node representing the error wrapped in the `Promise` object represented by this node.
      */
-    cached
-    Node getPromisedError() {
-      Stages::ApiStage::ref() and
-      result = this.getASuccessor(Label::promisedError())
-    }
+    Node getPromisedError() { result = this.getASuccessor(Label::promisedError()) }
 
     /**
      * Gets any class that has this value as a decorator.
@@ -363,7 +324,6 @@ module API {
      * class C2 {}
      * ```
      */
-    cached
     Node getADecoratedClass() { result = this.getASuccessor(Label::decoratedClass()) }
 
     /**
@@ -388,7 +348,6 @@ module API {
      * }
      * ```
      */
-    cached
     Node getADecoratedMember() { result = this.getASuccessor(Label::decoratedMember()) }
 
     /**
@@ -410,7 +369,6 @@ module API {
      * }
      * ```
      */
-    cached
     Node getADecoratedParameter() { result = this.getASuccessor(Label::decoratedParameter()) }
 
     /**
@@ -620,9 +578,7 @@ module API {
    * course, unavoidable). We pick as canonical the alphabetically least access path with
    * shortest length.
    */
-  cached
   private module Impl {
-    cached
     newtype TApiNode =
       MkRoot() or
       MkModuleDef(string m) { exists(MkModuleExport(m)) } or
@@ -683,7 +639,6 @@ module API {
      * Holds if `rhs` is the right-hand side of a definition of a node that should have an
      * incoming edge from `base` labeled `lbl` in the API graph.
      */
-    cached
     predicate rhs(TApiNode base, Label::ApiLabel lbl, DataFlow::Node rhs) {
       hasSemantics(rhs) and
       (
@@ -823,7 +778,6 @@ module API {
     /**
      * Holds if `rhs` is the right-hand side of a definition of node `nd`.
      */
-    cached
     predicate rhs(TApiNode nd, DataFlow::Node rhs) {
       exists(string m | nd = MkModuleExport(m) | exports(m, rhs))
       or
@@ -860,7 +814,6 @@ module API {
      * Holds if `ref` is a use of a node that should have an incoming edge from `base` labeled
      * `lbl` in the API graph.
      */
-    cached
     predicate use(TApiNode base, Label::ApiLabel lbl, DataFlow::Node ref) {
       hasSemantics(ref) and
       (
@@ -1019,7 +972,6 @@ module API {
     /**
      * Holds if `ref` is a use of node `nd`.
      */
-    cached
     predicate use(TApiNode nd, DataFlow::Node ref) {
       exists(string m, Module mod | nd = MkModuleDef(m) and mod = importableModule(m) |
         ref = DataFlow::moduleVarNode(mod)
@@ -1135,7 +1087,6 @@ module API {
     /**
      * Gets a node that is inter-procedurally reachable from `nd`, which is a use of some node.
      */
-    cached
     DataFlow::SourceNode trackUseNode(DataFlow::SourceNode nd) {
       result = trackUseNode(nd, false, 0, "")
     }
@@ -1186,7 +1137,6 @@ module API {
     /**
      * Gets a node that inter-procedurally flows into `nd`, which is a definition of some node.
      */
-    cached
     DataFlow::SourceNode trackDefNode(DataFlow::Node nd) {
       result = trackDefNode(nd, DataFlow::TypeBackTracker::end())
     }
@@ -1209,9 +1159,7 @@ module API {
     /**
      * Holds if there is an edge from `pred` to `succ` in the API graph that is labeled with `lbl`.
      */
-    cached
     predicate edge(TApiNode pred, Label::ApiLabel lbl, TApiNode succ) {
-      Stages::ApiStage::ref() and
       exists(string m |
         pred = MkRoot() and
         lbl = Label::moduleLabel(m)
@@ -1272,14 +1220,12 @@ module API {
     private predicate edge(TApiNode pred, TApiNode succ) { edge(pred, _, succ) }
 
     /** Gets the shortest distance from the root to `nd` in the API graph. */
-    cached
     int distanceFromRoot(TApiNode nd) = shortestDistances(MkRoot/0, edge/2)(_, nd, result)
 
     /**
      * Gets a call to a promisified function represented by `callee` where
      * `bound` arguments have been bound.
      */
-    cached
     DataFlow::InvokeNode getAPromisifiedInvocation(TApiNode callee, int bound, TApiNode succ) {
       exists(DataFlow::SourceNode src |
         Impl::use(callee, src) and

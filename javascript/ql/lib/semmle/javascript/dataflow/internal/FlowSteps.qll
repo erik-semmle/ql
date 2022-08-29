@@ -7,7 +7,6 @@
 import javascript
 import semmle.javascript.dataflow.Configuration
 import semmle.javascript.dataflow.internal.CallGraphs
-private import semmle.javascript.internal.CachedStages
 
 /**
  * Holds if flow should be tracked through properties of `obj`.
@@ -107,10 +106,8 @@ DataFlow::Node getThrowTarget(DataFlow::Node thrower) {
  * Implements a set of data flow predicates that are used by multiple predicates and
  * hence should only be computed once.
  */
-cached
 private module CachedSteps {
   /** Gets the nesting depth of the given container, starting with the top-level at 0. */
-  cached
   int getContainerDepth(StmtContainer container) {
     not exists(container.getEnclosingContainer()) and
     result = 0
@@ -119,7 +116,6 @@ private module CachedSteps {
   }
 
   /** Gets the nesting depth of the container declaring the given captured variable. */
-  cached
   int getCapturedVariableDepth(LocalVariable v) {
     v.isCaptured() and
     result = getContainerDepth(v.getDeclaringContainer())
@@ -128,7 +124,6 @@ private module CachedSteps {
   /**
    * Holds if `f` captures the given `variable` in `cap`.
    */
-  cached
   predicate captures(Function f, LocalVariable variable, SsaVariableCapture cap) {
     variable = cap.getSourceVariable() and
     f = cap.getContainer() and
@@ -138,7 +133,6 @@ private module CachedSteps {
   /**
    * Holds if `invk` may invoke `f`.
    */
-  cached
   predicate calls(DataFlow::Node invk, Function f) {
     f = invk.(DataFlow::InvokeNode).getACallee(0)
     or
@@ -159,7 +153,6 @@ private module CachedSteps {
    *
    * Does not hold for context-dependent call sites, such as callback invocations.
    */
-  cached
   predicate callsBound(DataFlow::InvokeNode invk, Function f, int boundArgs) {
     callsBoundInternal(invk, f, boundArgs, false)
   }
@@ -169,7 +162,6 @@ private module CachedSteps {
    *
    * Should only be used for graph pruning, as the edge may lead to spurious flow.
    */
-  cached
   predicate exploratoryBoundInvokeStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(DataFlow::InvokeNode invk, Function f, int i, int boundArgs |
       callsBoundInternal(invk, f, boundArgs, _) and
@@ -198,7 +190,6 @@ private module CachedSteps {
    * Holds if `arg` is passed as an argument into parameter `parm`
    * through invocation `invk` of function `f`.
    */
-  cached
   predicate argumentPassing(
     DataFlow::SourceNode invk, DataFlow::Node arg, Function f, DataFlow::SourceNode parm
   ) {
@@ -293,7 +284,6 @@ private module CachedSteps {
    * Holds if there is a flow step from `pred` to `succ` through parameter passing
    * to a function call.
    */
-  cached
   predicate callStep(DataFlow::Node pred, DataFlow::Node succ) { argumentPassing(_, pred, _, succ) }
 
   /**
@@ -302,7 +292,6 @@ private module CachedSteps {
    * - throwing an exception out of a function call, or
    * - the receiver flowing out of a constructor call.
    */
-  cached
   predicate returnStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(Function f | calls(succ, f) or callsBound(succ, f, _) |
       DataFlow::functionReturnNode(pred, f)
@@ -338,7 +327,6 @@ private module CachedSteps {
   /**
    * Holds if there is a flow step from `pred` to `succ` through an object property.
    */
-  cached
   predicate propertyFlowStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(AbstractValue obj, string prop |
       trackedPropertyWrite(obj, prop, pred) and
@@ -371,7 +359,6 @@ private module CachedSteps {
    * Holds if there is a flow step from `pred` to `succ` through a global
    * variable. Both `pred` and `succ` must be in the same file.
    */
-  cached
   predicate globalFlowStep(DataFlow::Node pred, DataFlow::Node succ) {
     exists(GlobalVariable gv, File f |
       pred = getADefIn(gv, f) and
@@ -418,7 +405,6 @@ private module CachedSteps {
    * then there is a store step from the right-hand side of the write to any
    * read of the same property from the same global variable in the same file.
    */
-  cached
   predicate basicStoreStep(DataFlow::Node pred, DataFlow::Node succ, string prop) {
     succ.(DataFlow::SourceNode).hasPropertyWrite(prop, pred)
     or
@@ -432,9 +418,7 @@ private module CachedSteps {
    * Holds if there is a load step from `pred` to `succ` under property `prop`,
    * that is, `succ` is a read of property `prop` from `pred`.
    */
-  cached
   predicate basicLoadStep(DataFlow::Node pred, DataFlow::PropRead succ, string prop) {
-    Stages::TypeTracking::ref() and
     succ.accesses(pred, prop)
   }
 
@@ -458,9 +442,7 @@ private module CachedSteps {
    * This is an over-approximation of a possible data flow step through a callback
    * invocation.
    */
-  cached
   predicate exploratoryCallbackStep(DataFlow::Node arg, DataFlow::SourceNode cb) {
-    Stages::TypeTracking::ref() and
     exists(DataFlow::InvokeNode invk, DataFlow::ParameterNode cbParm, DataFlow::Node cbArg |
       arg = invk.getAnArgument() and
       cbParm.flowsTo(invk.getCalleeNode()) and
@@ -476,9 +458,7 @@ private module CachedSteps {
   }
 
   /** Gets a function that flows to `parameter` via one or more parameter-passing steps. */
-  cached
   DataFlow::FunctionNode getACallbackSource(DataFlow::ParameterNode parameter) {
-    Stages::TypeTracking::ref() and
     callStep(result.getALocalUse(), parameter)
     or
     exists(DataFlow::ParameterNode mid |
@@ -490,7 +470,6 @@ private module CachedSteps {
   /**
    * Holds if `f` may return `base`, which has a write of property `prop` with right-hand side `rhs`.
    */
-  cached
   predicate returnedPropWrite(Function f, DataFlow::SourceNode base, string prop, DataFlow::Node rhs) {
     base.hasPropertyWrite(prop, rhs) and
     base.flowsToExpr(f.getAReturnedExpr())
@@ -499,7 +478,6 @@ private module CachedSteps {
   /**
    * Holds if `f` may assign `rhs` to `this.prop`.
    */
-  cached
   predicate receiverPropWrite(Function f, string prop, DataFlow::Node rhs) {
     DataFlow::thisNode(f).hasPropertyWrite(prop, rhs)
   }
@@ -507,7 +485,6 @@ private module CachedSteps {
   /**
    * Holds if there is a step from `pred` to `succ` through a call to an identity function.
    */
-  cached
   predicate identityFunctionStep(DataFlow::Node pred, DataFlow::CallNode succ) {
     exists(DataFlow::GlobalVarRefNode global |
       global.getName() = "Object" and

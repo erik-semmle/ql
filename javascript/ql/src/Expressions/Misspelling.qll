@@ -25,7 +25,6 @@ predicate whitelisted(string wrong, string right) {
  * where `wrongstart` and `wrongend` are the first and last characters, respectively,
  * of `wrong`, and similarly for `rightstart` and `rightend`.
  */
-cached
 predicate normalized_typos(
   string wrong, string right, string wrongstart, string wrongend, string rightstart, string rightend
 ) {
@@ -59,7 +58,6 @@ predicate normalized_typos(
  * For performance reasons, we restrict our attention to identifier parts
  * that are either known typos or known typo fixes.
  */
-cached
 predicate idPart(Identifier id, string part, int offset) {
   (normalized_typos(part, _, _, _, _, _) or normalized_typos(_, part, _, _, _, _)) and
   part = id.getName().regexpFind("[A-Z]([A-Z]+|[a-z]+)|[a-z]+", _, offset).toLowerCase()
