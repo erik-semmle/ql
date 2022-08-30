@@ -233,6 +233,8 @@ module AccessPath {
       baseName = fromReference(write.getBase(), root)
       or
       baseName = fromRhs(write.getBase(), root)
+      or
+      baseName = fromRhs(GetLaterAccess::getLaterBaseAccess(write), root)
     )
     or
     exists(GlobalVariable var |
@@ -264,6 +266,91 @@ module AccessPath {
       result = decl.getIdentifier().(GlobalVarDecl).getName() and
       root.isGlobal()
     )
+  }
+
+  /** A module for computing an access to a variable that happens after a write to that same variable */
+  private module GetLaterAccess {
+    /** Gets an access to a variable that is written to in `write`, where the access is after the write. */
+    pragma[noopt]
+    DataFlow::Node getLaterBaseAccess(DataFlow::PropWrite write) {
+      exists(
+        DataFlow::Node node, ControlFlowNode writeNode, VarAccess access, VarAccess otherAccess,
+        Variable variable, StmtContainer container
+      |
+        node = write.getBase() and
+        writeNode = write.getWriteNode() and
+        node.asExpr() = access and
+        access = getAnAccessInContainer(variable, container, true) and
+        variable = getARelevantVariable() and // manual magic
+        otherAccess = getAnAccessInContainer(variable, container, false) and
+        access != otherAccess and
+        result.asExpr() = otherAccess
+      |
+        exists(BasicBlock bb, int i, int j |
+          bb.getNode(i) = writeNode and
+          bb.getNode(j) = otherAccess and
+          i < j
+        )
+        or
+        exists(ReachableBasicBlock writeBB | writeBB = writeNode.getBasicBlock() |
+          otherAccess.getBasicBlock() = getASuccessorBBThatReadsVar(write, writeBB) // more manual magic - outlined into a helper predicate.
+        )
+      )
+    }
+
+    /** Gets an access to `var` inside `container` where `usedAsProp` indicates whether the access is the base of a property reference. */
+    private VarAccess getAnAccessInContainer(
+      Variable var, StmtContainer container, boolean usedAsProp
+    ) {
+      result.getVariable() = var and
+      result.getContainer() = container and
+      var.isLocal() and
+      if result = any(DataFlow::PropRef ref).getBase().asExpr()
+      then usedAsProp = true
+      else usedAsProp = false
+    }
+
+    /** Gets a variable that is relevant for the computations in the `GetLaterAccess` module. */
+    private Variable getARelevantVariable() {
+      // The variable might be used where `getLaterBaseAccess()` is called.
+      exists(DataFlow::Node node |
+        exists(fromRhs(node, _)) and
+        node.asExpr().(VarAccess).getVariable() = result
+      ) and
+      // There is a write that writes to the variable.
+      any(DataFlow::PropWrite write).getBase().asExpr().(VarAccess).getVariable() = result and
+      // It's local.
+      result.isLocal() and // we skip global variables, because that turns messy quick.
+      // There is both a "write" and "read" in the same container of the variable.
+      exists(StmtContainer container |
+        exists(getAnAccessInContainer(result, container, true)) and // a "write", an access to the variable that is the base of a property reference.
+        exists(getAnAccessInContainer(result, container, false)) // a "read", an access to the variable that is not the base of a property reference.
+      )
+    }
+
+    /** Gets a basic-block that has a read of the variable that is written to by `write`, where the basicblock occurs after `start`. */
+    pragma[noopt]
+    private ReachableBasicBlock getASuccessorBBThatReadsVar(
+      DataFlow::PropWrite write, BasicBlock start
+    ) {
+      exists(DataFlow::Node base, VarAccess baseExpr, Variable var, ControlFlowNode writeNode |
+        base = write.getBase() and
+        baseExpr = base.asExpr() and
+        var = baseExpr.getVariable() and
+        var = getARelevantVariable() and
+        writeNode = write.getWriteNode() and
+        start = writeNode.getBasicBlock() and
+        start instanceof ReachableBasicBlock and
+        exists(BasicBlock succ | succ = start.getASuccessor+() |
+          result = succ.(ReachableBasicBlock)
+        ) and
+        result = hasRelevantEndNode()
+      )
+    }
+
+    private ReachableBasicBlock hasRelevantEndNode() {
+      result = getAnAccessInContainer(getARelevantVariable(), _, false).getBasicBlock()
+    }
   }
 
   /**
