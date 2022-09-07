@@ -82,6 +82,8 @@ File tryExtensions(Folder dir, string basename, int priority) {
   )
 }
 
+File tryExt(Folder dir, int priority) { result = tryExtensions(dir, "Mermaid", priority) }
+
 /**
  * Gets `name` without a file extension.
  * Or `name`, if `name` has no file extension.
@@ -93,7 +95,7 @@ private string getStem(string name) { result = name.regexpCapture("(.+?)(?:\\.([
  * Gets the main module described by `pkg` with the given `priority`.
  */
 File resolveMainModule(PackageJson pkg, int priority) {
-  exists(PathExpr main | main = MainModulePath::of(pkg, ".") |
+  exists(PathExpr main | main = MainModulePath::of(pkg, _) |
     result = main.resolve() and priority = 0
     or
     result = tryExtensions(main.resolve(), "index", priority)
@@ -102,6 +104,10 @@ File resolveMainModule(PackageJson pkg, int priority) {
     exists(int n | n = main.getNumComponent() |
       result = tryExtensions(main.resolveUpTo(n - 1), getStem(main.getComponent(n - 1)), priority)
     )
+    or
+    not exists(main.resolve()) and
+    result =
+      tryExtensions(_, getStem(main.getComponent(main.getNumComponent() - 1)), priority - 999)
   )
   or
   exists(Folder folder, Folder child |
