@@ -33,7 +33,8 @@ module XssThroughDom {
   /**
    * Gets a DOM property name that could store user-controlled data.
    */
-  string unsafeDomPropertyName() { result = ["innerText", "textContent", "value", "name", "src"] }
+  bindingset[result]
+  string unsafeDomPropertyName() { exists(result) } // TODO: Testing, this might (most definitely) be too broads
 
   /** A read of a DOM property seen as a source for cross-site scripting vulnerabilities through the DOM. */
   abstract class DomPropertySource extends Source {
