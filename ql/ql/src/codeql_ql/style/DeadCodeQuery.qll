@@ -274,10 +274,11 @@ private File benignUnqueryableFile() {
   result.getAbsolutePath().matches("%/explore/%") or
   result.getRelativePath().matches("%/tutorials/%") or
   result.getRelativePath().matches("%/experimental/%") or
+  result.getRelativePath().matches("%/frameworks/%") or // the frameworks have a lot of code that only exists for completeness.
   result.getBaseName() =
     [
       "Expr.qll", "TypeScript.qll", "YAML.qll", "Tokens.qll", "Instruction.qll", "Persistence.qll",
-      "ES2015Modules.qll"
+      "ES2015Modules.qll", "TaintTrackingPublic.qll", "TaintTrackingUtil.qll",
     ] or // lots of classes that exist for completeness
   result.getBaseName() = ["CachedStages.qll", "Caching.qll", "tutorial.qll"] or
   result.getBaseName() = "PrettyPrintAst.qll" or // it's dead code, but seems intentional
