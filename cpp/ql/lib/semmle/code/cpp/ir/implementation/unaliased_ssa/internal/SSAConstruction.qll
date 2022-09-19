@@ -28,11 +28,6 @@ private module Cached {
   }
 
   cached
-  predicate hasChiInstructionCached(OldInstruction primaryInstruction) {
-    hasChiNode(_, primaryInstruction)
-  }
-
-  cached
   predicate hasUnreachedInstructionCached(IRFunction irFunc) {
     exists(OldInstruction oldInstruction |
       irFunc = oldInstruction.getEnclosingIRFunction() and
@@ -140,16 +135,6 @@ private module Cached {
     exists(Alias::MemoryLocation location |
       instruction = getPhi(_, location) and
       not exists(location.getAllocation())
-    )
-  }
-
-  cached
-  Instruction getRegisterOperandDefinition(Instruction instruction, RegisterOperandTag tag) {
-    exists(OldInstruction oldInstruction, OldIR::RegisterOperand oldOperand |
-      oldInstruction = getOldInstruction(instruction) and
-      oldOperand = oldInstruction.getAnOperand() and
-      tag = oldOperand.getOperandTag() and
-      result = getNewInstruction(oldOperand.getAnyDef())
     )
   }
 
@@ -1139,8 +1124,6 @@ module Ssa {
   class MemoryLocation = Alias::MemoryLocation;
 
   predicate hasPhiInstruction = Cached::hasPhiInstructionCached/2;
-
-  predicate hasChiInstruction = Cached::hasChiInstructionCached/1;
 
   predicate hasUnreachedInstruction = Cached::hasUnreachedInstructionCached/1;
 }
