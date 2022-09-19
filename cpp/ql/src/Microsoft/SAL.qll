@@ -93,22 +93,6 @@ class SalNotNull extends SalAnnotation {
 deprecated class SALNotNull = SalNotNull;
 
 /**
- * A SAL macro indicating that a value may be `NULL`.
- */
-class SalMaybeNull extends SalAnnotation {
-  SalMaybeNull() {
-    exists(SalMacro m | m = this.getMacro() |
-      m.getName().matches("%\\_opt\\_%") or
-      m.getName().matches("\\_Ret_maybenull\\_%") or
-      m.getName() = "_Result_nullonfailure_"
-    )
-  }
-}
-
-/** DEPRECATED: Alias for SalMaybeNull */
-deprecated class SALMaybeNull = SalMaybeNull;
-
-/**
  * A parameter annotated by one or more SAL annotations.
  */
 class SalParameter extends Parameter {
