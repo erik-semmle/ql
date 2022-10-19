@@ -1,0 +1,1 @@
+| redos.swift:5:47:5:53 | (a\|aa)* | This part of the regular expression may cause exponential backtracking on strings containing many repetitions of 'aa'. |
