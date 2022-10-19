@@ -15,6 +15,7 @@ private import codeql.swift.elements.expr.StringLiteralExpr
  * and therefore may be relevant for ReDoS queries are considered.
  */
 predicate usedAsRegex(StringLiteralExpr regex, string mode, boolean match_full_string) {
+  // TODO: This treats EVERY string literal as a regex
   mode = "None" and // TODO: proper mode detection
   (if matchesFullString(regex) then match_full_string = true else match_full_string = false)
 }
