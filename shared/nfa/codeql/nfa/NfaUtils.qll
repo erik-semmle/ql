@@ -10,30 +10,11 @@ private import codeql.utils.Locations as Locs
  * A tree view of regular expressions.
  */
 signature module RegexTreeView<Locs::LocationsSig LocImpl> {
-  /**
-   * A node in a regular expression tree.
-   * This class is used as a superclass for both `RegExpParent` and `RegExpTerm`.
-   */
-  class Top {
-    /** Gets a string representation of this node */
-    string toString();
+  class Top;
 
-    /** Gets the location of this node. */
-    LocImpl::Location getLocation();
-  }
+  /** Gets the location of something that has a location. */
+  LocImpl::Location getTermLocation(Top term);
 
-  /**
-   * An element containing a regular expression term, that is, either
-   * a regular expression literal, a string literal (parsed as a regular expression),
-   * or another regular expression term.
-   *
-   * Examples:
-   *
-   * ```
-   * // the regular expression literal and all terms it contains are regexp parents
-   * /((ECMA|Java)[sS]cript)*$/
-   * ```
-   */
   class RegExpParent extends Top;
 
   class RegExpTerm extends Top {
@@ -71,6 +52,8 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
 
     /** Gets the regular expression term that is matched (textually) after this one, if any. */
     RegExpTerm getSuccessor();
+
+    string toString();
   }
 
   /**
@@ -140,6 +123,34 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
      * are `lo`.
      */
     int getUpperBound();
+  }
+
+  /**
+   * An escaped regular expression term, that is, a regular expression
+   * term starting with a backslash.
+   *
+   * Example:
+   *
+   * ```
+   * \.
+   * \w
+   * ```
+   */
+  class RegExpEscape extends RegExpTerm;
+
+  /**
+   * A character class escape in a regular expression.
+   *
+   * Examples:
+   *
+   * ```
+   * \w
+   * \S
+   * ```
+   */
+  class RegExpCharacterClassEscape extends RegExpEscape {
+    /** Gets the name of the character class; for example, `w` for `\w`. */
+    string getValue();
   }
 
   /**
@@ -564,8 +575,6 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
 
     string toString() { result = this.(RegExpTerm).toString() }
 
-    Location getLocation() { result = this.(RegExpTerm).getLocation() }
-
     string getRawValue() { result = this.(RegExpTerm).getRawValue() }
 
     RegExpTerm getRootTerm() { result = this.(RegExpTerm).getRootTerm() } // TODO: getRoot(this)?
@@ -581,13 +590,11 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
   private predicate isCanonicalTerm(RelevantRegExpTerm term, string str) {
     term =
       min(RelevantRegExpTerm t, Location loc, File file |
-        loc = t.getLocation() and
-        file = t.getLocation().getFile() and
+        loc = getTermLocation(t) and
+        file = loc.getFile() and
         str = t.getRawValue() + "|" + getCanonicalizationFlags(t.getRootTerm())
       |
-        t
-        order by
-          t.getLocation().getFile().getRelativePath(), loc.getStartLine(), loc.getStartColumn()
+        t order by file.getRelativePath(), loc.getStartLine(), loc.getStartColumn()
       )
   }
 
@@ -1267,7 +1274,7 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
     /**
      * Gets the location for this state.
      */
-    Location getLocation() { result = repr.getLocation() }
+    Location getLocation() { result = getTermLocation(repr) }
 
     /**
      * Gets the term represented by this state.
@@ -1370,7 +1377,7 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
           max(RelevantState s, Location l |
             isStartState(s) and
             getRoot(s.getRepr()) = root and
-            l = s.getRepr().getLocation()
+            l = getTermLocation(s.getRepr())
           |
             s
             order by
@@ -1414,7 +1421,7 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
         prev =
           min(State s, Location loc |
             lengthFromStart(s) = lengthFromStart(state) - 1 and
-            loc = s.getRepr().getLocation() and
+            loc = getTermLocation(s.getRepr()) and
             delta(s, _, state)
           |
             s
@@ -1474,7 +1481,7 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
         state =
           max(State s, Location l |
             s = epsilonSucc+(state) and
-            l = s.getRepr().getLocation() and
+            l = getTermLocation(s.getRepr()) and
             isCandidate(s, _) and
             s.getRepr() instanceof InfiniteRepetitionQuantifier
           |
