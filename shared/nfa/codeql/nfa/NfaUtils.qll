@@ -57,9 +57,7 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
      */
     predicate isUsedAsRegExp();
 
-    /**
-     * Gets the outermost term of this regular expression.
-     */
+    /** Gets the outermost term of this regular expression. */
     RegExpTerm getRootTerm();
 
     /** Gets the raw source text of this term. */
@@ -70,6 +68,9 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
 
     /** Gets the number of child terms of this term. */
     int getNumChild();
+
+    /** Gets the regular expression term that is matched (textually) after this one, if any. */
+    RegExpTerm getSuccessor();
   }
 
   /**
@@ -163,7 +164,18 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
    * (?<quote>['"])
    * ```
    */
-  class RegExpGroup extends RegExpTerm;
+  class RegExpGroup extends RegExpTerm {
+    /**
+     * Gets the index of this capture group within the enclosing regular
+     * expression literal.
+     *
+     * For example, in the regular expression `/((a?).)(?:b)/`, the
+     * group `((a?).)` has index 1, the group `(a?)` nested inside it
+     * has index 2, and the group `(?:b)` has no index, since it is
+     * not a capture group.
+     */
+    int getNumber();
+  }
 
   /**
    * A back reference, that is, a term of the form `\i` or `\k<name>`
@@ -358,6 +370,17 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
   class RegExpCaret extends RegExpAnchor;
 
   /**
+   * A word boundary assertion.
+   *
+   * Example:
+   *
+   * ```
+   * \b
+   * ```
+   */
+  class RegExpWordBoundary extends RegExpTerm;
+
+  /**
    * A regular expression term that permits unlimited repetitions.
    */
   class InfiniteRepetitionQuantifier extends RegExpQuantifier; // TODO:
@@ -437,7 +460,7 @@ private int ascii(string char) {
 }
 
 module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
-  import Locs::Make<LocImpl>
+  private import Locs::Make<LocImpl>
   import TreeImpl
 
   /**
