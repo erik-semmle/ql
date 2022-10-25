@@ -126,7 +126,7 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
     state =
       rank[result](State s, Location l |
         stateInsideBacktracking(s) and
-        l = s.getRepr().getLocation()
+        l = getTermLocation(s.getRepr())
       |
         s order by l.getStartLine(), l.getStartColumn(), s.toString()
       )
