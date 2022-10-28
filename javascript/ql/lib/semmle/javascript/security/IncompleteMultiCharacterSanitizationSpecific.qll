@@ -3,7 +3,9 @@
  */
 
 import javascript
-import semmle.javascript.security.regexp.NfaUtils as NfaUtils
+private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
+private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
+import codeql.nfa.NfaUtils::Make<LocImpl, TreeView> as NfaUtils
 
 class StringSubstitutionCall = StringReplaceCall;
 
