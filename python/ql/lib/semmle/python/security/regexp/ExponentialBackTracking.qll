@@ -64,5 +64,5 @@
 
 private import RegexTreeView::RegexTreeView as TreeView
 // ExponentialBackTracking should be used directly from the shared pack, and not from this file.
-deprecated import codeql.nfa.ExponentialBackTracking::Make<TreeView> as Dep
+deprecated private import codeql.nfa.ExponentialBackTracking::Make<TreeView> as Dep
 import Dep

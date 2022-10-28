@@ -37,5 +37,5 @@
 
 private import RegexTreeView::RegexTreeView as TreeView
 // SuperlinearBackTracking should be used directly from the shared pack, and not from this file.
-deprecated import codeql.nfa.SuperlinearBackTracking::Make<TreeView> as Dep
+deprecated private import codeql.nfa.SuperlinearBackTracking::Make<TreeView> as Dep
 import Dep
