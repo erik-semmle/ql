@@ -49,7 +49,7 @@ module RegexInjection {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * A regex escaping, considered as a sanitizer.

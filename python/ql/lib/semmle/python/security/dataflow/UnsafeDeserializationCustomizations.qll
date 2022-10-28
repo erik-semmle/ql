@@ -41,7 +41,7 @@ module UnsafeDeserialization {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * An insecure decoding, considered as a flow sink.

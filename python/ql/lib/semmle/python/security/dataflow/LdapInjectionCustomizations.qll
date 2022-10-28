@@ -58,7 +58,7 @@ module LdapInjection {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * A logging operation, considered as a flow sink.

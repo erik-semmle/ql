@@ -51,7 +51,7 @@ module PolynomialReDoS {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * Gets the AST of a regular expression object that can flow to `node`.

@@ -41,7 +41,7 @@ module ReflectedXss {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * The body of a HTTP response that will be returned from a server, considered as a flow sink.

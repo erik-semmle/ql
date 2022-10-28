@@ -42,7 +42,7 @@ module SqlInjection {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /**
    * A SQL statement of a SQL construction, considered as a flow sink.

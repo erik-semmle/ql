@@ -42,7 +42,7 @@ module RegExpInjection {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /** A regexp literal, considered as a flow sink. */
   class RegExpLiteralAsSink extends Sink {

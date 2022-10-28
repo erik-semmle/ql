@@ -53,7 +53,7 @@ module ServerSideRequestForgery {
   /**
    * A source of remote user input, considered as a flow source.
    */
-  class RemoteFlowSourceAsSource extends Source, RemoteFlowSource { }
+  class RemoteFlowSourceAsSource extends Source instanceof RemoteFlowSource { }
 
   /** The URL of an HTTP request, considered as a sink. */
   class HttpRequestUrlAsSink extends Sink {
