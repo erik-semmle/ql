@@ -14,8 +14,8 @@
  *       external/cwe/cwe-400
  */
 
-import python
-import semmle.python.security.regexp.ExponentialBackTracking
+private import semmle.python.security.regexp.RegexTreeView::RegexTreeView as TreeView
+import codeql.nfa.ExponentialBackTracking::Make<TreeView>
 
 from RegExpTerm t, string pump, State s, string prefixMsg
 where

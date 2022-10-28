@@ -11,7 +11,7 @@ private import semmle.python.dataflow.new.TaintTracking
 private import semmle.python.Concepts
 private import semmle.python.dataflow.new.RemoteFlowSources
 private import semmle.python.dataflow.new.BarrierGuards
-private import semmle.python.RegexTreeView
+private import semmle.python.security.regexp.RegexTreeView::RegexTreeView as RegexTree
 private import semmle.python.ApiGraphs
 
 /**
@@ -20,6 +20,8 @@ private import semmle.python.ApiGraphs
  * vulnerabilities, as well as extension points for adding your own.
  */
 module PolynomialReDoS {
+  import codeql.nfa.SuperlinearBackTracking::Make<RegexTree>
+
   /**
    * A data flow source for "polynomial regular expression denial of service (ReDoS)" vulnerabilities.
    */

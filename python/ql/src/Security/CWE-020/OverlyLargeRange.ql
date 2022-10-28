@@ -12,7 +12,8 @@
  *       external/cwe/cwe-020
  */
 
-import semmle.python.security.OverlyLargeRangeQuery
+private import semmle.python.security.regexp.RegexTreeView::RegexTreeView as TreeView
+import codeql.nfa.OverlyLargeRangeQuery::Make<TreeView>
 
 from RegExpCharacterRange range, string reason
 where problem(range, reason)
