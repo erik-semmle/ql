@@ -4,7 +4,7 @@
 
 private import codeql.nfa.NfaUtils as NfaUtils
 
-/** An implementation  */
+/** An implementation that parses a regular expression into a tree of `RegExpTerm`s. */
 module RegexTreeView implements NfaUtils::RegexTreeView {
   import javascript
 
