@@ -57,7 +57,9 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
       RegexpMatching<isBadTagFilterCandidate/4>::fillsCaptureGroup(this, str, g)
     }
 
-    string toString() { result = this.(RootTerm).toString() }
+    string toString() { result = super.toString() }
+
+    Location getLocation() { result = getTermLocation(this) }
   }
 
   /**
