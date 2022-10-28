@@ -176,6 +176,12 @@ class RegExpTerm extends Locatable, @regexpterm {
    * Gets a string that is matched by this regular-expression term.
    */
   string getAMatchedString() { result = this.getConstantValue() }
+
+  predicate hasLocationInfo(
+    string filepath, int startline, int startcolumn, int endline, int endcolumn
+  ) {
+    this.getLocation().hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+  }
 }
 
 /**

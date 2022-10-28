@@ -62,15 +62,13 @@
  *     a suffix `x` (possible empty) that is most likely __not__ accepted.
  */
 
-private import codeql.utils.Locations as Locs
 private import NfaUtils as NfaUtils
 
 /**
  * A parameterized module implementing the analysis described in the above papers.
  */
-module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
-  import NfaUtils::Make<LocImpl, TreeImpl>
+module Make<NfaUtils::RegexTreeView TreeImpl> {
+  import NfaUtils::Make<TreeImpl>
 
   /**
    * Holds if state `s` might be inside a backtracking repetition.
@@ -124,11 +122,10 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
    */
   private int rankState(State state) {
     state =
-      rank[result](State s, Location l |
-        stateInsideBacktracking(s) and
-        l = getTermLocation(s.getRepr())
+      rank[result](State s |
+        stateInsideBacktracking(s)
       |
-        s order by l.getStartLine(), l.getStartColumn(), s.toString()
+        s order by getTermLocationString(s.getRepr())
       )
   }
 

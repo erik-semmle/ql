@@ -4,16 +4,11 @@
  * - `Make` is a full implementation the NFA API.
  */
 
-private import codeql.utils.Locations as Locs
-
 /**
  * A tree view of regular expressions.
  */
-signature module RegexTreeView<Locs::LocationsSig LocImpl> {
+signature module RegexTreeView {
   class Top;
-
-  /** Gets the location of something that has a location. */
-  LocImpl::Location getTermLocation(Top term);
 
   class RegExpParent extends Top;
 
@@ -54,6 +49,10 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
     RegExpTerm getSuccessor();
 
     string toString();
+
+    predicate hasLocationInfo(
+      string filepath, int startline, int startcolumn, int endline, int endcolumn
+    );
   }
 
   /**
@@ -465,8 +464,7 @@ private int ascii(string char) {
     )
 }
 
-module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
+module Make<RegexTreeView TreeImpl> {
   import TreeImpl
 
   /**
@@ -579,6 +577,16 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
   }
 
   /**
+   * Gets a string for the full location of `t`.
+   */
+  string getTermLocationString(RegExpTerm t) {
+    exists(string file, int startLine, int startColumn, int endLine, int endColumn |
+      t.hasLocationInfo(file, startLine, startColumn, endLine, endColumn) and
+      result = file + ":" + startLine + ":" + startColumn + "-" + endLine + ":" + endColumn
+    )
+  }
+
+  /**
    * Holds if `term` is the chosen canonical representative for all terms with string representation `str`.
    * The string representation includes which flags are used with the regular expression.
    *
@@ -587,12 +595,10 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
    */
   private predicate isCanonicalTerm(RelevantRegExpTerm term, string str) {
     term =
-      min(RelevantRegExpTerm t, Location loc, File file |
-        loc = getTermLocation(t) and
-        file = loc.getFile() and
+      min(RelevantRegExpTerm t |
         str = t.getRawValue() + "|" + getCanonicalizationFlags(t.getRootTerm())
       |
-        t order by file.getRelativePath(), loc.getStartLine(), loc.getStartColumn()
+        t order by getTermLocationString(t)
       )
   }
 
@@ -1270,11 +1276,6 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
     }
 
     /**
-     * Gets the location for this state.
-     */
-    Location getLocation() { result = getTermLocation(repr) }
-
-    /**
      * Gets the term represented by this state.
      */
     RegExpTerm getRepr() { result = repr }
@@ -1372,15 +1373,11 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
     private predicate lastStartState(RelevantState state) {
       exists(RegExpRoot root |
         state =
-          max(RelevantState s, Location l |
+          max(RelevantState s |
             isStartState(s) and
-            getRoot(s.getRepr()) = root and
-            l = getTermLocation(s.getRepr())
+            getRoot(s.getRepr()) = root
           |
-            s
-            order by
-              l.getStartLine(), l.getStartColumn(), s.getRepr().toString(), l.getEndColumn(),
-              l.getEndLine()
+            s order by getTermLocationString(s.getRepr())
           )
       )
     }
@@ -1417,15 +1414,11 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
       exists(State prev |
         // select a unique predecessor (by an arbitrary measure)
         prev =
-          min(State s, Location loc |
+          min(State s |
             lengthFromStart(s) = lengthFromStart(state) - 1 and
-            loc = getTermLocation(s.getRepr()) and
             delta(s, _, state)
           |
-            s
-            order by
-              loc.getStartLine(), loc.getStartColumn(), loc.getEndLine(), loc.getEndColumn(),
-              s.getRepr().toString()
+            s order by getTermLocationString(s.getRepr()), s.getRepr().toString()
           )
       |
         // greedy search for the shortest prefix
@@ -1477,13 +1470,12 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
         or
         epsilonSucc+(state) = state and
         state =
-          max(State s, Location l |
+          max(State s |
             s = epsilonSucc+(state) and
-            l = getTermLocation(s.getRepr()) and
             isCandidate(s, _) and
             s.getRepr() instanceof InfiniteRepetitionQuantifier
           |
-            s order by l.getStartLine(), l.getStartColumn(), l.getEndColumn(), l.getEndLine()
+            s order by getTermLocationString(s.getRepr())
           )
       )
     }
