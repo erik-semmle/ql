@@ -5,10 +5,13 @@
  */
 
 import javascript
-import SuperlinearBackTracking
+private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
+private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
 
 /** Module containing sources, sinks, and sanitizers for polynomial regular expression denial-of-service attacks. */
 module PolynomialReDoS {
+  import codeql.nfa.SuperlinearBackTracking::Make<LocImpl, TreeView>
+
   /**
    * A data flow source node for polynomial regular expression denial-of-service vulnerabilities.
    */

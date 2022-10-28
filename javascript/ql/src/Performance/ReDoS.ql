@@ -24,20 +24,3 @@ where hasReDoSResult(t, pump, s, prefixMsg)
 select t,
   "This part of the regular expression may cause exponential backtracking on strings " + prefixMsg +
     "containing many repetitions of '" + pump + "'."
-/*
- *    TODO:
- *    NfaUtils
- * Exponential
- * SuperlinearBacktracking
- * RegexpMatching
- * BadTagFilterQuery
- * OverlyLargeRangeQuery
- *
- * ReDoS.ql
- * PolynomialReDoS.ql
- * BadBagFilter.ql
- * IncompleteMultiChar
- * OverlyLargeRange
- * CaseSensitiveMiddleware
- */
-
