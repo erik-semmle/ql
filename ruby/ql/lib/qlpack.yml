@@ -7,3 +7,4 @@ upgrades: upgrades
 library: true
 dependencies:
   codeql/ssa: 0.0.1
+  codeql/nfa: 0.0.1

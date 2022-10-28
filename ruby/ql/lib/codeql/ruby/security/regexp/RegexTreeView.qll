@@ -3,15 +3,15 @@
  */
 
 private import codeql.nfa.NfaUtils as NfaUtils
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
+private import codeql.ruby.internal.LocationsImpl::LocationsImpl as LocImpl
+private import codeql.Locations
+private import codeql.ruby.ast.Literal as Ast
 
-/** An implementation  */
+/** An implementation */
 module RegexTreeView implements NfaUtils::RegexTreeView<LocImpl> {
-  import javascript
+  import codeql.ruby.Regexp
 
-  class Top = Locatable;
-
-  @location getTermLocation(Locatable term) { result = term.getLocation() }
+  class Top = RegExpParent;
 
   /**
    * Holds if `term` is an escape class representing e.g. `\d`.
@@ -19,34 +19,47 @@ module RegexTreeView implements NfaUtils::RegexTreeView<LocImpl> {
    */
   predicate isEscapeClass(RegExpTerm term, string clazz) {
     exists(RegExpCharacterClassEscape escape | term = escape | escape.getValue() = clazz)
+    or
+    // TODO: expand to cover more properties
+    exists(RegExpNamedCharacterProperty escape | term = escape |
+      escape.getName().toLowerCase() = "digit" and
+      if escape.isInverted() then clazz = "D" else clazz = "d"
+      or
+      escape.getName().toLowerCase() = "space" and
+      if escape.isInverted() then clazz = "S" else clazz = "s"
+      or
+      escape.getName().toLowerCase() = "word" and
+      if escape.isInverted() then clazz = "W" else clazz = "w"
+    )
+  }
+
+  /**
+   * Holds if the regular expression should not be considered.
+   */
+  predicate isExcluded(RegExpParent parent) {
+    parent.(RegExpTerm).getRegExp().(Ast::RegExpLiteral).hasFreeSpacingFlag() // exclude free-spacing mode regexes
   }
 
   /**
    * Holds if `term` is a possessive quantifier.
-   * As javascript's regexes do not support possessive quantifiers, this never holds, but is used by the shared library.
+   * Not currently implemented, but is used by the shared library.
    */
   predicate isPossessive(RegExpQuantifier term) { none() }
 
   /**
    * Holds if the regex that `term` is part of is used in a way that ignores any leading prefix of the input it's matched against.
-   * Not yet implemented for JavaScript.
+   * Not yet implemented for Ruby.
    */
   predicate matchesAnyPrefix(RegExpTerm term) { any() }
 
   /**
    * Holds if the regex that `term` is part of is used in a way that ignores any trailing suffix of the input it's matched against.
-   * Not yet implemented for JavaScript.
+   * Not yet implemented for Ruby.
    */
   predicate matchesAnySuffix(RegExpTerm term) { any() }
 
-  /**
-   * Holds if the regular expression should not be considered.
-   *
-   * For javascript we make the pragmatic performance optimization to ignore minified files.
-   */
-  predicate isExcluded(RegExpParent parent) { parent.(Expr).getTopLevel().isMinified() }
-
   /*
+   * TODO:
    * A module containing predicates for determining which flags a regular expression have.
    */
 
@@ -54,28 +67,17 @@ module RegexTreeView implements NfaUtils::RegexTreeView<LocImpl> {
   /**
    * Holds if `root` has the `i` flag for case-insensitive matching.
    */
-  predicate isIgnoreCase(RegExpTerm root) { RegExp::isIgnoreCase(getFlags(root)) }
-
-  /**
-   * Gets the flags for `root`, or the empty string if `root` has no flags.
-   */
-  private string getFlags(RegExpTerm root) {
+  predicate isIgnoreCase(RegExpTerm root) {
     root.isRootTerm() and
-    exists(DataFlow::RegExpCreationNode node | node.getRoot() = root |
-      result = node.getFlags()
-      or
-      not exists(node.getFlags()) and
-      result = ""
-    )
-    or
-    exists(RegExpPatternSource source | source.getRegExpTerm() = root |
-      result = source.getARegExpObject().(DataFlow::RegExpCreationNode).getFlags()
-    )
+    root.getLiteral().isIgnoreCase()
   }
 
   /**
    * Holds if `root` has the `s` flag for multi-line matching.
    */
-  predicate isDotAll(RegExpTerm root) { RegExp::isDotAll(getFlags(root)) }
+  predicate isDotAll(RegExpTerm root) {
+    root.isRootTerm() and
+    root.getLiteral().isDotAll()
+  }
   // }
 }
