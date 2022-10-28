@@ -9,5 +9,5 @@
 
 private import RegexTreeView::RegexTreeView as TreeView
 // NfaUtils should be used directly from the shared pack, and not from this file.
-deprecated import codeql.nfa.NfaUtils::Make<TreeView> as Dep
+deprecated private import codeql.nfa.NfaUtils::Make<TreeView> as Dep
 import Dep
