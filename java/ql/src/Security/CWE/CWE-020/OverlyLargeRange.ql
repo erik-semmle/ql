@@ -12,11 +12,12 @@
  *       external/cwe/cwe-020
  */
 
-import semmle.code.java.security.OverlyLargeRangeQuery
+private import semmle.code.java.security.regexp.RegexTreeView::RegexTreeView as TreeView
+import codeql.nfa.OverlyLargeRangeQuery::Make<TreeView>
 
 RegExpCharacterClass potentialMisparsedCharClass() {
   // nested char classes are currently misparsed
-  result.getAChild().(RegExpNormalChar).getValue() = "["
+  result.getAChild().(TreeView::RegExpNormalChar).getValue() = "["
 }
 
 from RegExpCharacterRange range, string reason

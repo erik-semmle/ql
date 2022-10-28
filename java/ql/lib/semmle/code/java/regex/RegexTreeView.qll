@@ -541,6 +541,13 @@ class RegExpEscape extends RegExpNormalChar {
 }
 
 /**
+ * A word boundary, that is, a regular expression term of the form `\b`.
+ */
+class RegExpWordBoundary extends RegExpSpecialChar {
+  RegExpWordBoundary() { this.getChar() = "\\b" }
+}
+
+/**
  * Gets the hex number for the `hex` char.
  */
 private int toHex(string hex) {
@@ -893,6 +900,18 @@ class RegExpDot extends RegExpSpecialChar {
 }
 
 /**
+ * A dollar `$` or caret assertion `^` matching the beginning or end of a line.
+ *
+ * Example:
+ *
+ * ```
+ * ^
+ * $
+ * ```
+ */
+abstract class RegExpAnchor extends RegExpSpecialChar { }
+
+/**
  * A dollar assertion `$` matching the end of a line.
  *
  * Example:
@@ -901,7 +920,7 @@ class RegExpDot extends RegExpSpecialChar {
  * $
  * ```
  */
-class RegExpDollar extends RegExpSpecialChar {
+class RegExpDollar extends RegExpAnchor {
   RegExpDollar() { this.getChar() = "$" }
 
   override string getPrimaryQLClass() { result = "RegExpDollar" }
@@ -916,7 +935,7 @@ class RegExpDollar extends RegExpSpecialChar {
  * ^
  * ```
  */
-class RegExpCaret extends RegExpSpecialChar {
+class RegExpCaret extends RegExpAnchor {
   RegExpCaret() { this.getChar() = "^" }
 
   override string getPrimaryQLClass() { result = "RegExpCaret" }
