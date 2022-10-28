@@ -9,7 +9,7 @@ private import codeql.ruby.CFG
 private import codeql.ruby.DataFlow
 private import codeql.ruby.dataflow.RemoteFlowSources
 private import codeql.ruby.Regexp
-private import codeql.ruby.security.regexp.SuperlinearBackTracking
+private import codeql.ruby.security.regexp.RegexTreeView::RegexTreeView as TreeView
 
 /**
  * Provides default sources, sinks and sanitizers for reasoning about
@@ -17,6 +17,8 @@ private import codeql.ruby.security.regexp.SuperlinearBackTracking
  * as extension points for adding your own.
  */
 module PolynomialReDoS {
+  import codeql.nfa.SuperlinearBackTracking::Make<TreeView>
+
   /**
    * A data flow source node for polynomial regular expression denial-of-service vulnerabilities.
    */

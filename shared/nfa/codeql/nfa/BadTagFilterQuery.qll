@@ -56,6 +56,12 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
     }
 
     string toString() { result = super.toString() }
+
+    predicate hasLocationInfo(
+      string filepath, int startline, int startcolumn, int endline, int endcolumn
+    ) {
+      super.hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+    }
   }
 
   /**

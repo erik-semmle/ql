@@ -12,14 +12,15 @@
  *       external/cwe/cwe-020
  */
 
-import codeql.ruby.security.OverlyLargeRangeQuery
+private import codeql.ruby.security.regexp.RegexTreeView::RegexTreeView as TreeView
+import codeql.nfa.OverlyLargeRangeQuery::Make<TreeView>
 
 RegExpCharacterClass potentialMisparsedCharClass() {
   // some escapes, e.g. [\000-\037] are currently misparsed.
-  result.getAChild().(RegExpNormalChar).getValue() = "\\"
+  result.getAChild().(TreeView::RegExpNormalChar).getValue() = "\\"
   or
   // nested char classes are currently misparsed
-  result.getAChild().(RegExpNormalChar).getValue() = "["
+  result.getAChild().(TreeView::RegExpNormalChar).getValue() = "["
 }
 
 from RegExpCharacterRange range, string reason

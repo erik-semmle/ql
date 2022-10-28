@@ -3,12 +3,11 @@
  */
 
 private import codeql.nfa.NfaUtils as NfaUtils
-private import codeql.ruby.internal.LocationsImpl::LocationsImpl as LocImpl
 private import codeql.Locations
 private import codeql.ruby.ast.Literal as Ast
 
 /** An implementation */
-module RegexTreeView implements NfaUtils::RegexTreeView<LocImpl> {
+module RegexTreeView implements NfaUtils::RegexTreeView {
   import codeql.ruby.Regexp
 
   class Top = RegExpParent;

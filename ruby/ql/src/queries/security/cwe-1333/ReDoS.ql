@@ -14,9 +14,8 @@
  *       external/cwe/cwe-400
  */
 
-import codeql.ruby.security.regexp.ExponentialBackTracking
-import codeql.ruby.security.regexp.NfaUtils
-import codeql.ruby.Regexp
+private import codeql.ruby.security.regexp.RegexTreeView::RegexTreeView as TreeView
+import codeql.nfa.ExponentialBackTracking::Make<TreeView>
 
 from RegExpTerm t, string pump, State s, string prefixMsg
 where hasReDoSResult(t, pump, s, prefixMsg)
