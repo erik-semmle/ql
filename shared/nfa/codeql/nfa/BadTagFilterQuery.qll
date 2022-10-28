@@ -5,6 +5,9 @@
 private import NfaUtils as NfaUtils
 private import RegexpMatching as RM
 
+/**
+ * Module implementing classes and predicates reasoing about bad tag filter vulnerabilities.
+ */
 module Make<NfaUtils::RegexTreeView TreeImpl> {
   import RM::Make<TreeImpl>
 
@@ -55,8 +58,10 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
       RegexpMatching<isBadTagFilterCandidate/4>::fillsCaptureGroup(this, str, g)
     }
 
+    /** Gets a string representation of this term. */
     string toString() { result = super.toString() }
 
+    /** Holds if this term has the specified location. */
     predicate hasLocationInfo(
       string filepath, int startline, int startcolumn, int endline, int endcolumn
     ) {

@@ -15,8 +15,10 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
   class RootTerm instanceof RegExpTerm {
     RootTerm() { this.isRootTerm() }
 
+    /** Gets a string representation of this term. */
     string toString() { result = super.toString() }
 
+    /** Holds if this term has the specified location. */
     predicate hasLocationInfo(
       string filepath, int startline, int startcolumn, int endline, int endcolumn
     ) {
