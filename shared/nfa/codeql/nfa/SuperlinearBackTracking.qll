@@ -425,5 +425,11 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
     string getReason() { result = reason }
 
     string toString() { result = this.(InfiniteRepetitionQuantifier).toString() }
+
+    /** Gets the outermost term of this regular expression. */
+    RegExpTerm getRootTerm() { result = super.getRootTerm() }
+
+    /** Gets the location of this term. */
+    Location getLocation() { result = getTermLocation(this) }
   }
 }

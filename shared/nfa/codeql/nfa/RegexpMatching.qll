@@ -17,7 +17,7 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
   class RootTerm instanceof RegExpTerm {
     RootTerm() { this.isRootTerm() }
 
-    string toString() { result = this.(RegExpTerm).toString() }
+    string toString() { result = super.toString() }
   }
 
   /**

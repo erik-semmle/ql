@@ -394,7 +394,7 @@ signature module RegexTreeView<Locs::LocationsSig LocImpl> {
   /**
    * A regular expression term that permits unlimited repetitions.
    */
-  class InfiniteRepetitionQuantifier extends RegExpQuantifier; // TODO:
+  class InfiniteRepetitionQuantifier extends RegExpQuantifier;
 
   //
   // The Specific bits - TODO: DO something else?
@@ -552,6 +552,9 @@ module Make<Locs::LocationsSig LocImpl, RegexTreeView<LocImpl> TreeImpl> {
     }
 
     string toString() { result = this.(RegExpTerm).toString() }
+
+    /** Gets the outermost term of this regular expression. */
+    RegExpTerm getRootTerm() { result = super.getRootTerm() }
   }
 
   /**
