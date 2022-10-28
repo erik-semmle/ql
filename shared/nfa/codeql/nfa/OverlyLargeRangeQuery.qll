@@ -2,11 +2,9 @@
  * Classes and predicates for working with suspicious character ranges.
  */
 
-private import codeql.utils.Locations as Locs
 private import NfaUtils as NfaUtils
 
-module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
+module Make<NfaUtils::RegexTreeView TreeImpl> {
   import TreeImpl
 
   /**
@@ -15,11 +13,11 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
    */
   int rankRange(RegExpCharacterRange range) {
     range =
-      rank[result](RegExpCharacterRange r, Location l, int low, int high |
-        l = getTermLocation(r) and
+      rank[result](RegExpCharacterRange r, int startline, int startcolumn, int low, int high |
+        r.hasLocationInfo(_, startline, startcolumn, _, _) and
         isRange(r, low, high)
       |
-        r order by (high - low) desc, l.getStartLine(), l.getStartColumn()
+        r order by (high - low) desc, startline, startcolumn
       )
   }
 

@@ -35,15 +35,13 @@
  * It also doesn't find all transitions in the product automaton, which can cause false negatives.
  */
 
-private import codeql.utils.Locations as Locs
 private import NfaUtils as NfaUtils
 
 /**
  * A parameterized module implementing the analysis described in the above papers.
  */
-module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
-  import NfaUtils::Make<LocImpl, TreeImpl>
+module Make<NfaUtils::RegexTreeView TreeImpl> {
+  import NfaUtils::Make<TreeImpl>
 
   /**
    * Gets any root (start) state of a regular expression.
@@ -428,8 +426,5 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
 
     /** Gets the outermost term of this regular expression. */
     RegExpTerm getRootTerm() { result = super.getRootTerm() }
-
-    /** Gets the location of this term. */
-    Location getLocation() { result = getTermLocation(this) }
   }
 }

@@ -2,13 +2,11 @@
  * Provides predicates for reasoning about bad tag filter vulnerabilities.
  */
 
-private import codeql.utils.Locations as Locs
 private import NfaUtils as NfaUtils
 private import RegexpMatching as RM
 
-module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
-  import RM::Make<LocImpl, TreeImpl>
+module Make<NfaUtils::RegexTreeView TreeImpl> {
+  import RM::Make<TreeImpl>
 
   /**
    * Holds if the regexp `root` should be tested against `str`.
@@ -58,8 +56,6 @@ module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImp
     }
 
     string toString() { result = super.toString() }
-
-    Location getLocation() { result = getTermLocation(this) }
   }
 
   /**

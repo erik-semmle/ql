@@ -3,15 +3,12 @@
  */
 
 private import codeql.nfa.NfaUtils as NfaUtils
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
 
 /** An implementation  */
-module RegexTreeView implements NfaUtils::RegexTreeView<LocImpl> {
+module RegexTreeView implements NfaUtils::RegexTreeView {
   import javascript
 
   class Top = Locatable;
-
-  @location getTermLocation(Locatable term) { result = term.getLocation() }
 
   /**
    * Holds if `term` is an escape class representing e.g. `\d`.

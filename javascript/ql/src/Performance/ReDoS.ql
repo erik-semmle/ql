@@ -16,8 +16,7 @@
 
 import javascript
 private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
-import codeql.nfa.ExponentialBackTracking::Make<LocImpl, TreeView>
+import codeql.nfa.ExponentialBackTracking::Make<TreeView>
 
 from RegExpTerm t, string pump, State s, string prefixMsg
 where hasReDoSResult(t, pump, s, prefixMsg)

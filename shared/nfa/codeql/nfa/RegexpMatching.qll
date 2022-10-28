@@ -3,15 +3,13 @@
  * and for testing which capture groups are filled when a particular regexp matches a string.
  */
 
-private import codeql.utils.Locations as Locs
 private import NfaUtils as NfaUtils
 
 /**
  * A parameterized module implementing the analysis described in the above papers.
  */
-module Make<Locs::LocationsSig LocImpl, NfaUtils::RegexTreeView<LocImpl> TreeImpl> {
-  private import Locs::Make<LocImpl>
-  import NfaUtils::Make<LocImpl, TreeImpl>
+module Make<NfaUtils::RegexTreeView TreeImpl> {
+  import NfaUtils::Make<TreeImpl>
 
   /** A root term */
   class RootTerm instanceof RegExpTerm {
