@@ -36,7 +36,6 @@
  */
 
 private import RegexTreeView::RegexTreeView as TreeView
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
 // SuperlinearBackTracking should be used directly from the shared pack, and not from this file.
-deprecated import codeql.nfa.SuperlinearBackTracking::Make<LocImpl, TreeView> as Dep
+deprecated import codeql.nfa.SuperlinearBackTracking::Make<TreeView> as Dep
 import Dep
