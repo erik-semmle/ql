@@ -21,8 +21,7 @@ string toOtherCase(string s) {
 }
 
 private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
-import codeql.nfa.NfaUtils::Make<LocImpl, TreeView> as NfaUtils
+import codeql.nfa.NfaUtils::Make<TreeView> as NfaUtils
 
 /** Holds if `s` is a relevant regexp term were we want to compute a string that matches the term (for `getCaseSensitiveBypassExample`). */
 predicate isCand(NfaUtils::State s) {
@@ -94,7 +93,7 @@ string getAnEndpointExample(Routing::RouteSetup endpoint) {
   )
 }
 
-import codeql.nfa.RegexpMatching::Make<LocImpl, TreeView> as RegexpMatching
+import codeql.nfa.RegexpMatching::Make<TreeView> as RegexpMatching
 
 NfaUtils::RegExpRoot getARoot(DataFlow::RegExpCreationNode creator) {
   result.getRootTerm() = creator.getRoot()

@@ -426,5 +426,11 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
 
     /** Gets the outermost term of this regular expression. */
     RegExpTerm getRootTerm() { result = super.getRootTerm() }
+
+    predicate hasLocationInfo(
+      string filepath, int startline, int startcolumn, int endline, int endcolumn
+    ) {
+      super.hasLocationInfo(filepath, startline, startcolumn, endline, endcolumn)
+    }
   }
 }

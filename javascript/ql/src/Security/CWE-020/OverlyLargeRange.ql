@@ -13,8 +13,7 @@
  */
 
 private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
-import codeql.nfa.OverlyLargeRangeQuery::Make<LocImpl, TreeView>
+import codeql.nfa.OverlyLargeRangeQuery::Make<TreeView>
 
 from RegExpCharacterRange range, string reason
 where problem(range, reason)

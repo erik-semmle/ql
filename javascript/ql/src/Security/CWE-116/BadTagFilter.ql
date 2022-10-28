@@ -17,8 +17,7 @@
  */
 
 private import semmle.javascript.security.regexp.RegexTreeView::RegexTreeView as TreeView
-private import semmle.javascript.internal.LocationsImpl::LocationsImpl as LocImpl
-import codeql.nfa.BadTagFilterQuery::Make<LocImpl, TreeView>
+import codeql.nfa.BadTagFilterQuery::Make<TreeView>
 
 from HtmlMatchingRegExp regexp, string msg
 where msg = min(string m | isBadRegexpFilter(regexp, m) | m order by m.length(), m) // there might be multiple, we arbitrarily pick the shortest one
