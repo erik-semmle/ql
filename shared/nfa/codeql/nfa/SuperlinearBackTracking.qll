@@ -422,11 +422,13 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
      */
     string getReason() { result = reason }
 
-    string toString() { result = this.(InfiniteRepetitionQuantifier).toString() }
+    /** Gets a string representation of this term. */
+    string toString() { result = super.toString() }
 
     /** Gets the outermost term of this regular expression. */
     RegExpTerm getRootTerm() { result = super.getRootTerm() }
 
+    /** Holds if this term has the specific location. */
     predicate hasLocationInfo(
       string filepath, int startline, int startcolumn, int endline, int endcolumn
     ) {

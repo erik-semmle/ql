@@ -464,6 +464,9 @@ private int ascii(string char) {
     )
 }
 
+/**
+ * Classes and predicates that create an NFA and various algorithms for working with it.
+ */
 module Make<RegexTreeView TreeImpl> {
   import TreeImpl
 
@@ -509,7 +512,8 @@ module Make<RegexTreeView TreeImpl> {
       matchesEpsilon(this.getOperand())
     }
 
-    string toString() { result = this.(RegExpSubPattern).toString() }
+    /** Gets a string representation of this sub-pattern. */
+    string toString() { result = super.toString() }
   }
 
   /** DEPRECATED: Use `EmptyPositiveSubPattern` instead. */
@@ -544,6 +548,7 @@ module Make<RegexTreeView TreeImpl> {
       not isExcluded(super.getRootTerm().getParent())
     }
 
+    /** Gets a string representation of this root term. */
     string toString() { result = this.(RegExpTerm).toString() }
 
     /** Gets the outermost term of this regular expression. */
@@ -569,11 +574,14 @@ module Make<RegexTreeView TreeImpl> {
   class RelevantRegExpTerm instanceof RegExpTerm {
     RelevantRegExpTerm() { getRoot(this).isRelevant() }
 
-    string toString() { result = this.(RegExpTerm).toString() }
+    /** Gets a string representation of this term. */
+    string toString() { result = super.toString() }
 
-    string getRawValue() { result = this.(RegExpTerm).getRawValue() }
+    /** Gets the raw source text of this term. */
+    string getRawValue() { result = super.getRawValue() }
 
-    RegExpTerm getRootTerm() { result = this.(RegExpTerm).getRootTerm() } // TODO: getRoot(this)?
+    /** Gets the outermost term of this regular expression. */
+    RegExpTerm getRootTerm() { result = super.getRootTerm() }
   }
 
   /**
@@ -1483,7 +1491,7 @@ module Make<RegexTreeView TreeImpl> {
     /** Gets a state that can reach the `accept-any` state using only epsilon steps. */
     private State acceptsAnySuffix() { epsilonSucc*(result) = AcceptAnySuffix(_) }
 
-    predicate isCandidateState(State s) { isReDoSCandidate(s, _) }
+    private predicate isCandidateState(State s) { isReDoSCandidate(s, _) }
 
     import PrefixConstruction<isCandidateState/1> as Prefix
 

@@ -4,6 +4,9 @@
 
 private import NfaUtils as NfaUtils
 
+/**
+ * Classes and predicates implementing an analysis detecting suspicious character ranges.
+ */
 module Make<NfaUtils::RegexTreeView TreeImpl> {
   import TreeImpl
 
@@ -109,9 +112,11 @@ module Make<NfaUtils::RegexTreeView TreeImpl> {
     /** Gets a string representation of a character class that matches the same chars as this range. */
     string printEquivalent() { result = RangePrinter::printEquivalentCharClass(this) }
 
-    string toString() { result = this.(RegExpCharacterRange).toString() }
+    /** Gets a string representation of this range. */
+    string toString() { result = super.toString() }
 
-    predicate isRange(string lo, string hi) { this.(RegExpCharacterRange).isRange(lo, hi) }
+    /** Holds if `lo` is the lower bound of this character range and `hi` the upper bound. */
+    predicate isRange(string lo, string hi) { super.isRange(lo, hi) }
   }
 
   /** Gets a range that should not be reported as an overly wide range. */
