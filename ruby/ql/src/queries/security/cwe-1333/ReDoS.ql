@@ -14,7 +14,7 @@
  *       external/cwe/cwe-400
  */
 
-private import codeql.ruby.security.regexp.RegexTreeView::RegexTreeView as TreeView
+private import codeql.ruby.regexp.RegExpTreeView::RegexTreeView as TreeView
 import codeql.nfa.ExponentialBackTracking::Make<TreeView>
 
 from RegExpTerm t, string pump, State s, string prefixMsg

@@ -8,8 +8,7 @@ private import codeql.ruby.AST as Ast
 private import codeql.ruby.CFG
 private import codeql.ruby.DataFlow
 private import codeql.ruby.dataflow.RemoteFlowSources
-private import codeql.ruby.Regexp
-private import codeql.ruby.security.regexp.RegexTreeView::RegexTreeView as TreeView
+private import codeql.ruby.regexp.RegExpTreeView::RegexTreeView as TreeView
 
 /**
  * Provides default sources, sinks and sanitizers for reasoning about
