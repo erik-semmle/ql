@@ -69,7 +69,7 @@ class CleartextStorageConfig extends TaintTracking::Configuration {
 
   override predicate isSanitizerIn(DataFlow::Node node) {
     // make sources barriers so that we only report the closest instance
-    isSource(node)
+    this.isSource(node)
   }
 
   override predicate isSanitizer(DataFlow::Node node) {
@@ -80,7 +80,7 @@ class CleartextStorageConfig extends TaintTracking::Configuration {
   override predicate allowImplicitRead(DataFlow::Node node, DataFlow::ContentSet c) {
     // flow out from fields of a `RealmSwiftObject` at the sink, for example in
     // `realmObj.data = sensitive`.
-    isSink(node) and
+    this.isSink(node) and
     exists(ClassOrStructDecl cd |
       c.getAReadContent().(DataFlow::Content::FieldContent).getField() = cd.getAMember() and
       cd.getABaseTypeDecl*().getName() = "RealmSwiftObject"

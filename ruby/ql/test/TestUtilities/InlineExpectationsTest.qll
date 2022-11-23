@@ -302,7 +302,7 @@ class FailureLocatable extends TFailureLocatable {
 
   Location getLocation() { none() }
 
-  final string getExpectationText() { result = getTag() + "=" + getValue() }
+  final string getExpectationText() { result = this.getTag() + "=" + this.getValue() }
 
   string getTag() { none() }
 
@@ -368,22 +368,22 @@ private class ValidExpectation extends Expectation, TValidExpectation {
 
   predicate matchesActualResult(ActualResult actualResult) {
     onSameLine(pragma[only_bind_into](this), actualResult) and
-    getTag() = actualResult.getTag() and
-    getValue() = actualResult.getValue()
+    this.getTag() = actualResult.getTag() and
+    this.getValue() = actualResult.getValue()
   }
 }
 
 /* Note: These next three classes correspond to all the possible values of type `TColumn`. */
 class GoodExpectation extends ValidExpectation {
-  GoodExpectation() { getKnownFailure() = "" }
+  GoodExpectation() { this.getKnownFailure() = "" }
 }
 
 class FalsePositiveExpectation extends ValidExpectation {
-  FalsePositiveExpectation() { getKnownFailure() = "SPURIOUS" }
+  FalsePositiveExpectation() { this.getKnownFailure() = "SPURIOUS" }
 }
 
 class FalseNegativeExpectation extends ValidExpectation {
-  FalseNegativeExpectation() { getKnownFailure() = "MISSING" }
+  FalseNegativeExpectation() { this.getKnownFailure() = "MISSING" }
 }
 
 class InvalidExpectation extends Expectation, TInvalidExpectation {
