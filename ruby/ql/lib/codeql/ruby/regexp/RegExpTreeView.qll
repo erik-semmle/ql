@@ -539,7 +539,7 @@ private module Impl implements RegexTreeViewSig {
     override predicate isNullable() { this.getAChild().isNullable() }
   }
 
-  class RegExpCharEscape = RegExpEscape;
+  addclass RegExpCharEscape = RegExpEscape;
 
   /**
    * An escaped regular expression term, that is, a regular expression
@@ -1050,7 +1050,7 @@ private module Impl implements RegexTreeViewSig {
    * (?!\n)
    * ```
    */
-  class RegExpNegativeLookahead extends RegExpLookahead {
+  additional class RegExpNegativeLookahead extends RegExpLookahead {
     RegExpNegativeLookahead() { re.negativeLookaheadAssertionGroup(start, end) }
 
     override string getAPrimaryQlClass() { result = "RegExpNegativeLookahead" }
