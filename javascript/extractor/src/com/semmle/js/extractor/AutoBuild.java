@@ -447,6 +447,7 @@ public class AutoBuild {
     startThreadPool();
     try {
       extractSource();
+      System.out.println("Finished with source(), hasSeenCode: " + hasSeenCode() + " | " + seenCode);
       if (hasSeenCode()) { // don't bother with the externs if no code was seen
         extractExterns();
       }
@@ -649,11 +650,15 @@ public class AutoBuild {
 
     List<CompletableFuture<?>> futures = new ArrayList<>();
     for (Path f : filesToExtract) {
-      if (extractedFiles.contains(f))
-        continue;
+      if (extractedFiles.contains(f)) {
+          System.out.println("Skipping " + f + " as it has already been extracted.");
+          continue;
+      }
       if (!shouldExtract.test(f)) {
+        System.out.println("Skipping " + f + " as it should not be extracted this round.");
         continue;
       }
+      System.out.println("Not skipping " + f);
       extractedFiles.add(f);
       futures.add(extract(extractors.forFile(f), f, true));
     }
@@ -1105,6 +1110,7 @@ protected DependencyInstallationResult preparePackagesAndDependencies(Set<Path> 
 
   private void doExtract(FileExtractor extractor, Path file, ExtractorState state) {
     File f = file.toFile();
+    System.out.println("Do extract: " + f);
     if (!f.exists()) {
       warn("Skipping " + file + ", which does not exist.");
       return;
@@ -1113,6 +1119,8 @@ protected DependencyInstallationResult preparePackagesAndDependencies(Set<Path> 
     try {
       long start = logBeginProcess("Extracting " + file);
       Integer loc = extractor.extract(f, state);
+      System.out.println("Extracted " + file + " with " + loc + " lines of code");
+      System.out.println("extractor.getConfig().isExterns() = " + extractor.getConfig().isExterns());
       if (!extractor.getConfig().isExterns() && (loc == null || loc != 0)) seenCode = true;
       if (!extractor.getConfig().isExterns()) seenFiles = true;
       logEndProcess(start, "Done extracting " + file);
