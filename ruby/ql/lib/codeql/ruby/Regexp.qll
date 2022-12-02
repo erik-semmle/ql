@@ -8,7 +8,8 @@
 import regexp.RegExpTreeView // re-export
 private import regexp.internal.ParseRegExp
 private import regexp.internal.RegExpConfiguration
-private import codeql.ruby.ast.Literal as Ast
+private import codeql.ruby.AST as Ast
+private import codeql.ruby.CFG
 private import codeql.ruby.DataFlow
 private import codeql.ruby.ApiGraphs
 
@@ -126,4 +127,69 @@ class StdLibRegExpInterpretation extends RegExpInterpretation::Range {
 cached
 DataFlow::Node regExpSource(DataFlow::Node re) {
   exists(RegExpConfiguration c | c.hasFlow(result, re))
+}
+
+/**
+ * Gets the AST of a regular expression object that can flow to `node`.
+ */
+private RegExpTerm getRegExpObjectFromNode(DataFlow::Node node) {
+  exists(DataFlow::LocalSourceNode regexp |
+    regexp.flowsTo(node) and
+    result = regexp.asExpr().(CfgNodes::ExprNodes::RegExpLiteralCfgNode).getExpr().getParsed()
+  )
+}
+
+// TODO: See what this is called in JS, and python?
+// TODO: QLdoc.
+predicate getRegexpExecution(RegExpTerm term, DataFlow::Node input, DataFlow::ExprNode matchNode) {
+  // this = input, matchNode = call, term = regexp
+  exists(DataFlow::Node regexp |
+    term.getRootTerm() = getRegExpObjectFromNode(regexp) and
+    (
+      // `=~` or `!~`
+      exists(CfgNodes::ExprNodes::BinaryOperationCfgNode op |
+        matchNode.asExpr() = op and
+        (
+          op.getExpr() instanceof Ast::RegExpMatchExpr or
+          op.getExpr() instanceof Ast::NoRegExpMatchExpr
+        ) and
+        (
+          input.asExpr() = op.getLeftOperand() and regexp.asExpr() = op.getRightOperand()
+          or
+          input.asExpr() = op.getRightOperand() and regexp.asExpr() = op.getLeftOperand()
+        )
+      )
+      or
+      // Any of the methods on `String` that take a regexp.
+      exists(CfgNodes::ExprNodes::MethodCallCfgNode call |
+        matchNode.asExpr() = call and
+        call.getExpr().getMethodName() =
+          [
+            "[]", "gsub", "gsub!", "index", "match", "match?", "partition", "rindex", "rpartition",
+            "scan", "slice!", "split", "sub", "sub!"
+          ] and
+        input.asExpr() = call.getReceiver() and
+        regexp.asExpr() = call.getArgument(0)
+      )
+      or
+      // A call to `match` or `match?` where the regexp is the receiver.
+      exists(CfgNodes::ExprNodes::MethodCallCfgNode call |
+        matchNode.asExpr() = call and
+        call.getExpr().getMethodName() = ["match", "match?"] and
+        regexp.asExpr() = call.getReceiver() and
+        input.asExpr() = call.getArgument(0)
+      )
+      or
+      // a case-when statement
+      exists(CfgNodes::ExprNodes::CaseExprCfgNode caseWhen |
+        matchNode.asExpr() = caseWhen and
+        input.asExpr() = caseWhen.getValue()
+      |
+        regexp.asExpr() =
+          caseWhen.getBranch(_).(CfgNodes::ExprNodes::WhenClauseCfgNode).getPattern(_)
+        or
+        regexp.asExpr() = caseWhen.getBranch(_).(CfgNodes::ExprNodes::InClauseCfgNode).getPattern()
+      )
+    )
+  )
 }
