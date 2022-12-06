@@ -74,6 +74,7 @@ class Sink extends DataFlow::Node {
   Sink() {
     RE::getRegexpExecution(term, this, matchNode) and
     term = getABadlyAnchoredTerm() and
+    // looks like a sanitizer, not just input transformation
     // TODO: unless? IfExpr? (add tests)
     exists(Ast::IfModifierExpr ifExpr, Ast::AstNode branch |
       ifExpr.getCondition() = matchNode.asExpr().getExpr() and
