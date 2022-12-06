@@ -11,7 +11,7 @@
  *       external/cwe/cwe-020
  */
 
-import codeql.ruby.DataFlow
+import ruby
 import codeql.ruby.Regexp as RE
 
 class RegExpTerm = RE::RegExpTerm;
@@ -73,7 +73,13 @@ class Sink extends DataFlow::Node {
 
   Sink() {
     RE::getRegexpExecution(term, this, matchNode) and
-    term = getABadlyAnchoredTerm()
+    term = getABadlyAnchoredTerm() and
+    // TODO: unless? IfExpr? (add tests)
+    exists(Ast::IfModifierExpr ifExpr, Ast::AstNode branch |
+      ifExpr.getCondition() = matchNode.asExpr().getExpr() and
+      branch = ifExpr.getBranch(_) and
+      branch.(Ast::MethodCall).getMethodName() = "raise"
+    )
   }
 
   DataFlow::Node getCallNode() { result = matchNode }
