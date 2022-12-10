@@ -1,5 +1,6 @@
 """ schema.yml format representation """
 import pathlib
+import re
 import types
 import typing
 from dataclasses import dataclass, field
@@ -8,6 +9,7 @@ from enum import Enum, auto
 import functools
 import importlib.util
 from toposort import toposort_flatten
+import inflection
 
 
 class Error(Exception):
@@ -35,6 +37,8 @@ class Property:
     type: Optional[str] = None
     is_child: bool = False
     pragmas: List[str] = field(default_factory=list)
+    doc: Optional[str] = None
+    description: List[str] = field(default_factory=list)
 
     @property
     def is_single(self) -> bool:
@@ -51,6 +55,14 @@ class Property:
     @property
     def is_predicate(self) -> bool:
         return self.kind == self.Kind.PREDICATE
+
+    @property
+    def has_class_type(self) -> bool:
+        return bool(self.type) and self.type[0].isupper()
+
+    @property
+    def has_builtin_type(self) -> bool:
+        return bool(self.type) and self.type[0].islower()
 
 
 SingleProperty = functools.partial(Property, Property.Kind.SINGLE)
@@ -75,7 +87,10 @@ class Class:
     properties: List[Property] = field(default_factory=list)
     group: str = ""
     pragmas: List[str] = field(default_factory=list)
-    ipa: Optional[IpaInfo] = None
+    ipa: Optional[Union[IpaInfo, bool]] = None
+    """^^^ filled with `True` for non-final classes with only synthesized final descendants """
+    doc: List[str] = field(default_factory=list)
+    default_doc_name: Optional[str] = None
 
     @property
     def final(self):
@@ -99,6 +114,16 @@ class Class:
 class Schema:
     classes: Dict[str, Class] = field(default_factory=dict)
     includes: Set[str] = field(default_factory=set)
+    null: Optional[str] = None
+
+    @property
+    def root_class(self):
+        # always the first in the dictionary
+        return next(iter(self.classes.values()))
+
+    @property
+    def null_class(self):
+        return self.classes[self.null] if self.null else None
 
 
 predicate_marker = object()
@@ -154,6 +179,27 @@ class PropertyModifier:
         raise NotImplementedError
 
 
+def split_doc(doc):
+    # implementation inspired from https://peps.python.org/pep-0257/
+    if not doc:
+        return []
+    lines = doc.splitlines()
+    # Determine minimum indentation (first line doesn't count):
+    strippedlines = (line.lstrip() for line in lines[1:])
+    indents = [len(line) - len(stripped) for line, stripped in zip(lines[1:], strippedlines) if stripped]
+    # Remove indentation (first line is special):
+    trimmed = [lines[0].strip()]
+    if indents:
+        indent = min(indents)
+        trimmed.extend(line[indent:].rstrip() for line in lines[1:])
+    # Strip off trailing and leading blank lines:
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    while trimmed and not trimmed[0]:
+        trimmed.pop(0)
+    return trimmed
+
+
 @dataclass
 class _PropertyNamer(PropertyModifier):
     name: str
@@ -165,22 +211,30 @@ class _PropertyNamer(PropertyModifier):
 def _get_class(cls: type) -> Class:
     if not isinstance(cls, type):
         raise Error(f"Only class definitions allowed in schema, found {cls}")
-    if cls.__name__[0].islower():
-        raise Error(f"Class name must be capitalized, found {cls.__name__}")
-    if len({b.group for b in cls.__bases__ if hasattr(b, "group")}) > 1:
+    # we must check that going to dbscheme names and back is preserved
+    # In particular this will not happen if uppercase acronyms are included in the name
+    to_underscore_and_back = inflection.camelize(inflection.underscore(cls.__name__), uppercase_first_letter=True)
+    if cls.__name__ != to_underscore_and_back:
+        raise Error(f"Class name must be upper camel-case, without capitalized acronyms, found {cls.__name__} "
+                    f"instead of {to_underscore_and_back}")
+    if len({b._group for b in cls.__bases__ if hasattr(b, "_group")}) > 1:
         raise Error(f"Bases with mixed groups for {cls.__name__}")
+    if any(getattr(b, "_null", False) for b in cls.__bases__):
+        raise Error(f"Null class cannot be derived")
     return Class(name=cls.__name__,
                  bases=[b.__name__ for b in cls.__bases__ if b is not object],
                  derived={d.__name__ for d in cls.__subclasses__()},
                  # getattr to inherit from bases
-                 group=getattr(cls, "group", ""),
+                 group=getattr(cls, "_group", ""),
                  # in the following we don't use `getattr` to avoid inheriting
-                 pragmas=cls.__dict__.get("pragmas", []),
-                 ipa=cls.__dict__.get("ipa", None),
+                 pragmas=cls.__dict__.get("_pragmas", []),
+                 ipa=cls.__dict__.get("_ipa", None),
                  properties=[
                      a | _PropertyNamer(n)
                      for n, a in cls.__dict__.get("__annotations__", {}).items()
                  ],
+                 doc=split_doc(cls.__doc__),
+                 default_doc_name=cls.__dict__.get("_doc_name"),
                  )
 
 
@@ -199,12 +253,43 @@ def _toposort_classes_by_group(classes: typing.Dict[str, Class]) -> typing.Dict[
     return ret
 
 
+def _fill_ipa_information(classes: typing.Dict[str, Class]):
+    """ Take a dictionary where the `ipa` field is filled for all explicitly synthesized classes
+    and update it so that all non-final classes that have only synthesized final descendants
+    get `True` as` value for the `ipa` field
+    """
+    if not classes:
+        return
+
+    is_ipa: typing.Dict[str, bool] = {}
+
+    def fill_is_ipa(name: str):
+        if name not in is_ipa:
+            cls = classes[name]
+            for d in cls.derived:
+                fill_is_ipa(d)
+            if cls.ipa is not None:
+                is_ipa[name] = True
+            elif not cls.derived:
+                is_ipa[name] = False
+            else:
+                is_ipa[name] = all(is_ipa[d] for d in cls.derived)
+
+    root = next(iter(classes))
+    fill_is_ipa(root)
+
+    for name, cls in classes.items():
+        if cls.ipa is None and is_ipa[name]:
+            cls.ipa = True
+
+
 def load(m: types.ModuleType) -> Schema:
     includes = set()
     classes = {}
     known = {"int", "string", "boolean"}
     known.update(n for n in m.__dict__ if not n.startswith("__"))
     import swift.codegen.lib.schema.defs as defs
+    null = None
     for name, data in m.__dict__.items():
         if hasattr(defs, name):
             continue
@@ -219,8 +304,15 @@ def load(m: types.ModuleType) -> Schema:
                 f"Only one root class allowed, found second root {name}")
         cls.check_types(known)
         classes[name] = cls
+        if getattr(data, "_null", False):
+            if null is not None:
+                raise Error(f"Null class {null} already defined, second null class {name} not allowed")
+            null = name
+            cls.is_null_class = True
 
-    return Schema(includes=includes, classes=_toposort_classes_by_group(classes))
+    _fill_ipa_information(classes)
+
+    return Schema(includes=includes, classes=_toposort_classes_by_group(classes), null=null)
 
 
 def load_file(path: pathlib.Path) -> Schema:

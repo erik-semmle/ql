@@ -10,7 +10,6 @@ private import semmle.code.java.dataflow.internal.ContainerFlow
 private import semmle.code.java.frameworks.spring.SpringController
 private import semmle.code.java.frameworks.spring.SpringHttp
 private import semmle.code.java.frameworks.Networking
-private import semmle.code.java.dataflow.ExternalFlow
 private import semmle.code.java.dataflow.FlowSources
 private import semmle.code.java.dataflow.internal.DataFlowPrivate
 import semmle.code.java.dataflow.FlowSteps
@@ -282,13 +281,8 @@ private predicate constructorStep(Expr tracked, ConstructorCall sink) {
  * Converts an argument index to a formal parameter index.
  * This is relevant for varadic methods.
  */
-private int argToParam(Call call, int arg) {
-  exists(call.getArgument(arg)) and
-  exists(Callable c | c = call.getCallee() |
-    if c.isVarargs() and arg >= c.getNumberOfParameters()
-    then result = c.getNumberOfParameters() - 1
-    else result = arg
-  )
+private int argToParam(Call call, int argIdx) {
+  result = call.getArgument(argIdx).(Argument).getParameterPos()
 }
 
 /** Access to a method that passes taint from qualifier to argument. */
@@ -620,6 +614,7 @@ private MethodAccess callReturningSameType(Expr ref) {
   result.getMethod().getReturnType() = ref.getType()
 }
 
+pragma[assume_small_delta]
 private SrcRefType entrypointType() {
   exists(RemoteFlowSource s, RefType t |
     s instanceof DataFlow::ExplicitParameterNode and

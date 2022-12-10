@@ -26,6 +26,9 @@ def ql_output_path(): return paths.swift_dir / "ql/lib/other/path"
 def ql_test_output_path(): return paths.swift_dir / "ql/test/path"
 
 
+def generated_registry_path(): return paths.swift_dir / "registry.list"
+
+
 def import_file(): return stub_path().with_suffix(".qll")
 
 
@@ -42,18 +45,20 @@ def qlgen_opts(opts):
     opts.ql_stub_output = stub_path()
     opts.ql_output = ql_output_path()
     opts.ql_test_output = ql_test_output_path()
+    opts.generated_registry = generated_registry_path()
     opts.ql_format = True
     opts.swift_dir = paths.swift_dir
+    opts.force = False
     return opts
 
 
 @pytest.fixture
-def generate(input, qlgen_opts, renderer):
-    renderer.written = []
+def generate(input, qlgen_opts, renderer, render_manager):
+    render_manager.written = []
 
     def func(classes):
         input.classes = {cls.name: cls for cls in classes}
-        return run_generation(qlgen.generate, qlgen_opts, renderer)
+        return run_managed_generation(qlgen.generate, qlgen_opts, renderer, render_manager)
 
     return func
 
@@ -80,6 +85,7 @@ def generate_children_implementations(generate):
 
 def _filter_generated_classes(ret, output_test_files=False):
     files = {x for x in ret}
+    print(files)
     files.remove(import_file())
     files.remove(children_file())
     stub_files = set()
@@ -88,6 +94,7 @@ def _filter_generated_classes(ret, output_test_files=False):
     for f in files:
         try:
             stub_files.add(f.relative_to(stub_path()))
+            print(f)
         except ValueError:
             try:
                 base_files.add(f.relative_to(ql_output_path()))
@@ -190,7 +197,7 @@ def test_single_property(generate_classes):
                          ql.Class(name="MyObject", final=True,
                                   properties=[
                                       ql.Property(singular="Foo", type="bar", tablename="my_objects",
-                                                  tableparams=["this", "result"]),
+                                                  tableparams=["this", "result"], doc="foo of this my object"),
                                   ])),
     }
 
@@ -200,13 +207,13 @@ def test_children(generate_classes):
         schema.Class("FakeRoot"),
         schema.Class("MyObject", properties=[
             schema.SingleProperty("a", "int"),
-            schema.SingleProperty("child1", "int", is_child=True),
-            schema.RepeatedProperty("b", "int"),
-            schema.RepeatedProperty("child2", "int", is_child=True),
+            schema.SingleProperty("child_1", "int", is_child=True),
+            schema.RepeatedProperty("bs", "int"),
+            schema.RepeatedProperty("children", "int", is_child=True),
             schema.OptionalProperty("c", "int"),
-            schema.OptionalProperty("child3", "int", is_child=True),
+            schema.OptionalProperty("child_3", "int", is_child=True),
             schema.RepeatedOptionalProperty("d", "int"),
-            schema.RepeatedOptionalProperty("child4", "int", is_child=True),
+            schema.RepeatedOptionalProperty("child_4", "int", is_child=True),
         ]),
     ]) == {
         "FakeRoot.qll": (ql.Stub(name="FakeRoot", base_import=gen_import_prefix + "FakeRoot"),
@@ -215,27 +222,35 @@ def test_children(generate_classes):
                          ql.Class(name="MyObject", final=True,
                                   properties=[
                                       ql.Property(singular="A", type="int", tablename="my_objects",
-                                                  tableparams=["this", "result", "_"]),
+                                                  tableparams=["this", "result", "_"],
+                                                  doc="a of this my object"),
                                       ql.Property(singular="Child1", type="int", tablename="my_objects",
-                                                  tableparams=["this", "_", "result"], prev_child=""),
+                                                  tableparams=["this", "_", "result"], prev_child="",
+                                                  doc="child 1 of this my object"),
                                       ql.Property(singular="B", plural="Bs", type="int",
                                                   tablename="my_object_bs",
-                                                  tableparams=["this", "index", "result"]),
-                                      ql.Property(singular="Child2", plural="Child2s", type="int",
-                                                  tablename="my_object_child2s",
-                                                  tableparams=["this", "index", "result"], prev_child="Child1"),
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="b of this my object", doc_plural="bs of this my object"),
+                                      ql.Property(singular="Child", plural="Children", type="int",
+                                                  tablename="my_object_children",
+                                                  tableparams=["this", "index", "result"], prev_child="Child1",
+                                                  doc="child of this my object",
+                                                  doc_plural="children of this my object"),
                                       ql.Property(singular="C", type="int", tablename="my_object_cs",
-                                                  tableparams=["this", "result"], is_optional=True),
-                                      ql.Property(singular="Child3", type="int", tablename="my_object_child3s",
                                                   tableparams=["this", "result"], is_optional=True,
-                                                  prev_child="Child2"),
+                                                  doc="c of this my object"),
+                                      ql.Property(singular="Child3", type="int", tablename="my_object_child_3s",
+                                                  tableparams=["this", "result"], is_optional=True,
+                                                  prev_child="Child", doc="child 3 of this my object"),
                                       ql.Property(singular="D", plural="Ds", type="int",
                                                   tablename="my_object_ds",
-                                                  tableparams=["this", "index", "result"], is_optional=True),
-                                      ql.Property(singular="Child4", plural="Child4s", type="int",
-                                                  tablename="my_object_child4s",
                                                   tableparams=["this", "index", "result"], is_optional=True,
-                                                  prev_child="Child3"),
+                                                  doc="d of this my object", doc_plural="ds of this my object"),
+                                      ql.Property(singular="Child4", plural="Child4s", type="int",
+                                                  tablename="my_object_child_4s",
+                                                  tableparams=["this", "index", "result"], is_optional=True,
+                                                  prev_child="Child3", doc="child 4 of this my object",
+                                                  doc_plural="child 4s of this my object"),
                                   ])),
     }
 
@@ -252,11 +267,14 @@ def test_single_properties(generate_classes):
                          ql.Class(name="MyObject", final=True,
                                   properties=[
                                       ql.Property(singular="One", type="x", tablename="my_objects",
-                                                  tableparams=["this", "result", "_", "_"]),
+                                                  tableparams=["this", "result", "_", "_"],
+                                                  doc="one of this my object"),
                                       ql.Property(singular="Two", type="y", tablename="my_objects",
-                                                  tableparams=["this", "_", "result", "_"]),
+                                                  tableparams=["this", "_", "result", "_"],
+                                                  doc="two of this my object"),
                                       ql.Property(singular="Three", type="z", tablename="my_objects",
-                                                  tableparams=["this", "_", "_", "result"]),
+                                                  tableparams=["this", "_", "_", "result"],
+                                                  doc="three of this my object"),
                                   ])),
     }
 
@@ -274,7 +292,7 @@ def test_optional_property(generate_classes, is_child, prev_child):
                          ql.Class(name="MyObject", final=True, properties=[
                              ql.Property(singular="Foo", type="bar", tablename="my_object_foos",
                                          tableparams=["this", "result"],
-                                         is_optional=True, prev_child=prev_child),
+                                         is_optional=True, prev_child=prev_child, doc="foo of this my object"),
                          ])),
     }
 
@@ -291,7 +309,8 @@ def test_repeated_property(generate_classes, is_child, prev_child):
         "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
                          ql.Class(name="MyObject", final=True, properties=[
                              ql.Property(singular="Foo", plural="Foos", type="bar", tablename="my_object_foos",
-                                         tableparams=["this", "index", "result"], prev_child=prev_child),
+                                         tableparams=["this", "index", "result"], prev_child=prev_child,
+                                         doc="foo of this my object", doc_plural="foos of this my object"),
                          ])),
     }
 
@@ -310,7 +329,8 @@ def test_repeated_optional_property(generate_classes, is_child, prev_child):
                          ql.Class(name="MyObject", final=True, properties=[
                              ql.Property(singular="Foo", plural="Foos", type="bar", tablename="my_object_foos",
                                          tableparams=["this", "index", "result"], is_optional=True,
-                                         prev_child=prev_child),
+                                         prev_child=prev_child, doc="foo of this my object",
+                                         doc_plural="foos of this my object"),
                          ])),
     }
 
@@ -323,8 +343,7 @@ def test_predicate_property(generate_classes):
         "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
                          ql.Class(name="MyObject", final=True, properties=[
                              ql.Property(singular="isFoo", type="predicate", tablename="my_object_is_foo",
-                                         tableparams=["this"],
-                                         is_predicate=True),
+                                         tableparams=["this"], is_predicate=True, doc="this my object is foo"),
                          ])),
     }
 
@@ -342,11 +361,21 @@ def test_single_class_property(generate_classes, is_child, prev_child):
                 ql.Property(singular="Foo", type="Bar", tablename="my_objects",
                             tableparams=[
                                 "this", "result"],
-                            prev_child=prev_child),
+                            prev_child=prev_child, doc="foo of this my object"),
             ],
         )),
         "Bar.qll": (ql.Stub(name="Bar", base_import=gen_import_prefix + "Bar"),
                     ql.Class(name="Bar", final=True)),
+    }
+
+
+def test_class_with_doc(generate_classes):
+    doc = ["Very important class.", "Very."]
+    assert generate_classes([
+        schema.Class("A", doc=doc),
+    ]) == {
+        "A.qll": (ql.Stub(name="A", base_import=gen_import_prefix + "A"),
+                  ql.Class(name="A", final=True, doc=doc)),
     }
 
 
@@ -382,10 +411,10 @@ def test_class_dir_imports(generate_import_list):
     ])
 
 
-def test_format(opts, generate, renderer, run_mock):
+def test_format(opts, generate, render_manager, run_mock):
     opts.codeql_binary = "my_fake_codeql"
     run_mock.return_value.stderr = "some\nlines\n"
-    renderer.written = [
+    render_manager.written = [
         pathlib.Path("x", "foo.ql"),
         pathlib.Path("bar.qll"),
         pathlib.Path("y", "baz.txt"),
@@ -397,11 +426,11 @@ def test_format(opts, generate, renderer, run_mock):
     ]
 
 
-def test_format_error(opts, generate, renderer, run_mock):
+def test_format_error(opts, generate, render_manager, run_mock):
     opts.codeql_binary = "my_fake_codeql"
     run_mock.return_value.stderr = "some\nlines\n"
     run_mock.return_value.returncode = 1
-    renderer.written = [
+    render_manager.written = [
         pathlib.Path("x", "foo.ql"),
         pathlib.Path("bar.qll"),
         pathlib.Path("y", "baz.txt"),
@@ -410,12 +439,9 @@ def test_format_error(opts, generate, renderer, run_mock):
         generate([schema.Class('A')])
 
 
-def test_empty_cleanup(generate, renderer):
-    generate([schema.Class('A')])
-    assert renderer.mock_calls[-1] == mock.call.cleanup(set())
-
-
-def test_non_empty_cleanup(opts, generate, renderer):
+@pytest.mark.parametrize("force", [False, True])
+def test_manage_parameters(opts, generate, renderer, force):
+    opts.force = force
     ql_a = opts.ql_output / "A.qll"
     ql_b = opts.ql_output / "B.qll"
     stub_a = opts.ql_stub_output / "A.qll"
@@ -425,30 +451,22 @@ def test_non_empty_cleanup(opts, generate, renderer):
     test_c = opts.ql_test_output / "B.txt"
     write(ql_a)
     write(ql_b)
-    write(stub_a, "// generated\nprivate import bla\n\nclass foo extends Generated::bar {\n}\n")
-    write(stub_b, "bar\n")
+    write(stub_a)
+    write(stub_b)
     write(test_a)
     write(test_b)
     write(test_c)
     generate([schema.Class('A')])
-    assert renderer.mock_calls[-1] == mock.call.cleanup(
-        {ql_a, ql_b, stub_a, test_a, test_b})
+    assert renderer.mock_calls == [
+        mock.call.manage(generated={ql_a, ql_b, test_a, test_b, import_file()}, stubs={stub_a, stub_b},
+                         registry=opts.generated_registry, force=force)
+    ]
 
 
-def test_modified_stub_still_generated(qlgen_opts, renderer):
+def test_modified_stub_skipped(qlgen_opts, generate, render_manager):
     stub = qlgen_opts.ql_stub_output / "A.qll"
-    write(stub, "// generated\nprivate import bla\n\nclass foo extends Generated::bar, baz {\n}\n")
-    with pytest.raises(qlgen.ModifiedStubMarkedAsGeneratedError):
-        run_generation(qlgen.generate, qlgen_opts, renderer)
-
-
-def test_extended_stub_still_generated(qlgen_opts, renderer):
-    stub = qlgen_opts.ql_stub_output / "A.qll"
-    write(stub,
-          "// generated\nprivate import bla\n\nclass foo extends Generated::bar {\n}\n\n"
-          "class other {\n  other() { none() }\n}")
-    with pytest.raises(qlgen.ModifiedStubMarkedAsGeneratedError):
-        run_generation(qlgen.generate, qlgen_opts, renderer)
+    render_manager.is_customized_stub.side_effect = lambda f: f == stub
+    assert stub not in generate([schema.Class('A')])
 
 
 def test_test_missing_source(generate_tests):
@@ -488,10 +506,8 @@ def test_test_total_properties(opts, generate_tests):
         ]),
     ]) == {
         "B/B.ql": ql.ClassTester(class_name="B", properties=[
-            ql.PropertyForTest(
-                getter="getX", is_single=True, type="string"),
-            ql.PropertyForTest(
-                getter="y", is_predicate=True, type="predicate"),
+            ql.PropertyForTest(getter="getX", type="string"),
+            ql.PropertyForTest(getter="y"),
         ])
     }
 
@@ -499,19 +515,29 @@ def test_test_total_properties(opts, generate_tests):
 def test_test_partial_properties(opts, generate_tests):
     write(opts.ql_test_output / "B" / "test.swift")
     assert generate_tests([
-        schema.Class("A", derived={"B"}, properties=[
+        schema.Class("A", derived={"B", "C"}, properties=[
             schema.OptionalProperty("x", "string"),
         ]),
         schema.Class("B", bases=["A"], properties=[
-            schema.RepeatedProperty("y", "int"),
+            schema.RepeatedProperty("y", "bool"),
+            schema.RepeatedOptionalProperty("z", "int"),
         ]),
     ]) == {
-        "B/B.ql": ql.ClassTester(class_name="B"),
+        "B/B.ql": ql.ClassTester(class_name="B", properties=[
+            ql.PropertyForTest(getter="hasX"),
+            ql.PropertyForTest(getter="getNumberOfYs", type="int"),
+        ]),
         "B/B_getX.ql": ql.PropertyTester(class_name="B",
-                                         property=ql.PropertyForTest(getter="getX", type="string")),
+                                         property=ql.PropertyForTest(getter="getX", is_total=False,
+                                                                            type="string")),
         "B/B_getY.ql": ql.PropertyTester(class_name="B",
-                                         property=ql.PropertyForTest(getter="getY", is_repeated=True,
-                                                                            type="int")),
+                                         property=ql.PropertyForTest(getter="getY", is_total=False,
+                                                                     is_repeated=True,
+                                                                     type="bool")),
+        "B/B_getZ.ql": ql.PropertyTester(class_name="B",
+                                         property=ql.PropertyForTest(getter="getZ", is_total=False,
+                                                                     is_repeated=True,
+                                                                     type="int")),
     }
 
 
@@ -520,19 +546,20 @@ def test_test_properties_deduplicated(opts, generate_tests):
     assert generate_tests([
         schema.Class("Base", derived={"A", "B"}, properties=[
             schema.SingleProperty("x", "string"),
-            schema.RepeatedProperty("y", "int"),
+            schema.RepeatedProperty("y", "bool"),
         ]),
         schema.Class("A", bases=["Base"], derived={"Final"}),
         schema.Class("B", bases=["Base"], derived={"Final"}),
         schema.Class("Final", bases=["A", "B"]),
     ]) == {
         "Final/Final.ql": ql.ClassTester(class_name="Final", properties=[
-            ql.PropertyForTest(
-                getter="getX", is_single=True, type="string"),
+            ql.PropertyForTest(getter="getX", type="string"),
+            ql.PropertyForTest(getter="getNumberOfYs", type="int"),
         ]),
         "Final/Final_getY.ql": ql.PropertyTester(class_name="Final",
-                                                 property=ql.PropertyForTest(getter="getY", is_repeated=True,
-                                                                                    type="int")),
+                                                 property=ql.PropertyForTest(getter="getY", is_total=False,
+                                                                                    is_repeated=True,
+                                                                                    type="bool")),
     }
 
 
@@ -616,6 +643,166 @@ def test_test_class_hierarchy_uncollapse_at_final(opts, generate_tests):
     ]) == {
         "Base/Base.ql": ql.ClassTester(class_name="Base", show_ql_class=True),
         "D3/D3.ql": ql.ClassTester(class_name="D3"),
+    }
+
+
+def test_property_description(generate_classes):
+    description = ["Lorem", "Ipsum"]
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.SingleProperty("foo", "bar", description=description),
+        ]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="Foo", type="bar", tablename="my_objects",
+                                                  tableparams=["this", "result"],
+                                                  doc="foo of this my object",
+                                                  description=description),
+                                  ])),
+    }
+
+
+def test_property_doc_override(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.SingleProperty("foo", "bar", doc="baz")]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="Foo", type="bar", tablename="my_objects",
+                                                  tableparams=["this", "result"], doc="baz"),
+                                  ])),
+    }
+
+
+def test_repeated_property_doc_override(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.RepeatedProperty("x", "int", doc="children of this"),
+            schema.RepeatedOptionalProperty("y", "int", doc="child of this")]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="X", plural="Xes", type="int",
+                                                  tablename="my_object_xes",
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="child of this", doc_plural="children of this"),
+                                      ql.Property(singular="Y", plural="Ys", type="int",
+                                                  tablename="my_object_ies", is_optional=True,
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="child of this", doc_plural="children of this"),
+                                  ])),
+    }
+
+
+@pytest.mark.parametrize("abbr,expected", list(qlgen.abbreviations.items()))
+def test_property_doc_abbreviations(generate_classes, abbr, expected):
+    expected_doc = f"foo {expected} bar of this object"
+    assert generate_classes([
+        schema.Class("Object", properties=[
+            schema.SingleProperty(f"foo_{abbr}_bar", "baz")]),
+    ]) == {
+        "Object.qll": (ql.Stub(name="Object", base_import=gen_import_prefix + "Object"),
+                       ql.Class(name="Object", final=True,
+                                properties=[
+                                    ql.Property(singular=f"Foo{abbr.capitalize()}Bar", type="baz",
+                                                tablename="objects",
+                                                tableparams=["this", "result"], doc=expected_doc),
+                                ])),
+    }
+
+
+@pytest.mark.parametrize("abbr,expected", list(qlgen.abbreviations.items()))
+def test_property_doc_abbreviations_ignored_if_within_word(generate_classes, abbr, expected):
+    expected_doc = f"foo {abbr}acadabra bar of this object"
+    assert generate_classes([
+        schema.Class("Object", properties=[
+            schema.SingleProperty(f"foo_{abbr}acadabra_bar", "baz")]),
+    ]) == {
+        "Object.qll": (ql.Stub(name="Object", base_import=gen_import_prefix + "Object"),
+                       ql.Class(name="Object", final=True,
+                                properties=[
+                                    ql.Property(singular=f"Foo{abbr.capitalize()}acadabraBar", type="baz",
+                                                tablename="objects",
+                                                tableparams=["this", "result"], doc=expected_doc),
+                                ])),
+    }
+
+
+def test_repeated_property_doc_override_with_format(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.RepeatedProperty("x", "int", doc="special {children} of this"),
+            schema.RepeatedOptionalProperty("y", "int", doc="special {child} of this")]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="X", plural="Xes", type="int",
+                                                  tablename="my_object_xes",
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="special child of this",
+                                                  doc_plural="special children of this"),
+                                      ql.Property(singular="Y", plural="Ys", type="int",
+                                                  tablename="my_object_ies", is_optional=True,
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="special child of this",
+                                                  doc_plural="special children of this"),
+                                  ])),
+    }
+
+
+def test_repeated_property_doc_override_with_multiple_formats(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.RepeatedProperty("x", "int", doc="{cat} or {dog}"),
+            schema.RepeatedOptionalProperty("y", "int", doc="{cats} or {dogs}")]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="X", plural="Xes", type="int",
+                                                  tablename="my_object_xes",
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="cat or dog", doc_plural="cats or dogs"),
+                                      ql.Property(singular="Y", plural="Ys", type="int",
+                                                  tablename="my_object_ies", is_optional=True,
+                                                  tableparams=["this", "index", "result"],
+                                                  doc="cat or dog", doc_plural="cats or dogs"),
+                                  ])),
+    }
+
+
+def test_property_doc_override_with_format(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.SingleProperty("foo", "bar", doc="special {baz} of this")]),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="Foo", type="bar", tablename="my_objects",
+                                                  tableparams=["this", "result"], doc="special baz of this"),
+                                  ])),
+    }
+
+
+def test_property_on_class_with_default_doc_name(generate_classes):
+    assert generate_classes([
+        schema.Class("MyObject", properties=[
+            schema.SingleProperty("foo", "bar")],
+            default_doc_name="baz"),
+    ]) == {
+        "MyObject.qll": (ql.Stub(name="MyObject", base_import=gen_import_prefix + "MyObject"),
+                         ql.Class(name="MyObject", final=True,
+                                  properties=[
+                                      ql.Property(singular="Foo", type="bar", tablename="my_objects",
+                                                  tableparams=["this", "result"], doc="foo of this baz"),
+                                  ])),
     }
 
 

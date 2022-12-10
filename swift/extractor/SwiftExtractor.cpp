@@ -9,47 +9,42 @@
 #include <swift/AST/Builtins.h>
 
 #include "swift/extractor/trap/TrapDomain.h"
-#include "swift/extractor/visitors/SwiftVisitor.h"
+#include "swift/extractor/translators/SwiftVisitor.h"
 #include "swift/extractor/TargetTrapFile.h"
 #include "swift/extractor/SwiftBuiltinSymbols.h"
+#include "swift/extractor/infra/file/Path.h"
 
 using namespace codeql;
 using namespace std::string_literals;
+namespace fs = std::filesystem;
 
-static void archiveFile(const SwiftExtractorConfiguration& config, swift::SourceFile& file) {
-  if (std::error_code ec = llvm::sys::fs::create_directories(config.trapDir)) {
-    std::cerr << "Cannot create TRAP directory: " << ec.message() << "\n";
-    return;
-  }
-
-  if (std::error_code ec = llvm::sys::fs::create_directories(config.sourceArchiveDir)) {
-    std::cerr << "Cannot create source archive directory: " << ec.message() << "\n";
-    return;
-  }
-
-  llvm::SmallString<PATH_MAX> srcFilePath(file.getFilename());
-  llvm::sys::fs::make_absolute(srcFilePath);
-
-  llvm::SmallString<PATH_MAX> dstFilePath(config.sourceArchiveDir);
-  llvm::sys::path::append(dstFilePath, srcFilePath);
-
-  llvm::StringRef parent = llvm::sys::path::parent_path(dstFilePath);
-  if (std::error_code ec = llvm::sys::fs::create_directories(parent)) {
-    std::cerr << "Cannot create source archive destination directory '" << parent.str()
-              << "': " << ec.message() << "\n";
-    return;
-  }
-
-  if (std::error_code ec = llvm::sys::fs::copy_file(srcFilePath, dstFilePath)) {
-    std::cerr << "Cannot archive source file '" << srcFilePath.str().str() << "' -> '"
-              << dstFilePath.str().str() << "': " << ec.message() << "\n";
-    return;
+static void ensureDirectory(const char* label, const fs::path& dir) {
+  std::error_code ec;
+  fs::create_directories(dir, ec);
+  if (ec) {
+    std::cerr << "Cannot create " << label << " directory: " << ec.message() << "\n";
+    std::abort();
   }
 }
 
-static std::string getFilename(swift::ModuleDecl& module, swift::SourceFile* primaryFile) {
+static void archiveFile(const SwiftExtractorConfiguration& config, swift::SourceFile& file) {
+  auto source = codeql::resolvePath(file.getFilename());
+  auto destination = config.sourceArchiveDir / source.relative_path();
+
+  ensureDirectory("source archive destination", destination.parent_path());
+
+  std::error_code ec;
+  fs::copy(source, destination, fs::copy_options::overwrite_existing, ec);
+
+  if (ec) {
+    std::cerr << "Cannot archive source file " << source << " -> " << destination << ": "
+              << ec.message() << "\n";
+  }
+}
+
+static fs::path getFilename(swift::ModuleDecl& module, swift::SourceFile* primaryFile) {
   if (primaryFile) {
-    return primaryFile->getFilename().str();
+    return resolvePath(primaryFile->getFilename());
   }
   // PCM clang module
   if (module.isNonSwiftModule()) {
@@ -57,7 +52,8 @@ static std::string getFilename(swift::ModuleDecl& module, swift::SourceFile* pri
     // In this case we want to differentiate them
     // Moreover, pcm files may come from caches located in different directories, but are
     // unambiguously identified by the base file name, so we can discard the absolute directory
-    std::string filename = "/pcms/"s + llvm::sys::path::filename(module.getModuleFilename()).str();
+    fs::path filename = "/pcms";
+    filename /= fs::path{std::string_view{module.getModuleFilename()}}.filename();
     filename += "-";
     filename += module.getName().str();
     return filename;
@@ -66,13 +62,13 @@ static std::string getFilename(swift::ModuleDecl& module, swift::SourceFile* pri
     // The Builtin module has an empty filename, let's fix that
     return "/__Builtin__";
   }
-  auto filename = module.getModuleFilename().str();
+  std::string_view filename = module.getModuleFilename();
   // there is a special case of a module without an actual filename reporting `<imports>`: in this
   // case we want to avoid the `<>` characters, in case a dirty DB is imported on Windows
   if (filename == "<imports>") {
     return "/__imports__";
   }
-  return filename;
+  return resolvePath(filename);
 }
 
 /* The builtin module is special, as it does not publish any top-level declaration
