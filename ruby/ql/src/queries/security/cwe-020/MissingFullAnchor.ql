@@ -29,7 +29,7 @@ predicate isLeftArmTerm(RegExpTerm term) {
 
 /** Holds if `term` is one of the transitive right children of a regexp. */
 predicate isRightArmTerm(RegExpTerm term) {
-  // TODO: shared with MissingRegExpAnchor.ql
+  // TODO: shared with MissingRegExpAnchor.qls
   term.isRootTerm()
   or
   exists(RegExpTerm parent |
@@ -75,11 +75,11 @@ class Sink extends DataFlow::Node {
     RE::getRegexpExecution(term, this, matchNode) and
     term = getABadlyAnchoredTerm() and
     // looks like a sanitizer, not just input transformation
-    // TODO: unless? IfExpr? (add tests)
-    exists(Ast::IfModifierExpr ifExpr, Ast::AstNode branch |
-      ifExpr.getCondition() = matchNode.asExpr().getExpr() and
-      branch = ifExpr.getBranch(_) and
-      branch.(Ast::MethodCall).getMethodName() = "raise"
+    exists(Ast::ConditionalExpr ifExpr |
+      // TODO: Test unary logical operations
+      [ifExpr.getCondition(), ifExpr.getCondition().(Ast::UnaryLogicalOperation).getOperand()] =
+        matchNode.asExpr().getExpr() and
+      ifExpr.getBranch(_).(Ast::MethodCall).getMethodName() = "raise"
     )
   }
 
