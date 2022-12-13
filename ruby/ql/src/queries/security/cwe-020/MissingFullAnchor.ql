@@ -4,7 +4,7 @@
  * @kind path-problem
  * @problem.severity warning
  * @security-severity 7.8
- * @precision medium
+ * @precision high
  * @id rb/regex/badly-anchored-regexp
  * @tags correctness
  *       security
