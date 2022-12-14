@@ -1,0 +1,38 @@
+<!DOCTYPE qhelp PUBLIC
+"-//Semmle//qhelp//EN"
+"qhelp.dtd">
+<qhelp>
+
+	<overview>
+		<p>
+
+			TODO: 
+
+		</p>
+	</overview>
+
+	<recommendation>
+		<p>
+TODO: 
+
+		</p>
+	</recommendation>
+
+	<example>
+
+		<p>
+TODO: 
+
+		</p>
+
+		<sample src="examples/IncompleteHostnameRegExp.rb"/>
+
+
+	</example>
+
+	<references>
+		<li>
+            <url href="https://www.owasp.org/index.php/Testing_for_HTTP_Parameter_pollution_(OTG-INPVAL-004)">OWASP: Testing for HTTP Parameter pollution</url>
+        </li>
+	</references>
+</qhelp>
