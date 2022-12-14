@@ -14,26 +14,6 @@
 import javascript
 import HostnameRegexpShared
 
-/** Holds if `term` is one of the transitive left children of a regexp. */
-predicate isLeftArmTerm(RegExpTerm term) {
-  term.isRootTerm()
-  or
-  exists(RegExpTerm parent |
-    term = parent.getChild(0) and
-    isLeftArmTerm(parent)
-  )
-}
-
-/** Holds if `term` is one of the transitive right children of a regexp. */
-predicate isRightArmTerm(RegExpTerm term) {
-  term.isRootTerm()
-  or
-  exists(RegExpTerm parent |
-    term = parent.getLastChild() and
-    isRightArmTerm(parent)
-  )
-}
-
 /**
  * Holds if `term` is an anchor that is not the first or last node
  * in its tree.

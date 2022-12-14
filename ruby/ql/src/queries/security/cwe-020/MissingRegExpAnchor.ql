@@ -11,7 +11,7 @@
  *       external/cwe/cwe-020
  */
 
-import HostnameRegexpShared
+import codeql.ruby.security.regexp.HostnameRegexpShared
 import codeql.ruby.DataFlow
 import codeql.ruby.regexp.RegExpTreeView
 import codeql.ruby.Regexp
