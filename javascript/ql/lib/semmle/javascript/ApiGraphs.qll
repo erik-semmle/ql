@@ -124,7 +124,6 @@ module API {
      * This is similar to `asSource()` but additionally includes nodes that are transitively reachable by data flow.
      * See `asSource()` for examples.
      */
-    pragma[inline]
     DataFlow::Node getAValueReachableFromSource() {
       Impl::trackUseNode(this.asSource()).flowsTo(result)
     }
@@ -611,7 +610,6 @@ module API {
   }
 
   private module AdditionalUseStep {
-    pragma[nomagic]
     predicate step(DataFlow::SourceNode pred, DataFlow::SourceNode succ) {
       any(AdditionalUseStep st).step(pred, succ)
     }
@@ -847,7 +845,6 @@ module API {
      * `propDesc` is compatible with that property, meaning it is either the
      * name of the property itself or the empty string.
      */
-    pragma[noinline]
     private predicate propertyRead(
       DataFlow::SourceNode pred, string propDesc, Label::ApiLabel lbl, DataFlow::Node ref
     ) {
@@ -944,7 +941,6 @@ module API {
     }
 
     /** Holds if `base` is a use-node that flows to the decorator expression of the given decorator. */
-    pragma[nomagic]
     private predicate useNodeFlowsToDecorator(TApiNode base, Decorator decorator) {
       exists(DataFlow::SourceNode decoratorSrc |
         use(base, decoratorSrc) and
@@ -1101,7 +1097,7 @@ module API {
       or
       exists(DataFlow::SourceNode mid |
         mid = trackUseNode(nd, promisified, boundArgs, prop, t) and
-        AdditionalUseStep::step(pragma[only_bind_out](mid), result)
+        AdditionalUseStep::step(mid, result)
       )
       or
       exists(DataFlow::Node pred, string preprop |
@@ -1127,7 +1123,6 @@ module API {
      *
      * This predicate exists solely to enforce a better join order in `trackUseNode` above.
      */
-    pragma[noopt]
     private DataFlow::TypeTracker useStep(
       DataFlow::Node nd, boolean promisified, int boundArgs, string prop, DataFlow::Node res
     ) {
@@ -1186,7 +1181,6 @@ module API {
      *
      * This predicate exists solely to enforce a better join order in `trackDefNode` above.
      */
-    pragma[noopt]
     private DataFlow::TypeBackTracker defStep(DataFlow::Node nd, DataFlow::SourceNode prev) {
       exists(DataFlow::TypeBackTracker t, StepSummary summary, DataFlow::Node next |
         next = trackDefNode(nd, t) and
@@ -1324,7 +1318,6 @@ module API {
     }
 
     /** Gets the API node for the `i`th parameter of this invocation. */
-    pragma[nomagic]
     Node getParameter(int i) {
       result = callee.getParameter(i) and
       result = this.getAParameterCandidate(i)
@@ -1333,7 +1326,6 @@ module API {
     /**
      * Gets an API node where a RHS of the node is the `i`th argument to this call.
      */
-    pragma[noinline]
     private Node getAParameterCandidate(int i) { result.asSink() = this.getArgument(i) }
 
     /** Gets the API node for a parameter of this invocation. */
