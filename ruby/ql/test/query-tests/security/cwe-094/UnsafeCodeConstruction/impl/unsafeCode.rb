@@ -61,6 +61,6 @@ class Foobar
     eval(arr.join(" ")) # NOT OK
 
     arr2 = [Array("foo = ", y).join(" ")]
-    eval(arr.join("\n")) # NOT OK
+    eval(arr2.join("\n")) # NOT OK
   end
 end

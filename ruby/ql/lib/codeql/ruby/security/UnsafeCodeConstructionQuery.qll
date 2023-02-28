@@ -36,4 +36,15 @@ class Configuration extends TaintTracking::Configuration {
     // if an array element gets tainted, then we treat the entire array as tainted
     Array::taintedArrayObjectSteps(pred, succ)
   }
+
+  override predicate allowImplicitRead(DataFlow::Node node, DataFlow::ContentSet c) {
+    (
+      this.isSink(node) or
+      this.isSink(node, _) or
+      this.isAdditionalTaintStep(node, _) or
+      this.isAdditionalTaintStep(node, _, _, _)
+    ) and
+    // TODO: More precise..
+    c = any(DataFlow::ContentSet s)
+  }
 }
