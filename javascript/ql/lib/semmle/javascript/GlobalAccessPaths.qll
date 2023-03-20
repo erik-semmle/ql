@@ -275,9 +275,13 @@ module AccessPath {
      * Either the definition or a use of the SSA variable
      */
     private VarRef getAVariableRef(SsaVariable variable) {
-      result = variable.getAUse()
-      or
-      result = variable.getDefinition().getAContributingVarDef().getTarget()
+      (
+        result = variable.getAUse()
+        or
+        result =
+          pragma[only_bind_out](variable.getDefinition().getAContributingVarDef()).getTarget()
+      ) and
+      variable = getARelevantVariableSimple()
     }
 
     /**
@@ -341,15 +345,26 @@ module AccessPath {
       if result = getBaseVar(_) then usedInWrite = true else usedInWrite = false
     }
 
-    /** Gets a variable that is relevant for the computations in the `GetLaterAccess` module. */
-    private SsaVariable getARelevantVariable() {
+    /**
+     * Gets a variable that is relevant for the computations in the `GetLaterAccess` module.
+     * This predicate restricts as much as it can, but without depending on `getAVariableRef`.
+     */
+    pragma[inline]
+    private SsaVariable getARelevantVariableSimple() {
       // The variable might be used where `getLaterBaseAccess()` is called.
       exists(DataFlow::Node node |
         exists(fromRhs(node, _)) and
-        node.asExpr() = getAVariableRef(result)
+        node.asExpr() = result.getAUse()
       ) and
       // There is a write that writes to the variable.
-      getBaseVar(_) = getAVariableRef(result) and
+      getBaseVar(_) = result.getAUse()
+    }
+
+    /**
+     * Gets a variable that is relevant for the computations in the `GetLaterAccess` module.
+     * This predicate depends on `getAVariableRef`, which in turn depends on `getARelevantVariableSimple`.
+     */
+    private SsaVariable getARelevantVariable() {
       // There is both a "write" and "read" in the same container of the variable.
       exists(StmtContainer container |
         exists(getAnAccessInContainer(result, container, true)) and // a "write", an access to the variable that is the base of a property reference.
@@ -364,7 +379,7 @@ module AccessPath {
         getAVariableRef(var) = baseExpr and
         var = getARelevantVariable() and
         writeNode = write.getWriteNode() and
-        writeNode.getBasicBlock().(ReachableBasicBlock).strictlyDominates(result) and
+        result.getImmediateDominator+() = writeNode.getBasicBlock() and
         // manual magic.
         result = getAnAccessInContainer(getARelevantVariable(), _, false).getBasicBlock()
       )
