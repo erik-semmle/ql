@@ -22,15 +22,23 @@ module Make<RegexTreeViewSig TreeImpl> {
    * Gets the `i`th codepoint in `s`.
    */
   bindingset[s]
-  private string getCodepointAt(string s, int i) { result = s.regexpFind("(.|\\s)", i, _) }
+  private string getCodepointAt(string s, int i) {
+    // codePointAt returns the integer codePoint, so we need to convert to a string.
+    // codePointAt returns integers for both the high and low end. The invalid strings are filtered out by `toUnicode`, but we need to re-count the index, therefore the rank.
+    // rank is 1-indexed, so we need to offset for that to make this predicate 0-indexed.
+    result =
+      rank[i + 1](string char, int charIndex |
+        char = s.codePointAt(charIndex).toUnicode()
+      |
+        char order by charIndex
+      )
+  }
 
   /**
    * Gets the length of `s` in codepoints.
    */
   bindingset[str]
-  private int getCodepointLength(string str) {
-    result = str.regexpReplaceAll("(.|\\s)", "x").length()
-  }
+  private int getCodepointLength(string str) { result = str.codePointCount(0, str.length()) }
 
   /**
    * Gets an approximation for the ASCII code for `char`.
