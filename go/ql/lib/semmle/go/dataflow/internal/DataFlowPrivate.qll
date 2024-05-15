@@ -4,6 +4,7 @@ private import DataFlowImplCommon
 private import ContainerFlow
 private import FlowSummaryImpl as FlowSummaryImpl
 private import semmle.go.dataflow.FlowSummary as FlowSummary
+private import semmle.go.dataflow.ExternalFlow
 private import codeql.util.Unit
 import DataFlowNodes::Private
 
@@ -205,6 +206,8 @@ predicate expectsContent(Node n, ContentSet c) {
 
 predicate typeStrongerThan(DataFlowType t1, DataFlowType t2) { none() }
 
+predicate localMustFlowStep(Node node1, Node node2) { none() }
+
 /** Gets the type of `n` used for type pruning. */
 DataFlowType getNodeType(Node n) { result = TTodoDataFlowType() and exists(n) }
 
@@ -249,11 +252,10 @@ class DataFlowType extends TDataFlowType {
   string toString() { result = "" }
 }
 
-class DataFlowLocation = Location;
-
 private newtype TDataFlowCallable =
   TCallable(Callable c) or
   TFileScope(File f) or
+  TExternalFileScope() or
   TSummarizedCallable(FlowSummary::SummarizedCallable c)
 
 class DataFlowCallable extends TDataFlowCallable {
@@ -266,6 +268,11 @@ class DataFlowCallable extends TDataFlowCallable {
    * Gets the `File` whose root scope corresponds to this `DataFlowCallable`, if any.
    */
   File asFileScope() { this = TFileScope(result) }
+
+  /**
+   * Holds if this `DataFlowCallable` is an external file scope.
+   */
+  predicate isExternalFileScope() { this = TExternalFileScope() }
 
   /**
    * Gets the `SummarizedCallable` corresponding to this `DataFlowCallable`, if any.
@@ -404,6 +411,12 @@ predicate lambdaCall(DataFlowCall call, LambdaCallKind kind, Node receiver) { no
 /** Extra data-flow steps needed for lambda flow analysis. */
 predicate additionalLambdaFlowStep(Node nodeFrom, Node nodeTo, boolean preservesValue) { none() }
 
+predicate knownSourceModel(Node source, string model) { sourceNode(source, _, model) }
+
+predicate knownSinkModel(Node sink, string model) { sinkNode(sink, _, model) }
+
+class DataFlowSecondLevelScope = Unit;
+
 /**
  * Holds if flow is allowed to pass from parameter `p` and back to itself as a
  * side-effect, resulting in a summary from `p` to itself.
@@ -412,7 +425,10 @@ predicate additionalLambdaFlowStep(Node nodeFrom, Node nodeTo, boolean preserves
  * by default as a heuristic.
  */
 predicate allowParameterReturnInSelf(ParameterNode p) {
-  FlowSummaryImpl::Private::summaryAllowParameterReturnInSelf(p)
+  exists(DataFlowCallable c, int pos |
+    p.isParameterOf(c, pos) and
+    FlowSummaryImpl::Private::summaryAllowParameterReturnInSelf(c.asSummarizedCallable(), pos)
+  )
 }
 
 /** An approximated `Content`. */
@@ -421,12 +437,3 @@ class ContentApprox = Unit;
 /** Gets an approximated value for content `c`. */
 pragma[inline]
 ContentApprox getContentApprox(Content c) { any() }
-
-/**
- * Gets an additional term that is added to the `join` and `branch` computations to reflect
- * an additional forward or backwards branching factor that is not taken into account
- * when calculating the (virtual) dispatch cost.
- *
- * Argument `arg` is part of a path from a source to a sink, and `p` is the target parameter.
- */
-int getAdditionalFlowIntoCallNodeTerm(ArgumentNode arg, ParameterNode p) { none() }

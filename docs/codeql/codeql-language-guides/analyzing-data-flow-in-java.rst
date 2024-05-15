@@ -1,9 +1,9 @@
 .. _analyzing-data-flow-in-java:
 
-Analyzing data flow in Java
-===========================
+Analyzing data flow in Java and Kotlin
+======================================
 
-You can use CodeQL to track the flow of data through a Java program to its use. 
+You can use CodeQL to track the flow of data through a Java/Kotlin program to its use. 
 
 .. include:: ../reusables/kotlin-beta-note.rst
 
@@ -12,7 +12,7 @@ You can use CodeQL to track the flow of data through a Java program to its use.
 About this article
 ------------------
 
-This article describes how data flow analysis is implemented in the CodeQL libraries for Java and includes examples to help you write your own data flow queries.
+This article describes how data flow analysis is implemented in the CodeQL libraries for Java/Kotlin and includes examples to help you write your own data flow queries.
 The following sections describe how to use the libraries for local data flow, global data flow, and taint tracking.
 
 For a more general introduction to modeling data flow, see ":ref:`About data flow analysis <about-data-flow-analysis>`."
@@ -27,7 +27,13 @@ Local data flow is data flow within a single method or callable. Local data flow
 Using local data flow
 ~~~~~~~~~~~~~~~~~~~~~
 
-The local data flow library is in the module ``DataFlow``, which defines the class ``Node`` denoting any element that data can flow through. ``Node``\ s are divided into expression nodes (``ExprNode``) and parameter nodes (``ParameterNode``). You can map between data flow nodes and expressions/parameters using the member predicates ``asExpr`` and ``asParameter``:
+To use the data flow library you need the following import:
+
+.. code-block:: ql
+
+   import semmle.code.java.dataflow.DataFlow
+
+The ``DataFlow`` module defines the class ``Node`` denoting any element that data can flow through. ``Node``\ s are divided into expression nodes (``ExprNode``) and parameter nodes (``ParameterNode``). You can map between data flow nodes and expressions/parameters using the member predicates ``asExpr`` and ``asParameter``:
 
 .. code-block:: ql
 
@@ -75,7 +81,14 @@ Local taint tracking extends local data flow by including non-value-preserving f
 
 If ``x`` is a tainted string then ``y`` is also tainted.
 
-The local taint tracking library is in the module ``TaintTracking``. Like local data flow, a predicate ``localTaintStep(DataFlow::Node nodeFrom, DataFlow::Node nodeTo)`` holds if there is an immediate taint propagation edge from the node ``nodeFrom`` to the node ``nodeTo``. You can apply the predicate recursively by using the ``+`` and ``*`` operators, or by using the predefined recursive predicate ``localTaint``, which is equivalent to ``localTaintStep*``.
+
+To use the taint tracking library you need the following import:
+
+.. code-block:: ql
+
+   import semmle.code.java.dataflow.TaintTracking
+
+Like local data flow, a predicate ``localTaintStep(DataFlow::Node nodeFrom, DataFlow::Node nodeTo)`` holds if there is an immediate taint propagation edge from the node ``nodeFrom`` to the node ``nodeTo``. You can apply the predicate recursively by using the ``+`` and ``*`` operators, or by using the predefined recursive predicate ``localTaint``, which is equivalent to ``localTaintStep*``.
 
 For example, you can find taint propagation from a parameter ``source`` to an expression ``sink`` in zero or more local steps:
 
