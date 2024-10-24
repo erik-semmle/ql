@@ -386,7 +386,7 @@ export class TypeTable {
   /**
    * If set to true, skip extracting types.
    */
-  public skipExtractingTypes = false;
+  public skipExtractingTypes = true;
 
   private virtualSourceRoot: VirtualSourceRoot;
 
